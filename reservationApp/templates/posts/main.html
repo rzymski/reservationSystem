@@ -2,7 +2,7 @@
 
 {% block content %}
     {% if object_list %}
-        <div class="grid grid-cols-3 gap-3">
+        <div class="grid grid-cols-4 gap-4">
             {% for obj in object_list %}
                 <a href="{% url 'reservations:detail' obj.pk %}" class="p-6 dark:text-white bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-slate-700 duration-200 rounded-lg drop-shadow-xl">
                     <h3 class="text-3xl">{{ obj.title }}</h3>
