@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django.urls import path, include
-from .views import *
+from . import views
 
-app_name = 'przypadkowaNazwaWUrls'
+app_name = 'systemOfReservationsApp'
 
 urlpatterns = [
-    path('', PostListView.as_view(), name='main'),
-    path('<pk>/', PostDetailView.as_view(), name='detail'),
+    path('', views.index, name='index'),
+    path('main/', views.PostListView.as_view(), name='main'),
+    path('<pk>/', views.PostDetailView.as_view(), name='detail'),
 ]
