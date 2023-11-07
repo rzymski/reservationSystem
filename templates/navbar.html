@@ -1,14 +1,14 @@
 <nav class="flex justify-between items-center h-20 bg-slate-400 dark:bg-slate-900 text-gray-900 dark:text-gray-100 px-4">
     <div>
         <i class="fa-regular fa-calendar-days fa-2xl"></i>
-        <a class="text-xl font-extrabold dark:text-white" href="#">System rezerwacji terminów</a>
+        <a class="text-xl font-extrabold dark:text-white" href="{% url 'index' %}">System rezerwacji terminów</a>
     </div>
     <ul class="flex px-8">
         <li class="px-4">
-            <a href="{% url 'reservations:main' %}" class="text-2xl dark:text-white no-underline">POST</a>
+            <a href="{% url 'main' %}" class="text-2xl dark:text-white no-underline">POST</a>
         </li>
         <li class="px-4">
-            <a href="{% url 'reservations:index' %}" class="text-2xl dark:text-white no-underline">KALENDARZ</a>
+            <a href="{% url 'index' %}" class="text-2xl dark:text-white no-underline">KALENDARZ</a>
         </li>
     </ul>
     <div>

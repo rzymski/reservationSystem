@@ -10,10 +10,22 @@ def index(request):
     return render(request, 'calendar/calendar.html')
 
 
+
+
+
+
+
+
+
+
+
+
+
+# Wersja testowa THEME
 class PostListView(ListView):
     model = Post
-    template_name = 'posts/main.html'
+    template_name = 'test/posts/main.html'
 
 class PostDetailView(DetailView):
     model = Post
-    template_name = 'posts/detail.html'
+    template_name = 'test/posts/detail.html'
