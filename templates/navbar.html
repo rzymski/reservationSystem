@@ -3,6 +3,7 @@
         <i class="fa-regular fa-calendar-days fa-2xl"></i>
         <a class="text-xl font-extrabold dark:text-white" href="{% url 'index' %}">System rezerwacji terminów</a>
     </div>
+    {% if request.user.is_staff %}
     <ul class="flex px-8">
         <li class="px-4">
             <a href="{% url 'main' %}" class="text-2xl dark:text-white no-underline">POST</a>
@@ -11,7 +12,15 @@
             <a href="{% url 'index' %}" class="text-2xl dark:text-white no-underline">KALENDARZ</a>
         </li>
     </ul>
+    {% endif %}
     <div>
+        {% if request.user.is_authenticated %}
+            <a href="{% url 'userProfile' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">{{ request.user }}</a>
+            <a href="{% url 'logout' %}" class="bg-gray-50 hover:bg-gray-200 text-red-600 font-bold py-2 px-4 rounded">Logout</a>
+        {% else %}
+            <a href="{% url 'login' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Login</a>
+            <a href="{% url 'register' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Register</a>
+        {% endif %}
         <a href="{% url 'change-theme' %}" class="bg-gray-100 px-4 py-2 rounded-xl hover:bg-gray-300 duration-300 dark:bg-slate-600">
             {% if is_dark_theme %}
                 <i class="fa-solid fa-sun"></i>
@@ -21,21 +30,3 @@
         </a>
     </div>
 </nav>
-
-{#<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />#}
-{#<nav class="navbar navbar-expand-lg navbar-dark bg-dark">#}
-{#    <div class="container-fluid">#}
-{#        <i class="fa-solid fa-person-running" style="color: #fff;"></i>#}
-{#        <a class="navbar-brand" href="#">Nocny bieg</a>#}
-{#        <div class="collapse navbar-collapse" id="navbarSupportedContent">#}
-{#            <ul class="navbar-nav me-auto mb-2 mb-lg-0">#}
-{#                <li class="nav-item">#}
-{#                    <a class="nav-link" href="">Wykres biegów</a>#}
-{#                </li>#}
-{#                <li class="nav-item">#}
-{#                    <a class="nav-link" href="">Tabela wyników</a>#}
-{#                </li>#}
-{#          </ul>#}
-{#        </div>#}
-{#    </div>#}
-{#</nav>#}
