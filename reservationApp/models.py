@@ -13,5 +13,8 @@ class Events(models.Model):
     start = models.DateTimeField(null=True, blank=True)
     end = models.DateTimeField(null=True, blank=True)
 
+    def __str__(self):
+        return f"{self.name} {self.start}:{self.end}"
+
     class Meta:
         db_table = "tblevents"

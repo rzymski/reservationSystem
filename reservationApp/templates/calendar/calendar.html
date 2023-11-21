@@ -20,6 +20,7 @@
             <div class="col-md-12" >
                 <div id='calendar' class="dark:text-white bg-gray-100 dark:bg-gray-600"></div>
             </div>
+            {% include 'partials/addReserwation.html' %}
         </body>
     </div>
 
@@ -28,6 +29,7 @@
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
+                timeZone: 'Europe/Warsaw',
                 headerToolbar: {
                     left: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay',
                     center: 'title',
@@ -38,8 +40,61 @@
                     center: '',
                     end: 'prev,next'
                 },
+
+                slotLabelFormat: {hour: 'numeric', minute: '2-digit', hour12: false},
+
+                events: '/allEvents',
+
+                eventTimeFormat: {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                },
+
+                selectable: true,
+                editable: true,
+
+                select: function (data){
+                    console.log("Wykonalo sie dodanie")
+                    console.log("D =", data)
+                    console.log(data.startStr)
+
+                    $.ajax({
+                        type: "POST",
+                        url: "{% url 'addEvent' %}",
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',  // Add CSRF token for security
+                            title: $('#title').val(),
+                            startTime: $('#startTime').val(),
+                            endTime: $('#endTime').val(),
+                            startStr: data.startStr,
+                        },
+                        success: function(response) {
+                            console.log(response);
+                            // Handle the success response, if needed
+                        },
+                        error: function(error) {
+                            console.log(error);
+                        }
+                    });
+
+                    {#$('#addEventModal').removeClass('hidden');#}
+                    {#$('body').addClass('overflow-hidden');#}
+                },
+
+
+                eventClick: function (info) {
+                    console.log("WYKONALO SIE klikniecie eventu")
+                    console.log('Event' + info.event.title + ' ' + info.event.start + ' : ' + info.event.end)
+                }
+
             });
             calendar.render();
         });
+
+        function closeAddEventModal() {
+            $('#addEventModal').addClass('hidden');
+            $('body').removeClass('overflow-hidden');
+        }
     </script>
 {% endblock %}

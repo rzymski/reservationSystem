@@ -1,15 +1,73 @@
 from django.shortcuts import render, redirect
-from .models import *
+from .models import Post, Events
 from .forms import CreateUserForm
 from .decorators import unauthenticatedUser, allowedUsers
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.contrib import messages
-
+from django.http import JsonResponse
+from icecream import ic
 
 def index(request):
-    return render(request, 'calendar/calendar.html')
+    ic("INDEX")
+    all_events = Events.objects.all()
+    context = {
+        "events": all_events,
+    }
+    return render(request, 'calendar/calendar.html', context)
+
+def allEvents(request):
+    eventsObjects = Events.objects.all()
+    out = []
+    for event in eventsObjects:
+        print(event)
+        out.append({
+            'title': event.name,
+            'id': event.id,
+            'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end': event.end.strftime('%Y-%m-%dT%H:%M:%S')
+        })
+    return JsonResponse(out, safe=False)
+
+def addEvent(request):
+    ic("Dodano event")
+    ic(request)
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        startTime = request.POST.get('startTime')
+        endTime = request.POST.get('endTime')
+        startStr = request.POST.get('startStr')
+        # event = Events(name=str(title), start=startTime, end=endTime)
+        # event.save()
+        ic(title, startTime, endTime, startStr)
+    ic("NADAL DZIALA")
+    return index(request)
+
+# def addEvent(request):
+#     print("Dodano event")
+#     start = request.GET.get("start", None)
+#     end = request.GET.get("end", None)
+#     title = request.GET.get("title", None)
+#     event = Events(name=str(title), start=start, end=end)
+#     event.save()
+#     data = {}
+#     return JsonResponse(data)
+
+def addEventJSON(request):
+    if request.method == 'GET':
+        ic("Dodano event")
+        start = request.GET.get("start", None)
+        end = request.GET.get("end", None)
+        title = request.GET.get("title", None)
+        ic(start, end, title)
+        event = Events(name=str(title), start=start, end=end)
+        event.save()
+        data = {'success': True}
+        return JsonResponse(data)
+    else:
+        data = {'success': False}
+        return JsonResponse(data)
 
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
