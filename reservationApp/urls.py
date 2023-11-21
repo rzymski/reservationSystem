@@ -15,7 +15,6 @@ urlpatterns = [
 
     path('allEvents/', views.allEvents, name='allEvents'),
     path('addEvent/', views.addEvent, name='addEvent'),
-    path('addEventJSON/', views.addEventJSON, name='addEventJSON'),
 
 
     path('test/main/', views.PostListView.as_view(), name='main'),

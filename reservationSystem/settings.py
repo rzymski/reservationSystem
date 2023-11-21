@@ -126,7 +126,7 @@ TIME_ZONE = 'Europe/Warsaw'
 
 USE_I18N = True
 
-USE_TZ = True
+USE_TZ = False  # jesli True to timezone w bazie danych nie zgadza sie z tym przy otrzymywaniu obiektow
 
 STATIC_ROOT = BASE_DIR / "theme/static"
 

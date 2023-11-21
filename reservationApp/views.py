@@ -7,21 +7,22 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import Group
 from django.contrib import messages
 from django.http import JsonResponse
+from datetime import datetime
 from icecream import ic
 
+
 def index(request):
-    ic("INDEX")
     all_events = Events.objects.all()
     context = {
         "events": all_events,
     }
     return render(request, 'calendar/calendar.html', context)
 
+
 def allEvents(request):
     eventsObjects = Events.objects.all()
     out = []
     for event in eventsObjects:
-        print(event)
         out.append({
             'title': event.name,
             'id': event.id,
@@ -30,49 +31,28 @@ def allEvents(request):
         })
     return JsonResponse(out, safe=False)
 
+
 def addEvent(request):
     ic("Dodano event")
-    ic(request)
     if request.method == 'POST':
         title = request.POST.get('title')
-        startTime = request.POST.get('startTime')
-        endTime = request.POST.get('endTime')
-        startStr = request.POST.get('startStr')
-        # event = Events(name=str(title), start=startTime, end=endTime)
-        # event.save()
-        ic(title, startTime, endTime, startStr)
-    ic("NADAL DZIALA")
-    return index(request)
-
-# def addEvent(request):
-#     print("Dodano event")
-#     start = request.GET.get("start", None)
-#     end = request.GET.get("end", None)
-#     title = request.GET.get("title", None)
-#     event = Events(name=str(title), start=start, end=end)
-#     event.save()
-#     data = {}
-#     return JsonResponse(data)
-
-def addEventJSON(request):
-    if request.method == 'GET':
-        ic("Dodano event")
-        start = request.GET.get("start", None)
-        end = request.GET.get("end", None)
-        title = request.GET.get("title", None)
-        ic(start, end, title)
+        startTimeSTR = request.POST.get('startTime')
+        endTimeSTR = request.POST.get('endTime')
+        startDateSTR = request.POST.get('startStr')
+        startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
+        endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
+        startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
+        start = datetime.combine(startDate, startTime)
+        end = datetime.combine(startDate, endTime)
         event = Events(name=str(title), start=start, end=end)
         event.save()
-        data = {'success': True}
-        return JsonResponse(data)
-    else:
-        data = {'success': False}
-        return JsonResponse(data)
+    return redirect('index')
 
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def notForClients(request):
     return render(request, 'calendar/restricted.html')
+
 
 @login_required(login_url='login')
 def userProfile(request):
@@ -82,7 +62,6 @@ def userProfile(request):
 @unauthenticatedUser
 def registerUser(request):
     form = CreateUserForm()
-
     if request.method == "POST":
         form = CreateUserForm(request.POST)
         if form.is_valid():
@@ -92,7 +71,6 @@ def registerUser(request):
             username = form.cleaned_data.get('username')
             messages.success(request, 'Account was createf for ' + username)
             return redirect('login')
-
     context = {'form': form}
     return render(request, 'accounts/register.html', context)
 
@@ -114,13 +92,13 @@ def loginUser(request):
     context = {}
     return render(request, 'accounts/login.html', context)
 
+
 def logoutUser(request):
     theme = True if 'is_dark_theme' in request.session else False
     logout(request)
     if theme:
         request.session["is_dark_theme"] = True
     return redirect('index')
-
 
 
 # Wersja testowa THEME

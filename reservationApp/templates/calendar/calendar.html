@@ -25,6 +25,7 @@
     </div>
 
     <script>
+        var selectedStartStr;
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -58,30 +59,12 @@
                     console.log("Wykonalo sie dodanie")
                     console.log("D =", data)
                     console.log(data.startStr)
+                    selectedStartStr = data.startStr;
 
-                    $.ajax({
-                        type: "POST",
-                        url: "{% url 'addEvent' %}",
-                        data: {
-                            csrfmiddlewaretoken: '{{ csrf_token }}',  // Add CSRF token for security
-                            title: $('#title').val(),
-                            startTime: $('#startTime').val(),
-                            endTime: $('#endTime').val(),
-                            startStr: data.startStr,
-                        },
-                        success: function(response) {
-                            console.log(response);
-                            // Handle the success response, if needed
-                        },
-                        error: function(error) {
-                            console.log(error);
-                        }
-                    });
-
-                    {#$('#addEventModal').removeClass('hidden');#}
-                    {#$('body').addClass('overflow-hidden');#}
+                    $('#startStrField').val(selectedStartStr);
+                    $('#addEventModal').removeClass('hidden');
+                    $('body').addClass('overflow-hidden');
                 },
-
 
                 eventClick: function (info) {
                     console.log("WYKONALO SIE klikniecie eventu")
@@ -95,6 +78,7 @@
         function closeAddEventModal() {
             $('#addEventModal').addClass('hidden');
             $('body').removeClass('overflow-hidden');
-        }
+        };
+
     </script>
 {% endblock %}
