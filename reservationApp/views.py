@@ -32,6 +32,26 @@ def allEvents(request):
     return JsonResponse(out, safe=False)
 
 
+def addAvailableBookingDate(request):
+    ic("Dodano dostepny termin")
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        startTimeSTR = request.POST.get('startTime')
+        endTimeSTR = request.POST.get('endTime')
+        startDateSTR = request.POST.get('startDate')
+        endDateSTR = request.POST.get('endDate')
+        startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
+        endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
+        startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
+        endDate = datetime.strptime(endDateSTR, '%Y-%m-%d').date()
+        start = datetime.combine(startDate, startTime)
+        end = datetime.combine(endDate, endTime)
+        event = Events(name=str(title), start=start, end=end)
+        event.save()
+    ic("DZIALA")
+    return redirect('index')
+
+
 def addEvent(request):
     ic("Dodano event")
     if request.method == 'POST':
@@ -47,7 +67,6 @@ def addEvent(request):
         event = Events(name=str(title), start=start, end=end)
         event.save()
     return redirect('index')
-
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def notForClients(request):

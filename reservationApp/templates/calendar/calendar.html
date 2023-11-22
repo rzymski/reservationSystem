@@ -15,9 +15,15 @@
 {#            <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.9/index.global.js" integrity="sha512-lU5sd0e7f59Jia30P5oEI5zC3BzVJ4ao+xRA70IIJ2UBzek4PCkPk+MTLIYwXTXGErOqjJ/rLdB3gLK0E5hD0w==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>#}
 {#            <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.9/index.global.min.js" integrity="sha512-XcSx5820pzZbdZYdvoBBKzuOivQv7oQMd+7JuUHh0jhMwqsWHOf+yRfZRxCtV0ySEKWtKblijTdl9pvODcmD7A==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>#}
 {#            <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.9/index.js" integrity="sha512-bBl4oHIOeYj6jgOLtaYQO99mCTSIb1HD0ImeXHZKqxDNC7UPWTywN2OQRp+uGi0kLurzgaA3fm4PX6e2Lnz9jQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>#}
+{#            Datepicker tailwind#}
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/datepicker.min.js"></script>
         </head>
         <body>
-            <div class="col-md-12" >
+            <div class="col-md-12 text-right">
+                <button id="btnAddAvailableBookingDate" onclick="openAddAvailableBookingDateModal()" type="button" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-bold rounded-lg text-lg px-2.5 py-2.5 me-2 mb-2 dark:bg-gray-900 dark:hover:bg-gray-800 dark:focus:ring-gray-700 dark:border-gray-700">Dodaj dostepny termin</button>
+            </div>
+            {% include 'availableBookingDate/addAvailableBookingDate.html' %}
+            <div class="col-md-12">
                 <div id='calendar' class="dark:text-white bg-gray-100 dark:bg-gray-600"></div>
             </div>
             {% include 'partials/addReserwation.html' %}
@@ -74,11 +80,9 @@
             });
             calendar.render();
         });
-
         function closeAddEventModal() {
             $('#addEventModal').addClass('hidden');
             $('body').removeClass('overflow-hidden');
         };
-
     </script>
 {% endblock %}
