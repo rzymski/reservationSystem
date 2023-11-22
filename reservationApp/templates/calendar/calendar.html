@@ -20,9 +20,10 @@
         </head>
         <body>
             <div class="col-md-12 text-right">
-                <button id="btnAddAvailableBookingDate" onclick="openAddAvailableBookingDateModal()" type="button" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-bold rounded-lg text-lg px-2.5 py-2.5 me-2 mb-2 dark:bg-gray-900 dark:hover:bg-gray-800 dark:focus:ring-gray-700 dark:border-gray-700">Dodaj dostepny termin</button>
+                <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-bold rounded-lg text-lg px-2.5 py-2.5 me-2 mb-2 dark:bg-gray-900 dark:hover:bg-gray-800 dark:focus:ring-gray-700 dark:border-gray-700">Dodaj dostepny termin</button>
             </div>
             {% include 'availableBookingDate/addAvailableBookingDate.html' %}
+            {% include 'availableBookingDate/deleteAvailableBookingDate.html' %}
             <div class="col-md-12">
                 <div id='calendar' class="dark:text-white bg-gray-100 dark:bg-gray-600"></div>
             </div>
@@ -32,6 +33,7 @@
 
     <script>
         var selectedStartStr;
+        var selectedEventId;
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -73,8 +75,12 @@
                 },
 
                 eventClick: function (info) {
-                    console.log("WYKONALO SIE klikniecie eventu")
-                    console.log('Event' + info.event.title + ' ' + info.event.start + ' : ' + info.event.end)
+                    console.log(info)
+                    console.log("WYKONALO SIE klikniecie eventu");
+                    console.log('Event' + info.event.title + ' ' + info.event.start + ' : ' + info.event.end);
+                    selectedEventId = info.event.id
+                    $('#deleteSelectedEvent').val(selectedEventId)
+                    openModal('deleteAvailableBookingDateModal');
                 }
 
             });

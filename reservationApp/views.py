@@ -51,6 +51,14 @@ def addAvailableBookingDate(request):
     ic("DZIALA")
     return redirect('index')
 
+def deleteAvailableBookingDate(request):
+    ic("Usunieto dostepny termin")
+    if request.method == 'POST':
+        id = request.POST.get('selectedEvent')
+        event = Events.objects.get(pk=id)
+        event.delete()
+    return redirect('index')
+
 
 def addEvent(request):
     ic("Dodano event")
