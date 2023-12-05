@@ -17,6 +17,7 @@ urlpatterns = [
     path('addEvent/', views.addEvent, name='addEvent'),
 
     path('availableBookingDate/addAvailableBookingDate/', views.addAvailableBookingDate, name='addAvailableBookingDate'),
+    path('availableBookingDate/editAvailableBookingDate/', views.editAvailableBookingDate, name='editAvailableBookingDate'),
     path('availableBookingDate/deleteAvailableBookingDate/', views.deleteAvailableBookingDate, name='deleteAvailableBookingDate'),
 
 

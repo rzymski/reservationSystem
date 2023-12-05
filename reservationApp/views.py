@@ -31,10 +31,26 @@ def allEvents(request):
         })
     return JsonResponse(out, safe=False)
 
+def addEvent(request):
+    ic("Dodano event")
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        startTimeSTR = request.POST.get('startTime')
+        endTimeSTR = request.POST.get('endTime')
+        startDateSTR = request.POST.get('startStr')
+        startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
+        endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
+        startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
+        start = datetime.combine(startDate, startTime)
+        end = datetime.combine(startDate, endTime)
+        event = Events(name=str(title), start=start, end=end)
+        event.save()
+    return redirect('index')
 
 def addAvailableBookingDate(request):
     ic("Dodano dostepny termin")
     if request.method == 'POST':
+        ic(request.POST)
         title = request.POST.get('title')
         startTimeSTR = request.POST.get('startTime')
         endTimeSTR = request.POST.get('endTime')
@@ -51,29 +67,38 @@ def addAvailableBookingDate(request):
     ic("DZIALA")
     return redirect('index')
 
+def editAvailableBookingDate(request):
+    ic("Edytuj dostepny termin")
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        startTimeSTR = request.POST.get('startTime')
+        endTimeSTR = request.POST.get('endTime')
+        startDateSTR = request.POST.get('startDate')
+        endDateSTR = request.POST.get('endDate')
+        startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
+        endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
+        startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
+        endDate = datetime.strptime(endDateSTR, '%Y-%m-%d').date()
+        start = datetime.combine(startDate, startTime)
+        end = datetime.combine(endDate, endTime)
+        ic(startTimeSTR, endTimeSTR)
+        # event = Events(name=str(title), start=start, end=end)
+        # event.save()
+        eventId = request.POST.get('selectedEvent')
+        event = Events.objects.get(id=eventId)
+        event.name = str(title)
+        event.start = start
+        event.end = end
+        event.save()
+    ic("DZIALA")
+    return redirect('index')
+
 def deleteAvailableBookingDate(request):
     ic("Usunieto dostepny termin")
     if request.method == 'POST':
         id = request.POST.get('selectedEvent')
         event = Events.objects.get(pk=id)
         event.delete()
-    return redirect('index')
-
-
-def addEvent(request):
-    ic("Dodano event")
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        startTimeSTR = request.POST.get('startTime')
-        endTimeSTR = request.POST.get('endTime')
-        startDateSTR = request.POST.get('startStr')
-        startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
-        endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
-        startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
-        start = datetime.combine(startDate, startTime)
-        end = datetime.combine(startDate, endTime)
-        event = Events(name=str(title), start=start, end=end)
-        event.save()
     return redirect('index')
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
