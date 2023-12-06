@@ -65,6 +65,23 @@
                 selectable: true,
                 editable: true,
 
+                {#contentHeight: 1500,#}
+                {#aspectRatio: 2,#}
+                {#expandRows: true,#}
+
+                views: {
+                    dayGridMonth: {
+                        titleFormat: myMonthTitleFormat,
+                    },
+                    timeGridWeek:{
+                        titleFormat: myWeekTitleFormat,
+                    },
+                    timeGridDay:{
+                        titleFormat: myDayTitleFormat,
+                    },
+                },
+
+
                 select: function (data){
                     console.log("Wykonalo sie dodanie")
                     console.log("D =", data)
@@ -100,6 +117,41 @@
         function closeAddEventModal() {
             $('#addEventModal').addClass('hidden');
             $('body').removeClass('overflow-hidden');
+        };
+
+
+
+        function myMonthTitleFormat(date) {
+            const startDate = new Date(date.start.marker);
+            const endDate = new Date(date.end.marker);
+            const startDay = startDate.getDate();
+            const startMonth = startDate.getMonth() + 1;
+            const startYear = startDate.getFullYear();
+            const endDay = endDate.getDate();
+            const endMonth = endDate.getMonth() + 1;
+            const endYear = endDate.getFullYear();
+            const dateRangeString = startDay + "/" + startMonth + "/" + startYear + " - " + endDay + "/" + endMonth + "/" + endYear
+            return dateRangeString;
+        };
+        function myWeekTitleFormat(date) {
+            const startDate = new Date(date.start.marker);
+            const endDate = new Date(date.end.marker);
+            const startDay = startDate.getDate();
+            const startMonth = startDate.getMonth() + 1;
+            const startYear = startDate.getFullYear();
+            const endDay = endDate.getDate();
+            const endMonth = endDate.getMonth() + 1;
+            const endYear = endDate.getFullYear();
+            const dateRangeString = startDay + "/" + startMonth + "/" + startYear + " - " + endDay + "/" + endMonth + "/" + endYear
+            return dateRangeString;
+        };
+        function myDayTitleFormat(date) {
+            const startDate = new Date(date.start.marker);
+            const startDay = startDate.getDate();
+            const startMonth = startDate.getMonth() + 1;
+            const startYear = startDate.getFullYear();
+            const dateRangeString = startDay + "/" + startMonth + "/" + startYear
+            return dateRangeString;
         };
     </script>
 {% endblock %}

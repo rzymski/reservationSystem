@@ -1,14 +1,6 @@
 from django.db import models
 
 
-class Post(models.Model):
-    title = models.CharField(max_length=200)
-    content = models.TextField()
-
-    def __str__(self):
-        return str(self.title)
-
-
 class Events(models.Model):
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=255, null=True, blank=True)
@@ -20,3 +12,11 @@ class Events(models.Model):
 
     class Meta:
         db_table = "tblevents"
+
+
+class Post(models.Model):
+    title = models.CharField(max_length=200)
+    content = models.TextField()
+
+    def __str__(self):
+        return str(self.title)
