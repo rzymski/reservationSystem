@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Post, Events
+from .models import *
 from .forms import CreateUserForm
 from .decorators import unauthenticatedUser, allowedUsers
 from django.contrib.auth import authenticate, login, logout
@@ -12,7 +12,7 @@ from icecream import ic
 
 
 def index(request):
-    all_events = Events.objects.all()
+    all_events = AvailableBookingDate.objects.all()
     context = {
         "events": all_events,
     }
@@ -20,22 +20,23 @@ def index(request):
 
 
 def allEvents(request):
-    eventsObjects = Events.objects.all()
+    eventsObjects = AvailableBookingDate.objects.all()
     out = []
     for event in eventsObjects:
         out.append({
-            'title': event.name,
+            'title': f"{event.user.first_name} {event.user.last_name}",
             'id': event.id,
             'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
             'end': event.end.strftime('%Y-%m-%dT%H:%M:%S')
         })
     return JsonResponse(out, safe=False)
 
-def addEvent(request):
+@login_required(login_url='login')
+def addAvailableBookingDateByCalendar(request):
     ic("Dodano event")
     if request.method == 'POST':
         ic(request.POST)
-        title = request.POST.get('title')
+        # title = request.POST.get('title')
         startTimeSTR = request.POST.get('startTime')
         endTimeSTR = request.POST.get('endTime')
         startDateSTR = request.POST.get('startStr')
@@ -44,15 +45,18 @@ def addEvent(request):
         startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
         start = datetime.combine(startDate, startTime)
         end = datetime.combine(startDate, endTime)
-        event = Events(name=str(title), start=start, end=end)
-        event.save()
+        currentUser = request.user
+        availableBookingDate = AvailableBookingDate(user=currentUser, start=start, end=end)
+        availableBookingDate.save()
+
     return redirect('index')
 
+@login_required(login_url='login')
 def addAvailableBookingDate(request):
     ic("Dodano dostepny termin")
     if request.method == 'POST':
         ic(request.POST)
-        title = request.POST.get('title')
+        # title = request.POST.get('title')
         startTimeSTR = request.POST.get('startTime')
         endTimeSTR = request.POST.get('endTime')
         startDateSTR = request.POST.get('startDate')
@@ -63,15 +67,17 @@ def addAvailableBookingDate(request):
         endDate = datetime.strptime(endDateSTR, '%Y-%m-%d').date()
         start = datetime.combine(startDate, startTime)
         end = datetime.combine(endDate, endTime)
-        event = Events(name=str(title), start=start, end=end)
-        event.save()
+        currentUser = request.user
+        availableBookingDate = AvailableBookingDate(user=currentUser, start=start, end=end)
+        availableBookingDate.save()
     ic("DZIALA")
     return redirect('index')
 
+@login_required(login_url='login')
 def editAvailableBookingDate(request):
     ic("Edytuj dostepny termin")
     if request.method == 'POST':
-        title = request.POST.get('title')
+        # title = request.POST.get('title')
         startTimeSTR = request.POST.get('startTime')
         endTimeSTR = request.POST.get('endTime')
         startDateSTR = request.POST.get('startDate')
@@ -83,23 +89,23 @@ def editAvailableBookingDate(request):
         start = datetime.combine(startDate, startTime)
         end = datetime.combine(endDate, endTime)
         ic(startTimeSTR, endTimeSTR)
-        # event = Events(name=str(title), start=start, end=end)
-        # event.save()
-        eventId = request.POST.get('selectedEvent')
-        event = Events.objects.get(id=eventId)
-        event.name = str(title)
-        event.start = start
-        event.end = end
-        event.save()
+        currentUser = request.user
+        availableBookingDateId = request.POST.get('selectedEvent')
+        availableBookingDate = AvailableBookingDate.objects.get(id=availableBookingDateId)
+        availableBookingDate.user = currentUser
+        availableBookingDate.start = start
+        availableBookingDate.end = end
+        availableBookingDate.save()
     ic("DZIALA")
     return redirect('index')
 
+@login_required(login_url='login')
 def deleteAvailableBookingDate(request):
     ic("Usunieto dostepny termin")
     if request.method == 'POST':
         id = request.POST.get('selectedEvent')
-        event = Events.objects.get(pk=id)
-        event.delete()
+        availableBookingDate = AvailableBookingDate.objects.get(pk=id)
+        availableBookingDate.delete()
     return redirect('index')
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
@@ -152,6 +158,8 @@ def logoutUser(request):
     if theme:
         request.session["is_dark_theme"] = True
     return redirect('index')
+
+
 
 
 # Wersja testowa THEME

@@ -14,8 +14,8 @@ urlpatterns = [
     path('restricted/', views.notForClients, name='notForClients'),
 
     path('allEvents/', views.allEvents, name='allEvents'),
-    path('addEvent/', views.addEvent, name='addEvent'),
 
+    path('addAvailableBookingDateByCalendar/', views.addAvailableBookingDateByCalendar, name='addAvailableBookingDateByCalendar'),
     path('availableBookingDate/addAvailableBookingDate/', views.addAvailableBookingDate, name='addAvailableBookingDate'),
     path('availableBookingDate/editAvailableBookingDate/', views.editAvailableBookingDate, name='editAvailableBookingDate'),
     path('availableBookingDate/deleteAvailableBookingDate/', views.deleteAvailableBookingDate, name='deleteAvailableBookingDate'),

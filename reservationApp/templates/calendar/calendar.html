@@ -22,6 +22,7 @@
             <div class="col-md-12 text-right">
                 <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-bold rounded-lg text-lg px-2.5 py-2.5 me-2 mb-2 dark:bg-gray-900 dark:hover:bg-gray-800 dark:focus:ring-gray-700 dark:border-gray-700">Dodaj dostepny termin</button>
             </div>
+            {% include 'availableBookingDate/addAvailableBookingDateByCalendar.html' %}
             {% include 'availableBookingDate/addAvailableBookingDate.html' %}
             {% include 'availableBookingDate/editAvailableBookingDate.html' %}
             {% include 'availableBookingDate/deleteAvailableBookingDate.html' %}
@@ -29,7 +30,6 @@
             <div class="col-md-12">
                 <div id='calendar' class="dark:text-white bg-gray-100 dark:bg-gray-600"></div>
             </div>
-            {% include 'partials/addReserwation.html' %}
         </body>
     </div>
 
@@ -72,6 +72,7 @@
                 views: {
                     dayGridMonth: {
                         titleFormat: myMonthTitleFormat,
+                        displayEventEnd: true,
                     },
                     timeGridWeek:{
                         titleFormat: myWeekTitleFormat,
@@ -80,7 +81,6 @@
                         titleFormat: myDayTitleFormat,
                     },
                 },
-
 
                 select: function (data){
                     console.log("Wykonalo sie dodanie")
@@ -93,10 +93,10 @@
                     let endTimeOnly = endDateTime.toLocaleTimeString().slice(0, 5);
                     console.log("CZAS =", startTimeOnly)
                     if (startTimeOnly != "01:00" || endTimeOnly != "01:00"){
-                        $('#addEventModal [name="startTime"]').val(startTimeOnly);
+                        $('#addAvailableBookingDateByCalendarModal [name="startTime"]').val(startTimeOnly);
                     }
                     $('#startStrField').val(startDateOnly);
-                    $('#addEventModal').removeClass('hidden');
+                    $('#addAvailableBookingDateByCalendarModal').removeClass('hidden');
                     $('body').addClass('overflow-hidden');
                 },
 
@@ -114,8 +114,8 @@
             });
             calendar.render();
         });
-        function closeAddEventModal() {
-            $('#addEventModal').addClass('hidden');
+        function closeAddAvailableBookingDateByCalendarModal() {
+            $('#addAvailableBookingDateByCalendarModal').addClass('hidden');
             $('body').removeClass('overflow-hidden');
         };
 
