@@ -34,7 +34,6 @@
     </div>
 
     <script>
-        var selectedStartStr;
         var selectedEventId;
         var selectedEventInfo;
         document.addEventListener('DOMContentLoaded', function() {
@@ -70,9 +69,16 @@
                     console.log("Wykonalo sie dodanie")
                     console.log("D =", data)
                     console.log(data.startStr)
-                    selectedStartStr = data.startStr;
-
-                    $('#startStrField').val(selectedStartStr);
+                    const startDateTime = new Date(data.startStr)
+                    let startDateOnly = startDateTime.toISOString().split('T')[0];
+                    let startTimeOnly = startDateTime.toLocaleTimeString().slice(0, 5);
+                    const endDateTime = new Date(data.endStr)
+                    let endTimeOnly = endDateTime.toLocaleTimeString().slice(0, 5);
+                    console.log("CZAS =", startTimeOnly)
+                    if (startTimeOnly != "01:00" || endTimeOnly != "01:00"){
+                        $('#addEventModal [name="startTime"]').val(startTimeOnly);
+                    }
+                    $('#startStrField').val(startDateOnly);
                     $('#addEventModal').removeClass('hidden');
                     $('body').addClass('overflow-hidden');
                 },

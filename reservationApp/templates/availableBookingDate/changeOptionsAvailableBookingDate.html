@@ -39,13 +39,14 @@
 <script>
     function editAvailableBookingDate() {
         {#console.log(selectedEventInfo)#}
+        console.log("DATETIME nieprzetworzone: ", selectedEventInfo.event.start)
         closeModal('changeOptionsAvailableBookingDateModal');
         $('#editAvailableBookingDateModal [name="title"]').val(selectedEventInfo.event.title);
         let startDate = selectedEventInfo.event.start.toISOString().split('T')[0];
         let startTime = selectedEventInfo.event.start.toISOString().split('T')[1].slice(0, 5);
         let endDate = selectedEventInfo.event.end.toISOString().split('T')[0];
         let endTime = selectedEventInfo.event.end.toISOString().split('T')[1].slice(0, 5);
-        {#console.log(startDate, startTime, endDate, endTime)#}
+        console.log(startDate, startTime, endDate, endTime)
         $('#editAvailableBookingDateModal [name="startDate"]').val(startDate);
         $('#editAvailableBookingDateModal [name="startTime"]').val(startTime);
         $('#editAvailableBookingDateModal [name="endDate"]').val(endDate);

@@ -34,6 +34,7 @@ def allEvents(request):
 def addEvent(request):
     ic("Dodano event")
     if request.method == 'POST':
+        ic(request.POST)
         title = request.POST.get('title')
         startTimeSTR = request.POST.get('startTime')
         endTimeSTR = request.POST.get('endTime')
