@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
 from .models import *
-from .forms import CreateUserForm
+from .forms import CreateUserForm, UpdateProfileForm, UpdateUserForm
 from .decorators import unauthenticatedUser, allowedUsers
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.http import JsonResponse
 from datetime import datetime
@@ -13,8 +13,13 @@ from icecream import ic
 
 def index(request):
     all_events = AvailableBookingDate.objects.all()
+
+    serviceProviderGroup = Group.objects.get(name='serviceProvider')
+    serviceProviders = serviceProviderGroup.user_set.all()
+
     context = {
         "events": all_events,
+        'serviceProviders': serviceProviders,
     }
     return render(request, 'calendar/calendar.html', context)
 
@@ -30,6 +35,21 @@ def allEvents(request):
             'end': event.end.strftime('%Y-%m-%dT%H:%M:%S')
         })
     return JsonResponse(out, safe=False)
+
+
+def getEvents(request, pk):
+    ic("GET EVENTS WORK")
+    eventsObjects = AvailableBookingDate.objects.filter(user=pk)
+    out = []
+    for event in eventsObjects:
+        out.append({
+            'title': f"{event.user.first_name} {event.user.last_name}",
+            'id': event.id,
+            'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end': event.end.strftime('%Y-%m-%dT%H:%M:%S')
+        })
+    return JsonResponse(out, safe=False)
+
 
 @login_required(login_url='login')
 def addAvailableBookingDateByCalendar(request):
@@ -114,13 +134,33 @@ def notForClients(request):
 
 
 @login_required(login_url='login')
-def userProfile(request):
-    return render(request, 'accounts/userProfile.html')
+def userProfile(request, pk):
+    userOwnerOfProfile = User.objects.get(pk=pk)
+    userProfileInstance = UserProfile.objects.get(user=userOwnerOfProfile)
+    return render(request, 'accounts/userProfile.html', {"userProfile": userProfileInstance})
+
+
+
+@login_required
+def updateUser(request):
+    if request.method == 'POST':
+        userForm = UpdateUserForm(request.POST, instance=request.user)
+        profileForm = UpdateProfileForm(request.POST, request.FILES, instance=request.user.userprofile)
+        if userForm.is_valid() and profileForm.is_valid():
+            userForm.save()
+            profileForm.save()
+            return redirect('userProfile', pk=request.user.id)
+    else:
+        userForm = UpdateUserForm(instance=request.user)
+        profileForm = UpdateProfileForm(instance=request.user.userprofile)
+    userOwnerOfProfile = User.objects.get(pk=request.user.id)
+    userProfileInstance = UserProfile.objects.get(user=userOwnerOfProfile)
+    return render(request, 'accounts/updateUser.html', {"userProfile": userProfileInstance, 'userForm': userForm, 'profileForm': profileForm})
 
 
 @unauthenticatedUser
 def registerUser(request):
-    form = CreateUserForm()
+    form = CreateUserForm()  # it's for case of not post or wrong validation
     if request.method == "POST":
         form = CreateUserForm(request.POST)
         if form.is_valid():
@@ -128,10 +168,14 @@ def registerUser(request):
             clientGroup = Group.objects.get(name='client')
             user.groups.add(clientGroup)
             username = form.cleaned_data.get('username')
-            messages.success(request, 'Account was createf for ' + username)
-            return redirect('login')
-    context = {'form': form}
-    return render(request, 'accounts/register.html', context)
+            # messages.success(request, 'Account was createf for ' + username)
+            # return redirect('login')
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password1']
+            user = authenticate(username=username, password=password)
+            login(request, user)
+            return redirect('index')
+    return render(request, 'accounts/register.html', {'form': form})
 
 
 @unauthenticatedUser

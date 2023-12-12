@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import *
+from django.contrib.auth.models import Group, User
+from .models import AvailableBookingDate, UserProfile, Post
 from django.utils import timezone
 
 
@@ -17,6 +18,24 @@ class AvailableBookingDateAdmin(admin.ModelAdmin):
     start_display.short_description = 'Start Time'
     end_display.short_description = 'End Time'
 
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'age', 'sex')
+
+# class UserProfileInline(admin.StackedInline):
+#     model = UserProfile
+#
+#
+# class UserAdmin(admin.ModelAdmin):
+#     model = User
+#     fields = ["username", "first_name", "last_name", "email", "is_staff"]
+#     inlines = [UserProfileInline]
+#
+#
+# admin.site.unregister(Group)
+# admin.site.unregister(User)
+# admin.site.register(User, UserAdmin)
 
 
 # @admin.register(Events)

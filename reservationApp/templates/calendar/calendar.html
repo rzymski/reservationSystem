@@ -19,8 +19,19 @@
             <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/datepicker.min.js"></script>
         </head>
         <body>
-            <div class="col-md-12 text-right">
-                <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-bold rounded-lg text-lg px-2.5 py-2.5 me-2 mb-2 dark:bg-gray-900 dark:hover:bg-gray-800 dark:focus:ring-gray-700 dark:border-gray-700">Dodaj dostepny termin</button>
+            <div style="display: flex; justify-content: space-between">
+                <div style="text-align: left">
+{#                    <label for="users" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Wybierz usługodawcę:</label>#}
+                    <select id="users" class="w-48 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+                      <option selected>Filtruj usługodawcę:</option>
+                      {% for user in serviceProviders %}
+                          <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                      {% endfor %}
+                    </select>
+                </div>
+                <div style="text-align: right">
+                    <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-bold rounded-lg text-lg px-2.5 py-2.5 me-2 mb-2 dark:bg-gray-900 dark:hover:bg-gray-800 dark:focus:ring-gray-700 dark:border-gray-700">Dodaj dostepny termin</button>
+                </div>
             </div>
             {% include 'availableBookingDate/addAvailableBookingDateByCalendar.html' %}
             {% include 'availableBookingDate/addAvailableBookingDate.html' %}
@@ -110,9 +121,16 @@
                     $('#editSelectedEvent').val(selectedEventId)
                     openModal('changeOptionsAvailableBookingDateModal');
                 }
-
             });
             calendar.render();
+
+            document.getElementById('users').addEventListener('change', function() {
+                console.log("WYKONALO SIE: ", this.value)
+                {#calendar.refetchEvents();#}
+
+                {#calendar.setOption('events', '/allEvents');#}
+                calendar.setOption('events', '/getEvents/' + this.value + '/');
+            });
         });
         function closeAddAvailableBookingDateByCalendarModal() {
             $('#addAvailableBookingDateByCalendarModal').addClass('hidden');

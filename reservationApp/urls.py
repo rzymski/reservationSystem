@@ -9,11 +9,13 @@ urlpatterns = [
     path('register/', views.registerUser, name='register'),
     path('login/', views.loginUser, name='login'),
     path('logout/', views.logoutUser, name='logout'),
-    path('userProfile/', views.userProfile, name='userProfile'),
+    path('userProfile/<pk>/', views.userProfile, name='userProfile'),
+    path('updateUser', views.updateUser, name='updateUser'),
 
     path('restricted/', views.notForClients, name='notForClients'),
 
     path('allEvents/', views.allEvents, name='allEvents'),
+    path('getEvents/<pk>/', views.getEvents, name='getEvents'),
 
     path('addAvailableBookingDateByCalendar/', views.addAvailableBookingDateByCalendar, name='addAvailableBookingDateByCalendar'),
     path('availableBookingDate/addAvailableBookingDate/', views.addAvailableBookingDate, name='addAvailableBookingDate'),

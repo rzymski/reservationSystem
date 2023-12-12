@@ -1,0 +1,137 @@
+<head>
+    <title>Register</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        .user_card {
+            width: 500px;
+            margin-top: auto;
+            margin-bottom: auto;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            padding: 10px;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            -webkit-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            -moz-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+            border-radius: 5px;
+        }
+
+        .form_container {
+            margin-top: 20px;
+        }
+        .login_btn {
+            width: 100%;
+            background: #33ccff !important;
+            color: white !important;
+        }
+        .login_btn:focus {
+            box-shadow: none !important;
+            outline: 0px !important;
+        }
+        .login_container {
+            padding: 0 2rem;
+        }
+        .input-group-text {
+            background: #f7ba5b !important;
+            color: white !important;
+            border: 0 !important;
+            border-radius: 0.25rem 0 0 0.25rem !important;
+        }
+        .input_user,
+        .input_pass:focus {
+            box-shadow: none !important;
+            outline: 0px !important;
+        }
+    </style>
+
+</head>
+<body>
+    {% include 'accounts/userProfile.html' %}
+    <div class="container mx-auto mt-8">
+        <div class="grid grid-cols-1 md:grid-cols-3">
+            <div class="md:col-span-1">
+            </div>
+            <div class="md:col-span-2">
+                <div class="d-flex">
+                    <div class="user_card">
+                        <div class="d-flex justify-content-center">
+                            <h3 class="text-gray-950 dark:text-gray-50">Zaaktualizuj konto</h3>
+                        </div>
+                        <div class="d-flex justify-content-center form_container">
+                            <form method="POST" action="" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    </div>
+                                    {{userForm.username}}
+                                </div>
+                                <div class="form-text text-red-600 dark:text-red-500 small">{{ userForm.username.errors }}</div>
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    </div>
+                                    {{userForm.first_name}}
+                                </div>
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <span class="input-group-text"><i class="fas fa-user"></i></span>
+                                    </div>
+                                    {{userForm.last_name}}
+                                </div>
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <span class="input-group-text"><i class="fas fa-envelope-square"></i></span>
+                                    </div>
+                                    {{userForm.email}}
+                                </div>
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <span class="input-group-text"><i class="fa-solid fa-clock"></i></span>
+                                    </div>
+                                    {{profileForm.age}}
+                                </div>
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <span class="input-group-text"><i class="fa-solid fa-mars-and-venus"></i></span>
+                                    </div>
+                                    {{profileForm.sex}}
+                                </div>
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <span class="input-group-text"><i class="fa-solid fa-file-lines"></i></span>
+                                    </div>
+                                    {{profileForm.description}}
+                                </div>
+                                <div class="input-group mb-2">
+                                    <div class="input-group-text">
+                                        <span class="input-group-text"><i class="fa-solid fa-image-portrait"></i></span>
+                                    </div>
+                                    <div class="text-gray-950 bg-gray-50 flex-grow">
+        {#                                    {{ profileForm.profileImage }}#}
+                                        <div class="custom-file">
+                                            <input type="file" name="{{ profileForm.profileImage.name }}" class="custom-file-input" id="customFile">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-text text-red-600 dark:text-red-500 small">{{ userForm.email.errors }}</div>
+                                <div class="d-flex justify-content-center mt-3 login_container">
+                                    <div class="d-flex justify-content-center">
+                                        <button type="submit" class="py-1 px-3 text-2xl font-semibold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Aktualizuj dane</button>
+                                        <button type="reset" class="py-1 px-3 text-2xl font-semibold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Resetuj dane</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
