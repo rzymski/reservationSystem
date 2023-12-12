@@ -2,8 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from PIL import Image
 from django.db.models.signals import post_save
-from django.dispatch import receiver
-
 
 class AvailableBookingDate(models.Model):
     id = models.AutoField(primary_key=True)
@@ -18,7 +16,22 @@ class AvailableBookingDate(models.Model):
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     age = models.IntegerField(null=True, blank=True)
-    sex = models.CharField(max_length=30, null=True, blank=True)
+
+    # class Sex(models.TextChoices):
+    #     UNDEFINED = "UNDEFINED", "Brak"
+    #     MAN = "MAN", "Mężczyzna"
+    #     WOMAN = "WOMAN", "Kobieta"
+    # sex = models.CharField(max_length=10, choices=Sex.choices, default=Sex.UNDEFINED)
+    UNDEFINED = 'UNDEFINED'
+    MALE = 'MALE'
+    FEMALE = 'FEMALE'
+    SEX_CHOICES = [
+        (UNDEFINED, 'Brak'),
+        (MALE, 'Mężczyzna'),
+        (FEMALE, 'Kobieta'),
+    ]
+    sex = models.CharField(max_length=30, choices=SEX_CHOICES, null=True, blank=True)
+    # sex = models.CharField(max_length=50, null=True, blank=True)
     description = models.CharField(max_length=300, null=True, blank=True)
     profileImage = models.ImageField(default='default.jpg', upload_to='profilePictures')
 
@@ -30,13 +43,6 @@ class UserProfile(models.Model):
         img = Image.open(self.profileImage.path)
         img = img.resize((300, 300))
         img.save(self.profileImage.path)
-        # if img.height > 300 or img.width > 300:
-        #     output_size = (300, 300)
-        #     img.thumbnail(output_size)
-        #     # img.save(self.profileImage.path)
-        #     new_img = Image.new("RGB", (300, 300), (255, 255, 255))
-        #     new_img.paste(img, (int((300 - img.width) / 2), int((300 - img.height) / 2)))
-        #     new_img.save(self.profileImage.path)
 
 
 def create_profile(sender, instance, created, **kwargs):

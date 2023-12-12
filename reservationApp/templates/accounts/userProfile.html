@@ -15,7 +15,7 @@
                     <p class="text-3xl mb-2"><strong>Nazwisko:</strong> {{ userProfile.user.last_name }}</p>
                     <p class="text-3xl mb-2"><strong>Email:</strong> {{ userProfile.user.email }}</p>
                     <p class="text-3xl mb-2"><strong>Wiek:</strong> {% if userProfile.age is not None %} {{ userProfile.age }} {% endif %}</p>
-                    <p class="text-3xl mb-2"><strong>Płeć:</strong> {% if userProfile.sex is not None %} {{ userProfile.sex }} {% endif %}</p>
+                    <p class="text-3xl mb-2"><strong>Płeć:</strong> {{ userProfile.get_sex_display }}</p>
                     <div>
                         <div class="grid grid-cols-12 gap-4">
                             <div class="col-span-9">

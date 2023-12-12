@@ -56,7 +56,8 @@ class UpdateUserForm(forms.ModelForm):
 
 class UpdateProfileForm(forms.ModelForm):
     age = forms.IntegerField(required=False, label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Wiek'}))
-    sex = forms.CharField(required=False, label="", max_length=50, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Płeć'}))
+    # sex = forms.CharField(required=False, label="", max_length=50, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Płeć'}))
+    sex = forms.ChoiceField(required=False, label="", choices=UserProfile.SEX_CHOICES, widget=forms.Select(attrs={'class': 'form-control', 'placeholder': 'Płeć'}))
     description = forms.CharField(required=False, widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Opis', 'rows': 5}))
     # profileImage = forms.ImageField(required=False, label="")
 

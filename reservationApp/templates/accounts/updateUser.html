@@ -101,7 +101,18 @@
                                     <div class="input-group-text">
                                         <span class="input-group-text"><i class="fa-solid fa-mars-and-venus"></i></span>
                                     </div>
-                                    {{profileForm.sex}}
+{#                                    {{ profileForm.sex}}#}
+                                    <select name="{{ profileForm.sex.name }}" class="form-control">
+                                        {% for value, label in profileForm.fields.sex.choices %}
+                                            <option value="{{ value }}" {% if profileForm.sex.value == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+{#                                    <select name="{{ profileForm.sex }}">#}
+{#                                        <option selected>{{profileForm.sex.name}}</option>#}
+{#                                        <option value="UNDEFINED">BRAK</option>#}
+{#                                        <option value="MALE">MĘSKA</option>#}
+{#                                        <option value="FEMALE">ŻEŃSKA</option>#}
+{#                                    </select>#}
                                 </div>
                                 <div class="input-group mb-2">
                                     <div class="input-group-text">
