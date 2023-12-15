@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from PIL import Image
 from django.db.models.signals import post_save
 
+
 class AvailableBookingDate(models.Model):
     id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -13,15 +14,18 @@ class AvailableBookingDate(models.Model):
         return f"{self.user} {self.start}:{self.end}"
 
 
+class Reservation(models.Model):
+    id = models.AutoField(primary_key=True)
+    bookingPerson = models.ForeignKey(User, on_delete=models.CASCADE)
+    availableBookingDate = models.ForeignKey(AvailableBookingDate, on_delete=models.CASCADE)
+    start = models.DateTimeField(null=True, blank=True)
+    end = models.DateTimeField(null=True, blank=True)
+    isAccepted = models.BooleanField(default=False)
+
+
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     age = models.IntegerField(null=True, blank=True)
-
-    # class Sex(models.TextChoices):
-    #     UNDEFINED = "UNDEFINED", "Brak"
-    #     MAN = "MAN", "Mężczyzna"
-    #     WOMAN = "WOMAN", "Kobieta"
-    # sex = models.CharField(max_length=10, choices=Sex.choices, default=Sex.UNDEFINED)
     UNDEFINED = 'UNDEFINED'
     MALE = 'MALE'
     FEMALE = 'FEMALE'
@@ -31,7 +35,6 @@ class UserProfile(models.Model):
         (FEMALE, 'Kobieta'),
     ]
     sex = models.CharField(max_length=30, choices=SEX_CHOICES, null=True, blank=True)
-    # sex = models.CharField(max_length=50, null=True, blank=True)
     description = models.CharField(max_length=300, null=True, blank=True)
     profileImage = models.ImageField(default='default.jpg', upload_to='profilePictures')
 

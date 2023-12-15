@@ -32,7 +32,8 @@ def allEvents(request):
             'title': f"{event.user.first_name} {event.user.last_name}",
             'id': event.id,
             'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
-            'end': event.end.strftime('%Y-%m-%dT%H:%M:%S')
+            'end': event.end.strftime('%Y-%m-%dT%H:%M:%S'),
+            'color': '#378006',
         })
     return JsonResponse(out, safe=False)
 

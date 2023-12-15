@@ -65,7 +65,10 @@
 
                 slotLabelFormat: {hour: 'numeric', minute: '2-digit', hour12: false},
 
-                events: '/allEvents',
+                {#events: '/allEvents',#}
+                eventSources: [
+                    '/allEvents',
+                ],
 
                 eventTimeFormat: {
                     hour: '2-digit',
@@ -77,7 +80,7 @@
                 editable: true,
 
                 {#contentHeight: 1500,#}
-                {#aspectRatio: 2,#}
+                aspectRatio: 3,
                 {#expandRows: true,#}
 
                 views: {
