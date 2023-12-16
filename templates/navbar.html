@@ -3,19 +3,17 @@
         <i class="fa-regular fa-calendar-days fa-2xl"></i>
         <a class="text-xl font-extrabold dark:text-white" href="{% url 'index' %}">System rezerwacji terminów</a>
     </div>
-    {% if request.user.is_staff %}
     <ul class="flex px-8">
         <li class="px-4">
-            <a href="{% url 'main' %}" class="text-2xl dark:text-white no-underline">POST</a>
+            <a href="{% url 'main' %}" class="text-3xl font-semibold dark:text-gray-50 no-underline">POST</a>
         </li>
         <li class="px-4">
-            <a href="{% url 'index' %}" class="text-2xl dark:text-white no-underline">KALENDARZ</a>
+            <a href="{% url 'index' %}" class="text-3xl font-semibold dark:text-gray-50 no-underline">KALENDARZ</a>
         </li>
     </ul>
-    {% endif %}
     <div class="relative flex items-center">
         {% if request.user.is_authenticated %}
-            <img id="avatarButton" type="button" data-dropdown-toggle="userDropdown" data-dropdown-placement="bottom-start" class="w-14 h-14 rounded-full cursor-pointer mr-4" src="{{ profileImageUrl }}" alt="User dropdown">
+            <img id="avatarButton" type="button" data-dropdown-toggle="userDropdown" data-dropdown-placement="bottom-start" class="w-14 h-14 rounded-full cursor-pointer mr-8" src="{{ profileImageUrl }}" alt="User dropdown">
             <!-- Dropdown menu -->
             <div id="userDropdown" class="absolute z-10 hidden bg-gray-50 divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600 top-16">
                 <div class="px-4 py-3 font-semibold text-gray-900 dark:text-white">
@@ -45,13 +43,18 @@
             {% endif %}
         </a>
     </div>
-
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             var avatarButton = document.getElementById("avatarButton");
             var userDropdown = document.getElementById("userDropdown");
-            avatarButton.addEventListener("click", function () {
+            avatarButton.addEventListener("click", function (event) {
+                event.stopPropagation();
                 userDropdown.classList.toggle("hidden");
+            });
+            document.body.addEventListener("click", function (event) {
+                if (!event.target.closest("#avatarButton") && !event.target.closest("#userDropdown")) {
+                    userDropdown.classList.add("hidden");
+                }
             });
         });
     </script>

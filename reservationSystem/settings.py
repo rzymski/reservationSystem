@@ -82,6 +82,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'theme.context_processors.theme',
                 'reservationApp.context_processors.userPicture',
+                'reservationApp.context_processors.userRole',
             ],
         },
     },

@@ -4,8 +4,6 @@
     <div>
         <head>
             <title>Calendar</title>
-{#            wlasny CSS kolidowal z naglowkiem#}
-{#            <link rel="stylesheet" type="text/css" href="{% static 'myCSS/calendar.css' %}">#}
 {#            link do jQuery#}
             <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 {#            Kalendarz z https://fullcalendar.io/docs/initialize-globals #}
@@ -17,27 +15,37 @@
 {#            <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.9/index.js" integrity="sha512-bBl4oHIOeYj6jgOLtaYQO99mCTSIb1HD0ImeXHZKqxDNC7UPWTywN2OQRp+uGi0kLurzgaA3fm4PX6e2Lnz9jQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>#}
 {#            Datepicker tailwind#}
             <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/datepicker.min.js"></script>
+
+            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+            {% load static %}
+            <link rel="stylesheet" type="text/css" href="{% static 'myCSS/calendar.css' %}">
         </head>
         <body>
-            <div style="display: flex; justify-content: space-between">
-                <div style="text-align: left">
-{#                    <label for="users" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Wybierz usługodawcę:</label>#}
-                    <select id="users" class="w-48 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-                      <option selected>Filtruj usługodawcę:</option>
-                      {% for user in serviceProviders %}
-                          <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
-                      {% endfor %}
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="text-align: left; vertical-align: center; display: flex; align-items: center;">
+                    <button id="filterButton" onclick="filter()" class="my-2 ml-2 mr-1 py-1 px-1 text-2xl font-semibold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Filtruj</button>
+                    <select class="js-example-basic-multiple" name="serviceProviders[]" multiple="multiple">
+                        {% for user in serviceProviders %}
+                            <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
+                        {% endfor %}
                     </select>
                 </div>
-                <div style="text-align: right">
-                    <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-bold rounded-lg text-lg px-2.5 py-2.5 me-2 mb-2 dark:bg-gray-900 dark:hover:bg-gray-800 dark:focus:ring-gray-700 dark:border-gray-700">Dodaj dostepny termin</button>
-                </div>
+                {% if userRole != 'normalUser' %}
+                    <div style="text-align: right; vertical-align: center">
+                        <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="m-2 py-1 px-1 text-2xl font-semibold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Dodaj dostepny termin</button>
+{#                        <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-bold rounded-lg text-lg px-2.5 py-2.5 me-2 mb-2 dark:bg-gray-900 dark:hover:bg-gray-800 dark:focus:ring-gray-700 dark:border-gray-700">Dodaj dostepny termin</button>#}
+                    </div>
+                {% endif %}
             </div>
-            {% include 'availableBookingDate/addAvailableBookingDateByCalendar.html' %}
-            {% include 'availableBookingDate/addAvailableBookingDate.html' %}
-            {% include 'availableBookingDate/editAvailableBookingDate.html' %}
-            {% include 'availableBookingDate/deleteAvailableBookingDate.html' %}
-            {% include 'availableBookingDate/changeOptionsAvailableBookingDate.html' %}
+            {% if userRole != 'normalUser' %}
+                {% include 'availableBookingDate/addAvailableBookingDateByCalendar.html' %}
+                {% include 'availableBookingDate/addAvailableBookingDate.html' %}
+                {% include 'availableBookingDate/editAvailableBookingDate.html' %}
+                {% include 'availableBookingDate/deleteAvailableBookingDate.html' %}
+                {% include 'availableBookingDate/changeOptionsAvailableBookingDate.html' %}
+            {% endif %}
             <div class="col-md-12">
                 <div id='calendar' class="dark:text-white bg-gray-100 dark:bg-gray-600"></div>
             </div>
@@ -45,11 +53,16 @@
     </div>
 
     <script>
+        var csrf_token = "{{ csrf_token }}";
+        var screenWidth = window.innerWidth;
+        var currentUserId = {{ request.user.id }};
+        var currentUserRole = "{{ userRole }}";
         var selectedEventId;
         var selectedEventInfo;
+        var calendar;
         document.addEventListener('DOMContentLoaded', function() {
             var calendarEl = document.getElementById('calendar');
-            var calendar = new FullCalendar.Calendar(calendarEl, {
+            calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
                 timeZone: 'Europe/Warsaw',
                 headerToolbar: {
@@ -95,46 +108,101 @@
                         titleFormat: myDayTitleFormat,
                     },
                 },
-
+                {#dodawanie dostepnych terminow#}
                 select: function (data){
-                    console.log("Wykonalo sie dodanie")
-                    console.log("D =", data)
-                    console.log(data.startStr)
-                    const startDateTime = new Date(data.startStr)
-                    let startDateOnly = startDateTime.toISOString().split('T')[0];
-                    let startTimeOnly = startDateTime.toLocaleTimeString().slice(0, 5);
-                    const endDateTime = new Date(data.endStr)
-                    let endTimeOnly = endDateTime.toLocaleTimeString().slice(0, 5);
-                    console.log("CZAS =", startTimeOnly)
-                    if (startTimeOnly != "01:00" || endTimeOnly != "01:00"){
-                        $('#addAvailableBookingDateByCalendarModal [name="startTime"]').val(startTimeOnly);
+                    if (currentUserRole !== "normalUser")
+                    {
+                        console.log("Wykonalo sie dodanie")
+                        console.log("D =", data)
+                        console.log(data.startStr)
+                        const startDateTime = new Date(data.startStr)
+                        let startDateOnly = startDateTime.toISOString().split('T')[0];
+                        let startTimeOnly = startDateTime.toLocaleTimeString().slice(0, 5);
+                        const endDateTime = new Date(data.endStr)
+                        let endTimeOnly = endDateTime.toLocaleTimeString().slice(0, 5);
+                        console.log("CZAS =", startTimeOnly)
+                        if (startTimeOnly != "01:00" || endTimeOnly != "01:00"){
+                            $('#addAvailableBookingDateByCalendarModal [name="startTime"]').val(startTimeOnly);
+                        }
+                        $('#startStrField').val(startDateOnly);
+                        $('#addAvailableBookingDateByCalendarModal').removeClass('hidden');
+                        $('body').addClass('overflow-hidden');
                     }
-                    $('#startStrField').val(startDateOnly);
-                    $('#addAvailableBookingDateByCalendarModal').removeClass('hidden');
-                    $('body').addClass('overflow-hidden');
                 },
-
+                {#edycja/usuwanie dostepnych terminow#}
                 eventClick: function (info) {
+                    console.log(currentUserRole)
+                    console.log("Aktualnie zalogowany userId", currentUserId)
                     console.log(info)
                     console.log("WYKONALO SIE klikniecie eventu");
                     console.log('Event' + info.event.title + ' ' + info.event.start + ' : ' + info.event.end);
-                    selectedEventId = info.event.id
-                    selectedEventInfo = info
-                    $('#deleteSelectedEvent').val(selectedEventId)
-                    $('#editSelectedEvent').val(selectedEventId)
-                    openModal('changeOptionsAvailableBookingDateModal');
+                    console.log("ServiceProvider userId", info.event.extendedProps.serviceProviderId)
+                    let serviceProviderId = info.event.extendedProps.serviceProviderId;
+                    if (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller"){
+                        selectedEventId = info.event.id
+                        selectedEventInfo = info
+                        $('#deleteSelectedEvent').val(selectedEventId)
+                        $('#editSelectedEvent').val(selectedEventId)
+                        openModal('changeOptionsAvailableBookingDateModal');
+                    }else{
+                        console.log("Nie masz uprawnien, zeby to zrobic")
+                    }
                 }
             });
             calendar.render();
+            {#filtrowanie#}
+            $(document).ready(function() {
+                var select2Instance = $('.js-example-basic-multiple').select2({
+                    width: '200px',  // Set initial width
+                    placeholder: "Filtruj usługodawców",
+                    allowClear: true,
+                });
+                $('.select2-search__field').css('height', '24px');
 
-            document.getElementById('users').addEventListener('change', function() {
-                console.log("WYKONALO SIE: ", this.value)
-                {#calendar.refetchEvents();#}
+                function calculateTextLength(selectedOptions) {
+                    let totalLength = 0;
+                    selectedOptions.forEach(function(option) {
+                        totalLength += option.text.length;
+                    });
+                    return totalLength;
+                };
 
-                {#calendar.setOption('events', '/allEvents');#}
-                calendar.setOption('events', '/getEvents/' + this.value + '/');
+                select2Instance.on('select2:select select2:unselect', function (e) {
+                    let selectedOptions = select2Instance.select2('data');
+                    {#console.log(selectedOptions, selectedOptions.length)#}
+                    let newWidth = calculateTextLength(selectedOptions) * 8 + 30 * selectedOptions.length + 100;
+                    {#console.log(newWidth)#}
+                    let newWidthMax = selectedOptions.length > 0 ? newWidth : '200';
+                    {#console.log(newWidthMax)#}
+                    newWidth = newWidthMax < screenWidth-350 ? newWidthMax+'px' : screenWidth-350+'px';
+                    {#console.log(newWidth)#}
+                    select2Instance.next('.select2-container').find('.select2-selection--multiple').css('width', newWidth);
+                });
             });
         });
+        function filter() {
+            let selectedOptions = $('.js-example-basic-multiple').select2('data');
+            console.log("Selected Options:", selectedOptions);
+            $.ajax({
+                type: 'POST',
+                url: '/filterServiceProviders/',
+                headers: {
+                    'X-CSRFToken': csrf_token
+                },
+                data: {
+                    'selected_options': JSON.stringify(selectedOptions)
+                },
+                success: function(response) {
+                    console.log("POWINNO DZIALAC")
+                    console.log(response);
+                    {#calendar.refetchEvents();#}
+                    calendar.getEventSources().forEach(function(source) {
+                        source.remove();
+                    });
+                    calendar.addEventSource(response)
+                }
+            });
+        };
         function closeAddAvailableBookingDateByCalendarModal() {
             $('#addAvailableBookingDateByCalendarModal').addClass('hidden');
             $('body').removeClass('overflow-hidden');

@@ -9,13 +9,15 @@ from django.contrib import messages
 from django.http import JsonResponse
 from datetime import datetime
 from icecream import ic
+import json
 
 
 def index(request):
     all_events = AvailableBookingDate.objects.all()
 
-    serviceProviderGroup = Group.objects.get(name='serviceProvider')
-    serviceProviders = serviceProviderGroup.user_set.all()
+    clientsGroup = Group.objects.get(name='client')
+    serviceProviders = User.objects.exclude(groups=clientsGroup)
+    # serviceProviders = serviceProviderGroup.user_set.all()
 
     context = {
         "events": all_events,
@@ -34,25 +36,51 @@ def allEvents(request):
             'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
             'end': event.end.strftime('%Y-%m-%dT%H:%M:%S'),
             'color': '#378006',
+            'serviceProviderId': event.user.id,
         })
     return JsonResponse(out, safe=False)
 
 
-def getEvents(request, pk):
-    ic("GET EVENTS WORK")
-    eventsObjects = AvailableBookingDate.objects.filter(user=pk)
-    out = []
-    for event in eventsObjects:
-        out.append({
-            'title': f"{event.user.first_name} {event.user.last_name}",
-            'id': event.id,
-            'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
-            'end': event.end.strftime('%Y-%m-%dT%H:%M:%S')
-        })
-    return JsonResponse(out, safe=False)
+# def getEvents(request, pk):
+#     ic("GET EVENTS WORK")
+#     eventsObjects = AvailableBookingDate.objects.filter(user=pk)
+#     out = []
+#     for event in eventsObjects:
+#         out.append({
+#             'title': f"{event.user.first_name} {event.user.last_name}",
+#             'id': event.id,
+#             'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
+#             'end': event.end.strftime('%Y-%m-%dT%H:%M:%S')
+#         })
+#     return JsonResponse(out, safe=False)
 
 
-@login_required(login_url='login')
+def filterServiceProviders(request):
+    if request.method == 'POST':
+        selectedOptionsJson = request.POST.get('selected_options')
+        selectedOptions = json.loads(selectedOptionsJson)
+        selectedIds = [option['id'] for option in selectedOptions]
+        if len(selectedIds) == 0:
+            return redirect('allEvents')
+        ic(selectedIds)
+        eventsObjects = AvailableBookingDate.objects.filter(user__id__in=selectedIds)
+        ic(eventsObjects)
+        out = []
+        for event in eventsObjects:
+            out.append({
+                'title': f"{event.user.first_name} {event.user.last_name}",
+                'id': event.id,
+                'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
+                'end': event.end.strftime('%Y-%m-%dT%H:%M:%S'),
+                'color': '#378006',
+                'serviceProviderId': event.user.id,
+            })
+        return JsonResponse(out, safe=False)
+    ic("NIGDY NIE POWINNO SIE ZDARZYC")
+    return redirect('allEvents')
+
+
+@allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def addAvailableBookingDateByCalendar(request):
     ic("Dodano event")
     if request.method == 'POST':
@@ -72,7 +100,7 @@ def addAvailableBookingDateByCalendar(request):
 
     return redirect('index')
 
-@login_required(login_url='login')
+@allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def addAvailableBookingDate(request):
     ic("Dodano dostepny termin")
     if request.method == 'POST':
@@ -94,7 +122,7 @@ def addAvailableBookingDate(request):
     ic("DZIALA")
     return redirect('index')
 
-@login_required(login_url='login')
+@allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def editAvailableBookingDate(request):
     ic("Edytuj dostepny termin")
     if request.method == 'POST':
@@ -110,17 +138,17 @@ def editAvailableBookingDate(request):
         start = datetime.combine(startDate, startTime)
         end = datetime.combine(endDate, endTime)
         ic(startTimeSTR, endTimeSTR)
-        currentUser = request.user
+        # currentUser = request.user
         availableBookingDateId = request.POST.get('selectedEvent')
         availableBookingDate = AvailableBookingDate.objects.get(id=availableBookingDateId)
-        availableBookingDate.user = currentUser
+        # availableBookingDate.user = currentUser
         availableBookingDate.start = start
         availableBookingDate.end = end
         availableBookingDate.save()
     ic("DZIALA")
     return redirect('index')
 
-@login_required(login_url='login')
+@allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def deleteAvailableBookingDate(request):
     ic("Usunieto dostepny termin")
     if request.method == 'POST':

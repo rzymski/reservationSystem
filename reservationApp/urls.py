@@ -15,7 +15,7 @@ urlpatterns = [
     path('restricted/', views.notForClients, name='notForClients'),
 
     path('allEvents/', views.allEvents, name='allEvents'),
-    path('getEvents/<pk>/', views.getEvents, name='getEvents'),
+    path('filterServiceProviders/', views.filterServiceProviders, name='filterServiceProviders'),
 
     path('addAvailableBookingDateByCalendar/', views.addAvailableBookingDateByCalendar, name='addAvailableBookingDateByCalendar'),
     path('availableBookingDate/addAvailableBookingDate/', views.addAvailableBookingDate, name='addAvailableBookingDate'),
