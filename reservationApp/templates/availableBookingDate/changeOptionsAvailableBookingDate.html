@@ -5,7 +5,8 @@
             <!-- Modal header -->
             <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Opcje zmian
+                    <a id="serviceProviderProfileLink" href="" class="hover:text-blue-500"><span id="serviceProviderNameAndSurname"></span></a>
+                    <div id="dateRangeAvailableBookingDate"></div>
                 </h3>
                 <button onclick="closeModal('changeOptionsAvailableBookingDateModal')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm h-8 w-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crypto-modal">
                     <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -37,6 +38,44 @@
 </div>
 
 <script>
+    {#    Script to add/close new available booking date or used to changeOptions with data then#}
+    function openModal(modalId, data) {
+        let modal = document.getElementById(modalId);
+        {#$('#'+modal).removeClass('hidden');#}
+        if(data){
+            let serviceProviderProfileElement = modal.querySelector('#serviceProviderProfileLink');
+            serviceProviderProfileElement.href = "/userProfile/"+data.serviceProviderId+"/";
+            let serviceProviderNameAndSurnameElement = modal.querySelector('#serviceProviderNameAndSurname');
+            serviceProviderNameAndSurnameElement.textContent = "Usługodawca: " + data.serviceProviderNameAndSurname;
+
+            let startDate = data.startAvailableBookingDate;
+            let endDate = data.endAvailableBookingDate;
+            {#uwzglednienie strefy czasowej#}
+            startDate.setMinutes(startDate.getMinutes() + startDate.getTimezoneOffset())
+            endDate.setMinutes(endDate.getMinutes() + endDate.getTimezoneOffset())
+            {#let startDateString = data.startAvailableBookingDate.toISOString().split('T')[0];#}
+            let startDayOfTheWeek = polishDaysOfWeek[startDate.getDay()]
+            let startDateString = startDate.getDate() + " " + polishMonths[startDate.getMonth()]
+            let startTimeString = startDate.getMinutes() < 10 ? startDate.getHours() + ":0" + startDate.getMinutes() : startDate.getHours() + ":" + startDate.getMinutes();
+            let endDateString = endDate.getDate() + " " + polishMonths[endDate.getMonth()]
+            let endTimeString = endDate.getMinutes() < 10 ? endDate.getHours() + ":0" + endDate.getMinutes() : endDate.getHours() + ":" + endDate.getMinutes();
+            let dateRangeAvailableBookingDateElement = modal.querySelector('#dateRangeAvailableBookingDate');
+            if (startDate.getDate() === endDate.getDate()){
+                dateRangeAvailableBookingDateElement.textContent = startDayOfTheWeek + ", " + startDateString + " " + startTimeString + " - " + endTimeString
+            }else{
+                dateRangeAvailableBookingDateElement.textContent = startDateString + " " + startTimeString + " - " + endDateString + " " + endTimeString
+            }
+
+        }
+        {#$('body').addClass('overflow-hidden');#}
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    };
+    function closeModal(modal) {
+        $('#'+modal).addClass('hidden');
+        $('body').removeClass('overflow-hidden');
+    };
+
     function editAvailableBookingDate() {
         {#console.log(selectedEventInfo)#}
         console.log("DATETIME nieprzetworzone: ", selectedEventInfo.event.start)
