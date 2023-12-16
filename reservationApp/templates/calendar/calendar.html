@@ -68,9 +68,16 @@
                 initialView: 'dayGridMonth',
                 timeZone: 'Europe/Warsaw',
                 headerToolbar: {
-                    left: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay',
+                    {#left: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay',#}
+                    left: 'dayGridMonth,timeGridWeek,timeGridDay',
                     center: 'title',
-                    right: 'prevYear,prev,today,next,nextYear'
+                    right: 'prev,today,next'
+                },
+                buttonText: {
+                    today: 'dzisiaj',
+                    month:    'miesiąc',
+                    week:     'tydzień',
+                    day:      'dzisiaj',
                 },
                 footerToolbar: {
                     start: '',
@@ -87,21 +94,26 @@
                     minute: '2-digit',
                     hour12: false
                 },
+                firstDay: 1,
                 selectable: true,
                 editable: true,
                 {#contentHeight: 1500,#}
                 aspectRatio: 3,
-                {#expandRows: true,#}
+                expandRows: true,
+                allDayText: 'czas',
                 views: {
                     dayGridMonth: {
                         titleFormat: myMonthTitleFormat,
                         displayEventEnd: true,
+                        dayHeaderContent: myMonthdayHeaderContent,
                     },
                     timeGridWeek:{
                         titleFormat: myWeekTitleFormat,
+                        dayHeaderContent: myWeekdayHeaderContent,
                     },
                     timeGridDay:{
                         titleFormat: myDayTitleFormat,
+                        dayHeaderContent: myDaydayHeaderContent,
                     },
                 },
                 {#dodawanie dostepnych terminow#}
@@ -240,6 +252,19 @@
             const startYear = startDate.getFullYear();
             const dateRangeString = startDay + " " + polishMonths[startMonth] + " " + startYear
             return dateRangeString;
+        };
+
+        function myMonthdayHeaderContent(date){
+            return polishDaysOfWeek[date.date.getDay()];
+        };
+
+        function myWeekdayHeaderContent(date){
+            return polishDaysOfWeek[date.date.getDay()]  + " " + date.date.getDate();
+        };
+
+        function myDaydayHeaderContent(date){
+            {#return polishDaysOfWeek[date.date.getDay()]  + ", " + date.date.getDate() + " " + polishMonths[date.date.getMonth()] + " " + date.date.getFullYear();#}
+            return polishDaysOfWeek[date.date.getDay()];
         };
     </script>
 {% endblock %}

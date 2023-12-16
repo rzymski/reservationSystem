@@ -71,9 +71,12 @@
         modal.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
     };
-    function closeModal(modal) {
-        $('#'+modal).addClass('hidden');
-        $('body').removeClass('overflow-hidden');
+    function closeModal(modalId) {
+        {#$('#'+modal).addClass('hidden');#}
+        {#$('body').removeClass('overflow-hidden');#}
+        let modal = document.getElementById(modalId);
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
     };
 
     function editAvailableBookingDate() {

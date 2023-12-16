@@ -153,6 +153,7 @@ def deleteAvailableBookingDate(request):
     ic("Usunieto dostepny termin")
     if request.method == 'POST':
         id = request.POST.get('selectedEvent')
+        ic(id)
         availableBookingDate = AvailableBookingDate.objects.get(pk=id)
         availableBookingDate.delete()
     return redirect('index')
