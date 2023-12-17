@@ -1,3 +1,21 @@
 /*.select2-selection.select2-selection--multiple{*/
 /*    background-color: lightyellow;*/
 /*}*/
+
+.inputTime {
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+
+.inputCurrentTime {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 10px; /* Adjust this value as needed */
+}
+
+.input-control.error {
+    margin-top: 8px;
+    color: red;
+}
