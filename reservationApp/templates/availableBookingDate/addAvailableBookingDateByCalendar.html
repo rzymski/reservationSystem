@@ -52,53 +52,6 @@
     </div>
 </div>
 
-<script>
-    const formAddAvailableBookingDateByCalendar = document.getElementById('addAvailableBookingDateByCalendarForm')
-    const startTimeAddAvailableBookingDateByCalendar = document.getElementById('startTimeAddAvailableBookingDateByCalendarModal')
-    const endTimeAddAvailableBookingDateByCalendar = document.getElementById('endTimeAddAvailableBookingDateByCalendarModal')
-    formAddAvailableBookingDateByCalendar.addEventListener('submit', (e) => {
-        const startTimeValue = startTimeAddAvailableBookingDateByCalendar.value;
-        const endTimeValue = endTimeAddAvailableBookingDateByCalendar.value;
-        if (compareTime(endTimeValue, startTimeValue) <= 0) {
-            console.error('End time cannot be earlier than start time');
-            e.preventDefault();
-
-            setErrorFromCalendar(startTimeAddAvailableBookingDateByCalendar, "Czas końcowy nie może być przed czasem początku.")
-            setErrorFromCalendar(endTimeAddAvailableBookingDateByCalendar, "Czas końcowy nie może być przed czasem początku.")
-        } else {
-            setSuccessFromCalendar(startTimeAddAvailableBookingDateByCalendar);
-            setSuccessFromCalendar(endTimeAddAvailableBookingDateByCalendar);
-        }
-    });
-
-    const setErrorFromCalendar = (element, message) => {
-        console.log("Ser error work")
-        const inputControl = element.parentElement.parentElement;
-        const errorDisplay = inputControl.querySelector('.error');
-        errorDisplay.innerText = message;
-        inputControl.classList.add('error');
-        inputControl.classList.remove('success');
-    };
-
-    const setSuccessFromCalendar = element => {
-        const inputControl = element.parentElement.parentElement;
-        const errorDisplay = inputControl.querySelector('.error');
-        errorDisplay.innerText = "";
-        inputControl.classList.add('success');
-        inputControl.classList.remove('error');
-    };
-
-    function compareTime(time1, time2) {
-        // Compare two time values in the format 'HH:mm'
-        const [hours1, minutes1] = time1.split(':').map(Number);
-        const [hours2, minutes2] = time2.split(':').map(Number);
-        if (hours1 !== hours2) {
-            return hours1 - hours2;
-        }
-        return minutes1 - minutes2;
-    };
-</script>
-
 
 {#<div id="addAvailableBookingDateByCalendarModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">#}
 {#    <div class="relative p-4 w-full max-w-lg max-h-full">#}
