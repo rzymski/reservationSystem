@@ -53,25 +53,25 @@
 </div>
 
 <script>
-    const form = document.getElementById('addAvailableBookingDateByCalendarForm')
-    const startTime = document.getElementById('startTimeAddAvailableBookingDateByCalendarModal')
-    const endTime = document.getElementById('endTimeAddAvailableBookingDateByCalendarModal')
-    form.addEventListener('submit', (e) => {
-        const startTimeValue = startTime.value;
-        const endTimeValue = endTime.value;
+    const formAddAvailableBookingDateByCalendar = document.getElementById('addAvailableBookingDateByCalendarForm')
+    const startTimeAddAvailableBookingDateByCalendar = document.getElementById('startTimeAddAvailableBookingDateByCalendarModal')
+    const endTimeAddAvailableBookingDateByCalendar = document.getElementById('endTimeAddAvailableBookingDateByCalendarModal')
+    formAddAvailableBookingDateByCalendar.addEventListener('submit', (e) => {
+        const startTimeValue = startTimeAddAvailableBookingDateByCalendar.value;
+        const endTimeValue = endTimeAddAvailableBookingDateByCalendar.value;
         if (compareTime(endTimeValue, startTimeValue) <= 0) {
             console.error('End time cannot be earlier than start time');
             e.preventDefault();
 
-            setError(startTime, "Czas początkowy nie może być czasem końcowym.")
-            setError(endTime, "Czas początkowy nie może być czasem końcowym.")
+            setErrorFromCalendar(startTimeAddAvailableBookingDateByCalendar, "Czas końcowy nie może być przed czasem początku.")
+            setErrorFromCalendar(endTimeAddAvailableBookingDateByCalendar, "Czas końcowy nie może być przed czasem początku.")
         } else {
-            setSuccess(startTime);
-            setSuccess(endTime);
+            setSuccessFromCalendar(startTimeAddAvailableBookingDateByCalendar);
+            setSuccessFromCalendar(endTimeAddAvailableBookingDateByCalendar);
         }
     });
 
-    const setError = (element, message) => {
+    const setErrorFromCalendar = (element, message) => {
         console.log("Ser error work")
         const inputControl = element.parentElement.parentElement;
         const errorDisplay = inputControl.querySelector('.error');
@@ -80,7 +80,7 @@
         inputControl.classList.remove('success');
     };
 
-    const setSuccess = element => {
+    const setSuccessFromCalendar = element => {
         const inputControl = element.parentElement.parentElement;
         const errorDisplay = inputControl.querySelector('.error');
         errorDisplay.innerText = "";
@@ -96,7 +96,7 @@
             return hours1 - hours2;
         }
         return minutes1 - minutes2;
-    }
+    };
 </script>
 
 
