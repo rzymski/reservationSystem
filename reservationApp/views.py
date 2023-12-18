@@ -13,46 +13,134 @@ import json
 
 
 def index(request):
-    all_events = AvailableBookingDate.objects.all()
-
-    clientsGroup = Group.objects.get(name='client')
-    serviceProviders = User.objects.exclude(groups=clientsGroup)
-    # serviceProviders = serviceProviderGroup.user_set.all()
+    allAvailableBookingDatesObjects = AvailableBookingDate.objects.all()
+    # clientsGroup = Group.objects.get(name='client')
+    # serviceProviders = User.objects.exclude(groups=clientsGroup)
+    serviceProviders = User.objects.filter(availablebookingdate__isnull=False).distinct()
 
     context = {
-        "events": all_events,
+        "events": allAvailableBookingDatesObjects,
         'serviceProviders': serviceProviders,
     }
     return render(request, 'calendar/calendar.html', context)
 
 
-def allEvents(request):
-    eventsObjects = AvailableBookingDate.objects.all()
+def allUnconfirmedReservations(request):
+    reservations = Reservation.objects.filter(isAccepted=False)
     out = []
-    for event in eventsObjects:
+    for reservation in reservations:
         out.append({
-            'title': f"{event.user.first_name} {event.user.last_name}",
-            'id': event.id,
-            'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
-            'end': event.end.strftime('%Y-%m-%dT%H:%M:%S'),
-            'color': '#378006',
-            'serviceProviderId': event.user.id,
+            'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
+            'id': reservation.id,
+            'start': reservation.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end': reservation.end.strftime('%Y-%m-%dT%H:%M:%S'),
+            'backgroundColor': '#FFA500',
+            'borderColor': '#FFFFFF',
+            'display': 'block',
+            'serviceProviderId': reservation.availableBookingDate.user.id,
+            'eventType': 1,
         })
     return JsonResponse(out, safe=False)
 
 
-# def getEvents(request, pk):
-#     ic("GET EVENTS WORK")
-#     eventsObjects = AvailableBookingDate.objects.filter(user=pk)
-#     out = []
-#     for event in eventsObjects:
-#         out.append({
-#             'title': f"{event.user.first_name} {event.user.last_name}",
-#             'id': event.id,
-#             'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
-#             'end': event.end.strftime('%Y-%m-%dT%H:%M:%S')
-#         })
-#     return JsonResponse(out, safe=False)
+def allConfirmedReservations(request):
+    reservations = Reservation.objects.filter(isAccepted=True)
+    out = []
+    for reservation in reservations:
+        out.append({
+            'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
+            'id': reservation.id,
+            'start': reservation.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end': reservation.end.strftime('%Y-%m-%dT%H:%M:%S'),
+            'backgroundColor': '#795695',
+            'borderColor': '#FFFFFF',
+            'display': 'block',
+            'serviceProviderId': reservation.availableBookingDate.user.id,
+            'eventType': 2,
+        })
+    return JsonResponse(out, safe=False)
+
+
+def reservePartSingleDayBookingDate(request):
+    ic("Zarezerwowano czesc dostepnego terminu z jednego dnia")
+    if request.method == "POST":
+        availableBookingDateId = request.POST.get('selectedBookingDateId')
+        selectedAvailableBookingDate = AvailableBookingDate.objects.get(id=availableBookingDateId)
+        startTimeSTR = request.POST.get('startTime')
+        endTimeSTR = request.POST.get('endTime')
+        startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
+        endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
+        start = datetime.combine(selectedAvailableBookingDate.start.date(), startTime)
+        end = datetime.combine(selectedAvailableBookingDate.end.date(), endTime)
+        ic(startTimeSTR, endTimeSTR)
+        reservation = Reservation.objects.create(
+            bookingPerson=request.user,
+            availableBookingDate=selectedAvailableBookingDate,
+            start=start,
+            end=end,
+            isAccepted=False,
+        )
+    ic("DZIALA")
+    return redirect('index')
+
+
+def reservePartMultipleDaysBookingDate(request):
+    ic("Zarezerwowano czesc dostepnego terminu z wielu dni")
+    if request.method == "POST":
+        availableBookingDateId = request.POST.get('selectedBookingDateId')
+        ic(availableBookingDateId)
+        selectedAvailableBookingDate = AvailableBookingDate.objects.get(id=availableBookingDateId)
+        startTimeSTR = request.POST.get('startTime')
+        endTimeSTR = request.POST.get('endTime')
+        startDateSTR = request.POST.get('startDate')
+        endDateSTR = request.POST.get('endDate')
+        startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
+        endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
+        startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
+        endDate = datetime.strptime(endDateSTR, '%Y-%m-%d').date()
+        start = datetime.combine(startDate, startTime)
+        end = datetime.combine(endDate, endTime)
+        reservation = Reservation.objects.create(
+            bookingPerson=request.user,
+            availableBookingDate=selectedAvailableBookingDate,
+            start=start,
+            end=end,
+            isAccepted=False,
+        )
+    return redirect('index')
+
+
+def reserveEntireBookingDate(request):
+    ic("Zarezerwowano dostepny termin")
+    if request.method == 'POST':
+        availableBookingDateId = request.POST.get('selectedBookingDateId')
+        selectedAvailableBookingDate = AvailableBookingDate.objects.get(pk=availableBookingDateId)
+        reservation = Reservation.objects.create(
+            bookingPerson=request.user,
+            availableBookingDate=selectedAvailableBookingDate,
+            start=selectedAvailableBookingDate.start,
+            end=selectedAvailableBookingDate.end,
+            isAccepted=False,
+        )
+    return redirect('index')
+
+
+def allAvailableBookingDates(request):
+    eventsObjects = AvailableBookingDate.objects.all()
+    out = []
+    for event in eventsObjects:
+        out.append({
+            'title': f"{event.user.first_name} \n {event.user.last_name}",
+            'id': event.id,
+            'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end': event.end.strftime('%Y-%m-%dT%H:%M:%S'),
+            'backgroundColor': '#3ec336',
+            'borderColor': '#FFFFFF',
+            'display': 'block',
+            'serviceProviderId': event.user.id,
+            'eventType': 0,
+        })
+    return JsonResponse(out, safe=False)
 
 
 def filterServiceProviders(request):
@@ -61,7 +149,7 @@ def filterServiceProviders(request):
         selectedOptions = json.loads(selectedOptionsJson)
         selectedIds = [option['id'] for option in selectedOptions]
         if len(selectedIds) == 0:
-            return redirect('allEvents')
+            return redirect('allAvailableBookingDates')
         ic(selectedIds)
         eventsObjects = AvailableBookingDate.objects.filter(user__id__in=selectedIds)
         ic(eventsObjects)
@@ -77,7 +165,7 @@ def filterServiceProviders(request):
             })
         return JsonResponse(out, safe=False)
     ic("NIGDY NIE POWINNO SIE ZDARZYC")
-    return redirect('allEvents')
+    return redirect('allAvailableBookingDates')
 
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
@@ -152,9 +240,9 @@ def editAvailableBookingDate(request):
 def deleteAvailableBookingDate(request):
     ic("Usunieto dostepny termin")
     if request.method == 'POST':
-        id = request.POST.get('selectedEvent')
-        ic(id)
-        availableBookingDate = AvailableBookingDate.objects.get(pk=id)
+        availableBookingDateId = request.POST.get('selectedEvent')
+        ic(availableBookingDateId)
+        availableBookingDate = AvailableBookingDate.objects.get(pk=availableBookingDateId)
         availableBookingDate.delete()
     return redirect('index')
 

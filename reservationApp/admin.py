@@ -1,22 +1,42 @@
 from django.contrib import admin
 from django.contrib.auth.models import Group, User
-from .models import AvailableBookingDate, UserProfile, Post
+from .models import AvailableBookingDate, Reservation, UserProfile, Post
 from django.utils import timezone
 
 
 @admin.register(AvailableBookingDate)
 class AvailableBookingDateAdmin(admin.ModelAdmin):
-    # list_display = ('id', 'name', 'start', 'end')
     list_display = ('id', 'user', 'start_display', 'end_display')
+    list_filter = ('id', 'user', 'start', 'end')
+    search_fields = ('id', 'user', 'start', 'end')
+    ordering = ('id', 'user', 'start', 'end')
 
     def start_display(self, obj):
-        return obj.start.astimezone(timezone.get_current_timezone()).strftime('%Y-%m-%d %H:%M')
+        return obj.start.astimezone(timezone.get_current_timezone()).strftime('%H:%M  %a  %d/%m/%Y')
+    start_display.short_description = 'Start Time'
+    start_display.admin_order_field = 'start'
 
     def end_display(self, obj):
-        return obj.end.astimezone(timezone.get_current_timezone()).strftime('%Y-%m-%d %H:%M')
-
-    start_display.short_description = 'Start Time'
+        return obj.end.astimezone(timezone.get_current_timezone()).strftime('%H:%M  %a  %d/%m/%Y')
     end_display.short_description = 'End Time'
+    end_display.admin_order_field = 'end'
+
+@admin.register(Reservation)
+class ReservationAdmin(admin.ModelAdmin):
+    list_display = ('id', 'bookingPerson', 'availableBookingDate', 'start_display', 'end_display', 'isAccepted')
+    list_filter = ('id', 'bookingPerson', 'availableBookingDate', 'start', 'end', 'isAccepted')
+    search_fields = ('id', 'bookingPerson', 'availableBookingDate', 'start', 'end', 'isAccepted')
+    ordering = ('id', 'bookingPerson', 'availableBookingDate', 'start', 'end', 'isAccepted')
+
+    def start_display(self, obj):
+        return obj.start.astimezone(timezone.get_current_timezone()).strftime('%H:%M  %a  %d/%m/%Y')
+    start_display.short_description = 'Start Time'
+    start_display.admin_order_field = 'start'
+
+    def end_display(self, obj):
+        return obj.end.astimezone(timezone.get_current_timezone()).strftime('%H:%M  %a  %d/%m/%Y')
+    end_display.short_description = 'End Time'
+    end_display.admin_order_field = 'end'
 
 
 @admin.register(UserProfile)

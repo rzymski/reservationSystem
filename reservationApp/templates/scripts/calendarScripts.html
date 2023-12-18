@@ -3,11 +3,12 @@
     let screenWidth = window.innerWidth;
     let currentUserId;
     let currentUserRole = "{{ userRole }}";
-    let selectedEventId;
+    let selectedBookingDateId;
     let selectedEventInfo;
     let calendar;
     let polishDaysOfWeek = ["Niedziela", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota"];
     let polishMonths = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
+    let availableBookingData;
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
         calendar = new FullCalendar.Calendar(calendarEl, {
@@ -33,13 +34,16 @@
             slotLabelFormat: {hour: 'numeric', minute: '2-digit', hour12: false},
             {#events: '/allEvents',#}
             eventSources: [
-                '/allEvents',
+                '/allAvailableBookingDates',
+                '/allUnconfirmedReservations',
+                '/allConfirmedReservations',
             ],
             eventTimeFormat: {
                 hour: '2-digit',
                 minute: '2-digit',
                 hour12: false
             },
+
             firstDay: 1,
             selectable: true,
             editable: true,
@@ -52,6 +56,11 @@
                     titleFormat: myMonthTitleFormat,
                     displayEventEnd: true,
                     dayHeaderContent: myMonthdayHeaderContent,
+                    eventContent: function(arg) {
+                        return {
+                            html: '<div class="fc-title">' + arg.timeText + '</div><div class="fc-title">' + arg.event.title + '</div>',
+                        };
+                    },
                 },
                 timeGridWeek:{
                     titleFormat: myWeekTitleFormat,
@@ -64,7 +73,7 @@
             },
             {#dodawanie dostepnych terminow#}
             select: function (data){
-                if (currentUserRole !== "normalUser")
+                if (currentUserRole !== "client")
                 {
                     console.log("Wykonalo sie dodanie")
                     console.log("D =", data)
@@ -90,21 +99,33 @@
                 console.log("WYKONALO SIE klikniecie eventu");
                 //console.log('Event' + info.event.title + ' ' + info.event.start + ' : ' + info.event.end, "ServiceProvider userId", info.event.extendedProps.serviceProviderId);
                 let serviceProviderId = info.event.extendedProps.serviceProviderId;
-                if (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller"){
-                    selectedEventId = info.event.id
-                    selectedEventInfo = info
-                    $('#deleteSelectedEvent').val(selectedEventId)
-                    $('#editSelectedEvent').val(selectedEventId)
-                    var availableBookindData = {
-                        serviceProviderNameAndSurname: info.event.title,
-                        serviceProviderId: serviceProviderId,
-                        startAvailableBookingDate: info.event.start,
-                        endAvailableBookingDate: info.event.end,
-                    };
-                    openModal('changeOptionsAvailableBookingDateModal', availableBookindData);
-                }else{
+                let eventType = info.event.extendedProps.eventType;
+                availableBookingData = {
+                    serviceProviderNameAndSurname: info.event.title,
+                    serviceProviderId: serviceProviderId,
+                    startAvailableBookingDate: info.event.start,
+                    endAvailableBookingDate: info.event.end,
+                };
+                selectedBookingDateId = info.event.id
+                selectedEventInfo = info
+                if (eventType === 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ //edycja/usuwanie dostępnego terminu
+                    $('#deleteSelectedEvent').val(selectedBookingDateId)
+                    $('#editSelectedEvent').val(selectedBookingDateId)
+                    openModal('changeOptionsAvailableBookingDateModal', availableBookingData);
+                }else if (eventType === 0 && currentUserRole === "client") { //proba rezerwacji
+                    $('#reserveEntireSelectedBookingDate').val(selectedBookingDateId)
+                    $('#reservePartSingleDaySelectedBookingDateId').val(selectedBookingDateId)
+                    $('#reservePartMultipleDaysSelectedBookingDateId').val(selectedBookingDateId)
+
+                    {#let reservationOptionsModal = document.getElementById('reservationOptionsModal');#}
+                    {#let reservePartBtn = reservationOptionsModal.querySelector('#reservePartBookingDateOption');#}
+                    {#reservePartBtn.dataset = availableBookingData;#}
+
+                    openModal('reservationOptionsModal', availableBookingData);
+                } else{
                     console.log("Nie masz uprawnien, zeby to zrobic")
                 }
+                console.log(currentUserRole);
             }
         });
         calendar.render();
@@ -210,7 +231,6 @@
     };
 
 
-
     function fillCurrentTime(containerValue, inputValue) {
         const now = new Date();
         const hours = now.getHours().toString().padStart(2, '0');
@@ -287,7 +307,7 @@
             setErrorParent3Times(startDateAddAvailableBookingDateModal, "Data końcowa nie może być przed datą początku.")
             setErrorParent3Times(endDateAddAvailableBookingDateModal, "Data końcowa nie może być przed datą początku.")
             return;
-        } else{
+        } else {
             setSuccessParent3Times(startDateAddAvailableBookingDateModal);
             setSuccessParent3Times(endDateAddAvailableBookingDateModal);
         }
@@ -334,20 +354,162 @@
         if (compareDate(endDateValue, startDateValue) < 0){
             e.preventDefault();
             setErrorParent3Times(startDateEditAvailableBookingDateModal, "Data końcowa nie może być przed datą początku.")
-            setErrorParent3Times(endDateEditAvailableBookingDateModal, "Data końcowa nie może być przed datą początku.")
             return;
-        } else{
+        } else {
             setSuccessParent3Times(startDateEditAvailableBookingDateModal);
-            setSuccessParent3Times(endDateEditAvailableBookingDateModal);
         }
+        if (compareDate(endDateValue, startDateValue) === 0 && compareTime(endTimeValue, startTimeValue) <= 0) {
+            console.error('edit3times End time cannot be earlier than start time or equal');
+            e.preventDefault();
+            setErrorParent3Times(startTimeEditAvailableBookingDateModal, "Czas końcowy nie może być przed czasem początku.")
+        } else {
+            setSuccessParent3Times(startTimeEditAvailableBookingDateModal);
+        }
+    });
+    {#    Script to add/close new available booking date or used to changeOptions with data then#}
+    function openModal(modalId, data) {
+        let modal = document.getElementById(modalId);
+        {#$('#'+modal).removeClass('hidden');#}
+        if(data){
+            let serviceProviderProfileElement = modal.querySelector('#serviceProviderProfileLink');
+            serviceProviderProfileElement.href = "/userProfile/"+data.serviceProviderId+"/";
+            let serviceProviderNameAndSurnameElement = modal.querySelector('#serviceProviderNameAndSurname');
+            serviceProviderNameAndSurnameElement.textContent = "Usługodawca: " + data.serviceProviderNameAndSurname;
+
+            let startDate = data.startAvailableBookingDate;
+            let endDate = data.endAvailableBookingDate;
+            {#uwzglednienie strefy czasowej#}
+            startDate.setMinutes(startDate.getMinutes() + startDate.getTimezoneOffset())
+            endDate.setMinutes(endDate.getMinutes() + endDate.getTimezoneOffset())
+            {#let startDateString = data.startAvailableBookingDate.toISOString().split('T')[0];#}
+            let startDayOfTheWeek = polishDaysOfWeek[startDate.getDay()]
+            let startDateString = startDate.getDate() + " " + polishMonths[startDate.getMonth()]
+            let startTimeString = startDate.getMinutes() < 10 ? startDate.getHours() + ":0" + startDate.getMinutes() : startDate.getHours() + ":" + startDate.getMinutes();
+            let endDateString = endDate.getDate() + " " + polishMonths[endDate.getMonth()]
+            let endTimeString = endDate.getMinutes() < 10 ? endDate.getHours() + ":0" + endDate.getMinutes() : endDate.getHours() + ":" + endDate.getMinutes();
+            let dateRangeAvailableBookingDateElement = modal.querySelector('#dateRangeAvailableBookingDate');
+            if (startDate.getDate() === endDate.getDate()){
+                dateRangeAvailableBookingDateElement.textContent = startDayOfTheWeek + ", " + startDateString + " " + startTimeString + " - " + endTimeString
+            }else{
+                dateRangeAvailableBookingDateElement.textContent = startDateString + " " + startTimeString + " - " + endDateString + " " + endTimeString
+            }
+        }
+        {#$('body').addClass('overflow-hidden');#}
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    };
+    function closeModal(modalId) {
+        {#$('#'+modal).addClass('hidden');#}
+        {#$('body').removeClass('overflow-hidden');#}
+        let modal = document.getElementById(modalId);
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    };
+    function editAvailableBookingDate() {
+        {#console.log(selectedEventInfo)#}
+        console.log("DATETIME nieprzetworzone: ", selectedEventInfo.event.start)
+        closeModal('changeOptionsAvailableBookingDateModal');
+        $('#editAvailableBookingDateModal [name="title"]').val(selectedEventInfo.event.title);
+        let startDate = selectedEventInfo.event.start.toISOString().split('T')[0];
+        let startTime = selectedEventInfo.event.start.toISOString().split('T')[1].slice(0, 5);
+        let endDate = selectedEventInfo.event.end.toISOString().split('T')[0];
+        let endTime = selectedEventInfo.event.end.toISOString().split('T')[1].slice(0, 5);
+        console.log(startDate, startTime, endDate, endTime)
+        $('#editAvailableBookingDateModal [name="startDate"]').val(startDate);
+        $('#editAvailableBookingDateModal [name="startTime"]').val(startTime);
+        $('#editAvailableBookingDateModal [name="endDate"]').val(endDate);
+        $('#editAvailableBookingDateModal [name="endTime"]').val(endTime);
+
+        openModal('editAvailableBookingDateModal')
+    };
+    function openDeleteAvailableBookingDateModal() {
+        closeModal('changeOptionsAvailableBookingDateModal');
+        openModal('deleteAvailableBookingDateModal');
+    };
+    function openReservePartBookingDateModal() {
+        closeModal('reservationOptionsModal');
+
+        let startDate = selectedEventInfo.event.start.toISOString().split('T')[0];
+        let startTime = selectedEventInfo.event.start.toISOString().split('T')[1].slice(0, 5);
+        let endDate = selectedEventInfo.event.end.toISOString().split('T')[0];
+        let endTime = selectedEventInfo.event.end.toISOString().split('T')[1].slice(0, 5);
+
+        if (availableBookingData.startAvailableBookingDate.getDate() === availableBookingData.endAvailableBookingDate.getDate()) {
+            $('#reservePartSingleDayBookingDateModal [name="startTime"]').val(startTime);
+            $('#reservePartSingleDayBookingDateModal [name="endTime"]').val(endTime);
+            openModal('reservePartSingleDayBookingDateModal');
+        } else {
+            $('#reservePartMultipleDaysBookingDateModal [name="startTime"]').val(startTime);
+            $('#reservePartMultipleDaysBookingDateModal [name="endTime"]').val(endTime);
+            $('#reservePartMultipleDaysBookingDateModal [name="startDate"]').val(startDate);
+            $('#reservePartMultipleDaysBookingDateModal [name="endDate"]').val(endDate);
+            openModal('reservePartMultipleDaysBookingDateModal');
+        }
+    };
+    {#Skrypt odpowiadajacy za walidacje czasow przy rezerwacji terminu skladajacego sie z pojedynczego dnia#}
+    const formReservePartSingleDayBookingDateModal = document.getElementById('reservePartSingleDayBookingDateForm')
+    const startTimeReservePartSingleDayBookingDateModal = document.getElementById('startTimeReservePartSingleDayBookingDateModal')
+    const endTimeReservePartSingleDayBookingDateModal = document.getElementById('endTimeReservePartSingleDayBookingDateModal')
+    formReservePartSingleDayBookingDateModal.addEventListener('submit', (e) => {
+        console.log("WYKONALa SIE walidacja")
+        const startTimeValue = startTimeReservePartSingleDayBookingDateModal.value;
+        const endTimeValue = endTimeReservePartSingleDayBookingDateModal.value;
+        const availableBookingStartTimeString = availableBookingData.startAvailableBookingDate.getHours() + ':' + availableBookingData.startAvailableBookingDate.getMinutes();
+        const availableBookingEndTimeString = availableBookingData.endAvailableBookingDate.getHours() + ':' + availableBookingData.endAvailableBookingDate.getMinutes();
+        if (compareTime(endTimeValue, startTimeValue) <= 0) {
+            console.error('End time cannot be earlier than start time or equal');
+            e.preventDefault();
+            setErrorParent3Times(startTimeReservePartSingleDayBookingDateModal, "Czas końcowy nie może być przed czasem początku.")
+        } else if (compareTime(startTimeValue, availableBookingStartTimeString) < 0 || compareTime(availableBookingEndTimeString, endTimeValue) < 0){
+            console.error('Czas rezerwacji nie moze przekraczac czasu dostepnego terminu');
+            e.preventDefault();
+            setErrorParent3Times(startTimeReservePartSingleDayBookingDateModal, "Czas wykracza poza czas dotępnego terminu.")
+        } else {
+            setSuccessParent3Times(startTimeReservePartSingleDayBookingDateModal);
+        }
+    });
+    {#Skrypt odpowiadajacy za walidacje czasow i dat przy rezerwacji terminu skladajacego sie z kilku dni#}
+    const formReservePartMultipleDaysBookingDateModal = document.getElementById('reservePartMultipleDaysBookingDateForm')
+    const startTimeReservePartMultipleDaysBookingDateModal = document.getElementById('startTimeReservePartMultipleDaysBookingDateModal')
+    const endTimeReservePartMultipleDaysBookingDateModal = document.getElementById('endTimeReservePartMultipleDaysBookingDateModal')
+    const startDateReservePartMultipleDaysBookingDateModal = document.getElementById('startDateReservePartMultipleDaysBookingDateModal')
+    const endDateReservePartMultipleDaysBookingDateModal = document.getElementById('endDateReservePartMultipleDaysBookingDateModal')
+    formReservePartMultipleDaysBookingDateModal.addEventListener('submit', (e) => {
+        console.log("WYKONALa SIE walidacja")
+        const startTimeValue = startTimeReservePartMultipleDaysBookingDateModal.value;
+        const endTimeValue = endTimeReservePartMultipleDaysBookingDateModal.value;
+        const startDateValue = startDateReservePartMultipleDaysBookingDateModal.value;
+        const endDateValue = endDateReservePartMultipleDaysBookingDateModal.value;
+        const availableBookingStartTimeString = availableBookingData.startAvailableBookingDate.getHours() + ':' + availableBookingData.startAvailableBookingDate.getMinutes();
+        const availableBookingEndTimeString = availableBookingData.endAvailableBookingDate.getHours() + ':' + availableBookingData.endAvailableBookingDate.getMinutes();
+
+        console.log("Test")
+        console.log(startDateValue)
+        console.log(availableBookingData.startAvailableBookingDate.getDate())
+
+        if (compareDate(endDateValue, startDateValue) < 0){
+            e.preventDefault();
+            setErrorParent3Times(startDateReservePartMultipleDaysBookingDateModal, "Data końcowa nie może być przed datą początku.")
+            return;
+        } else if (compareDate(startDateValue, availableBookingData.startAvailableBookingDate.toISOString().split('T')[0]) < 0 || compareDate(availableBookingData.endAvailableBookingDate.toISOString().split('T')[0], endDateValue) < 0){
+            console.error('Data rezerwacji nie moze przekraczac daty dostepnego terminu');
+            e.preventDefault();
+            setErrorParent3Times(startTimeReservePartMultipleDaysBookingDateModal, "Data wykracza poza date dotępnego terminu.")
+            return;
+        } else {
+            setSuccessParent3Times(startDateReservePartMultipleDaysBookingDateModal);
+        }
+
         if (compareDate(endDateValue, startDateValue) === 0 && compareTime(endTimeValue, startTimeValue) <= 0) {
             console.error('End time cannot be earlier than start time or equal');
             e.preventDefault();
-            setErrorParent3Times(startTimeEditAvailableBookingDateModal, "Czas końcowy nie może być przed czasem początku.")
-            setErrorParent3Times(endTimeEditAvailableBookingDateModal, "Czas końcowy nie może być przed czasem początku.")
+            setErrorParent3Times(startTimeReservePartMultipleDaysBookingDateModal, "Czas końcowy nie może być przed czasem początku.")
+        } else if (compareTime(startTimeValue, availableBookingStartTimeString) < 0 || compareTime(availableBookingEndTimeString, endTimeValue) < 0){
+            console.error('Czas rezerwacji nie moze przekraczac czasu dostepnego terminu');
+            e.preventDefault();
+            setErrorParent3Times(startTimeReservePartMultipleDaysBookingDateModal, "Czas wykracza poza czas dotępnego terminu.")
         } else {
-            setSuccessParent3Times(startTimeEditAvailableBookingDateModal);
-            setSuccessParent3Times(endTimeEditAvailableBookingDateModal);
+            setSuccessParent3Times(startTimeReservePartMultipleDaysBookingDateModal);
         }
     });
 </script>

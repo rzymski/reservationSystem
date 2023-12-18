@@ -13,7 +13,8 @@ def userRole(request):
     isServiceProvider = currentUser.groups.filter(name='serviceProvider').exists()
     if isServiceProvider:
         return {'userRole': 'serviceProvider'}
-    return {'userRole': 'normalUser'}
+    return {'userRole': 'client'}
+
 
 def userPicture(request):
     defaultImage = settings.MEDIA_URL + 'default.jpg'

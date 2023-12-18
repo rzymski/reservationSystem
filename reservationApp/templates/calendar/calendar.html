@@ -32,20 +32,24 @@
                         {% endfor %}
                     </select>
                 </div>
-                {% if userRole != 'normalUser' %}
+                {% if userRole != 'client' %}
                     <div style="text-align: right; vertical-align: center">
                         <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="m-2 py-1 px-1 text-2xl font-semibold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Dodaj dostepny termin</button>
 {#                        <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-bold rounded-lg text-lg px-2.5 py-2.5 me-2 mb-2 dark:bg-gray-900 dark:hover:bg-gray-800 dark:focus:ring-gray-700 dark:border-gray-700">Dodaj dostepny termin</button>#}
                     </div>
                 {% endif %}
             </div>
-            {% if userRole != 'normalUser' %}
-                {% include 'availableBookingDate/addAvailableBookingDateByCalendar.html' %}
-                {% include 'availableBookingDate/addAvailableBookingDate.html' %}
-                {% include 'availableBookingDate/editAvailableBookingDate.html' %}
-                {% include 'availableBookingDate/deleteAvailableBookingDate.html' %}
-                {% include 'availableBookingDate/changeOptionsAvailableBookingDate.html' %}
-            {% endif %}
+
+            {% include 'availableBookingDate/addAvailableBookingDateByCalendar.html' %}
+            {% include 'availableBookingDate/addAvailableBookingDate.html' %}
+            {% include 'availableBookingDate/editAvailableBookingDate.html' %}
+            {% include 'availableBookingDate/deleteAvailableBookingDate.html' %}
+            {% include 'availableBookingDate/changeOptionsAvailableBookingDate.html' %}
+
+            {% include 'reservation/reservationOptions.html' %}
+            {% include 'reservation/reservePartSingleDayBookingDate.html' %}
+            {% include 'reservation/reservePartMultipleDaysBookingDate.html' %}
+
             <div class="col-md-12">
                 <div id='calendar' class="dark:text-white bg-gray-100 dark:bg-gray-600"></div>
             </div>

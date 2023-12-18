@@ -14,13 +14,20 @@ urlpatterns = [
 
     path('restricted/', views.notForClients, name='notForClients'),
 
-    path('allEvents/', views.allEvents, name='allEvents'),
+    path('allAvailableBookingDates/', views.allAvailableBookingDates, name='allAvailableBookingDates'),
     path('filterServiceProviders/', views.filterServiceProviders, name='filterServiceProviders'),
 
     path('addAvailableBookingDateByCalendar/', views.addAvailableBookingDateByCalendar, name='addAvailableBookingDateByCalendar'),
     path('availableBookingDate/addAvailableBookingDate/', views.addAvailableBookingDate, name='addAvailableBookingDate'),
     path('availableBookingDate/editAvailableBookingDate/', views.editAvailableBookingDate, name='editAvailableBookingDate'),
     path('availableBookingDate/deleteAvailableBookingDate/', views.deleteAvailableBookingDate, name='deleteAvailableBookingDate'),
+
+    path('allUnconfirmedReservations/', views.allUnconfirmedReservations, name='allUnconfirmedReservations'),
+    path('allConfirmedReservations/', views.allConfirmedReservations, name='allConfirmedReservations'),
+
+    path('reserveEntireBookingDate/', views.reserveEntireBookingDate, name='reserveEntireBookingDate'),
+    path('reservePartSingleDayBookingDate/', views.reservePartSingleDayBookingDate, name='reservePartSingleDayBookingDate'),
+    path('reservePartMultipleDaysBookingDate/', views.reservePartMultipleDaysBookingDate, name='reservePartMultipleDaysBookingDate'),
 
 
     path('test/main/', views.PostListView.as_view(), name='main'),

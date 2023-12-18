@@ -11,7 +11,7 @@ class AvailableBookingDate(models.Model):
     end = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.user} {self.start}:{self.end}"
+        return f"{self.user} {self.start.strftime('%H:%M %d/%m/%Y')} - {self.end.strftime('%H:%M %d/%m/%Y')}"
 
 
 class Reservation(models.Model):
