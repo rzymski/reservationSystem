@@ -15,6 +15,14 @@ class AvailableBookingDate(models.Model):
     def __str__(self):
         return f"{self.user} {self.start.strftime('%H:%M %d/%m/%Y')} - {self.end.strftime('%H:%M %d/%m/%Y')}"
 
+    def clean(self):
+        if self.start and self.end and self.start >= self.end:
+            raise ValidationError("End date must be after start date.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
 
 class Reservation(models.Model):
     id = models.AutoField(primary_key=True)
@@ -25,6 +33,8 @@ class Reservation(models.Model):
     isAccepted = models.BooleanField(default=False)
 
     def clean(self):
+        if self.start and self.end and self.start >= self.end:
+            raise ValidationError("End date must be after start date.")
         # Check for conflicts only if both reservations are accepted
         if self.isAccepted:
             conflicting_reservations = Reservation.objects.filter(
@@ -36,10 +46,9 @@ class Reservation(models.Model):
             if conflicting_reservations.exists():
                 raise ValidationError("Reservation conflicts with an existing accepted reservation.")
 
-    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
-        ic("Wykonala sie zmiana/dodanie rezerwacji")
+    def save(self, *args, **kwargs):
         self.clean()
-        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
+        super().save(*args, **kwargs)
 
 
 class UserProfile(models.Model):
