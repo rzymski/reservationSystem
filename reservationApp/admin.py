@@ -8,7 +8,7 @@ from django.utils import timezone
 class AvailableBookingDateAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'start_display', 'end_display')
     list_filter = ('id', 'user', 'start', 'end')
-    search_fields = ('id', 'user', 'start', 'end')
+    search_fields = ('id', 'start', 'end')
     ordering = ('id', 'user', 'start', 'end')
 
     def start_display(self, obj):
@@ -25,7 +25,7 @@ class AvailableBookingDateAdmin(admin.ModelAdmin):
 class ReservationAdmin(admin.ModelAdmin):
     list_display = ('id', 'bookingPerson', 'availableBookingDate', 'start_display', 'end_display', 'isAccepted')
     list_filter = ('id', 'bookingPerson', 'availableBookingDate', 'start', 'end', 'isAccepted')
-    search_fields = ('id', 'bookingPerson', 'availableBookingDate', 'start', 'end', 'isAccepted')
+    search_fields = ('id', 'start', 'end', 'isAccepted')
     ordering = ('id', 'bookingPerson', 'availableBookingDate', 'start', 'end', 'isAccepted')
 
     def start_display(self, obj):

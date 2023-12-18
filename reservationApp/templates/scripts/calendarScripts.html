@@ -48,15 +48,30 @@
             selectable: true,
             editable: true,
             {#contentHeight: 1500,#}
-            aspectRatio: 3,
+            aspectRatio: 2.5,
             expandRows: true,
             allDayText: 'czas',
+            eventContent: function(arg) {
+                const start = getDateDetails(arg.event.start, '.', 'YMD')
+                const end = getDateDetails(arg.event.end, '.', 'YMD')
+                if (start.dateWithoutTime === end.dateWithoutTime) {
+                    return {
+                        {#html: '<div class="fc-title">' + start.time + " - " + end.time + '</div><div class="fc-title">' + arg.event.title + '</div>',#}
+                        html: `<div class="fc-title">${start.time} - ${end.time}</div><div class="fc-title">${arg.event.title}</div>`,
+                    };
+                }
+                else {
+                    return {
+                        html: `<div class="fc-title">Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}</div><div class="fc-title">Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div><div class="fc-title">${arg.event.title}</div>`,
+                    };
+                }
+            },
             views: {
                 dayGridMonth: {
                     titleFormat: myMonthTitleFormat,
                     displayEventEnd: true,
                     dayHeaderContent: myMonthdayHeaderContent,
-                    eventContent: function(arg) {
+                    {% comment %}eventContent: function(arg) {
                         const start = getDateDetails(arg.event.start, '.', 'YMD')
                         const end = getDateDetails(arg.event.end, '.', 'YMD')
                         if (start.dateWithoutTime === end.dateWithoutTime) {
@@ -70,7 +85,7 @@
                                 html: `<div class="fc-title">Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}</div><div class="fc-title">Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div><div class="fc-title">${arg.event.title}</div>`,
                             };
                         }
-                    },
+                    },{% endcomment %}
                 },
                 timeGridWeek:{
                     titleFormat: myWeekTitleFormat,
@@ -214,12 +229,14 @@
         $('body').removeClass('overflow-hidden');
     };
     function getDateDetails(date, dateSeparator = '-' , dateOrder = 'YMD'){
-        const day = date.getDate();
-        const month = date.getMonth();
-        const year = date.getFullYear();
-        const dayOfTheWeek = polishDaysOfWeek[date.getDay()];
-        const namedMonth = polishMonths[date.getMonth()];
-        let dateWithoutTime = date.toISOString().split('T')[0];
+        let time = date.toISOString().split('T')[1].slice(0, 5);
+        const dateWithoutTimeZone = new Date(date.setMinutes(date.getMinutes() + date.getTimezoneOffset()))
+        const day = dateWithoutTimeZone.getDate();
+        const month = dateWithoutTimeZone.getMonth();
+        const year = dateWithoutTimeZone.getFullYear();
+        const dayOfTheWeek = polishDaysOfWeek[dateWithoutTimeZone.getDay()];
+        const namedMonth = polishMonths[dateWithoutTimeZone.getMonth()];
+        let dateWithoutTime = dateWithoutTimeZone.toISOString().split('T')[0];
         if (dateSeparator !== '-' || dateOrder !== 'YMD'){
             if (dateOrder === 'YMD'){
                 dateWithoutTime = year + dateSeparator + month + dateSeparator + day;
@@ -228,7 +245,6 @@
                 dateWithoutTime = day + dateSeparator + month + dateSeparator + year;
             }
         }
-        let time = date.toISOString().split('T')[1].slice(0, 5);
         return {dateWithoutTime, time, day, month, year, dayOfTheWeek, namedMonth};
     };
     function myMonthTitleFormat(date) {
