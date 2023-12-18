@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from PIL import Image
 from django.db.models.signals import post_save
+from django.core.exceptions import ValidationError
+from icecream import ic
 
 
 class AvailableBookingDate(models.Model):
@@ -21,6 +23,23 @@ class Reservation(models.Model):
     start = models.DateTimeField(null=True, blank=True)
     end = models.DateTimeField(null=True, blank=True)
     isAccepted = models.BooleanField(default=False)
+
+    def clean(self):
+        # Check for conflicts only if both reservations are accepted
+        if self.isAccepted:
+            conflicting_reservations = Reservation.objects.filter(
+                availableBookingDate=self.availableBookingDate,
+                isAccepted=True,
+                start__lt=self.end,
+                end__gt=self.start,
+            ).exclude(pk=self.pk)  # Exclude self if instance is being updated
+            if conflicting_reservations.exists():
+                raise ValidationError("Reservation conflicts with an existing accepted reservation.")
+
+    def save(self):
+        ic("Wykonala sie zmiana/dodanie rezerwacji")
+        self.clean()
+        super().save()
 
 
 class UserProfile(models.Model):

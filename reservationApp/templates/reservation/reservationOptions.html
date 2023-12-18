@@ -22,7 +22,9 @@
                     <li>
                         <form method="post" action="{% url 'reserveEntireBookingDate' %}" id="reserveAvailableBookingDateForm">
                             {% csrf_token %}
-                            <input type="hidden" name="selectedBookingDateId" id="reserveEntireSelectedBookingDate" value="">
+                            <input type="hidden" name="selectedBookingDateId" id="reserveEntireSelectedBookingDateId" value="">
+                            <input type="hidden" name="selectedBookingDateStart" id="reserveEntireSelectedBookingDateStart" value="">
+                            <input type="hidden" name="selectedBookingDateEnd" id="reserveEntireSelectedBookingDateEnd" value="">
                             <button id="reserveEntireAvailableBookingDateBtn" type="submit" class="w-full flex items-center p-3 text-base font-bold text-gray-900 rounded-lg bg-gray-50 hover:bg-gray-100 group hover:shadow dark:bg-gray-600 dark:hover:bg-gray-500 dark:text-white">
                                 <i class="fa-solid fa-calendar-week"></i>
                                 <span class="ms-3 whitespace-nowrap">Zarezerwuj cały dostępny termin</span>

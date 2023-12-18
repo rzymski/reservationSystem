@@ -104,6 +104,7 @@
                 if ("{{ request.user }}" === 'AnonymousUser') { return; }
                 currentUserId = {{ request.user.id }}
                 console.log("WYKONALO SIE klikniecie eventu");
+
                 //console.log('Event' + info.event.title + ' ' + info.event.start + ' : ' + info.event.end, "ServiceProvider userId", info.event.extendedProps.serviceProviderId);
                 let serviceProviderId = info.event.extendedProps.serviceProviderId;
                 let serviceProviderNameAndSurname = info.event.extendedProps.serviceProviderNameAndSurname;
@@ -125,14 +126,13 @@
                     $('#editSelectedEvent').val(selectedBookingDateId)
                     openModal('changeOptionsAvailableBookingDateModal', availableBookingData);
                 }else if (eventType === 0 && currentUserRole === "client") { //proba rezerwacji
-                    $('#reserveEntireSelectedBookingDate').val(selectedBookingDateId)
+                    // calosc
+                    $('#reserveEntireSelectedBookingDateId').val(selectedBookingDateId)
+                    $('#reserveEntireSelectedBookingDateStart').val(info.event.start.toISOString())
+                    $('#reserveEntireSelectedBookingDateEnd').val(info.event.end.toISOString())
+                    // czesc
                     $('#reservePartSingleDaySelectedBookingDateId').val(selectedBookingDateId)
                     $('#reservePartMultipleDaysSelectedBookingDateId').val(selectedBookingDateId)
-
-                    {#let reservationOptionsModal = document.getElementById('reservationOptionsModal');#}
-                    {#let reservePartBtn = reservationOptionsModal.querySelector('#reservePartBookingDateOption');#}
-                    {#reservePartBtn.dataset = availableBookingData;#}
-
                     openModal('reservationOptionsModal', availableBookingData);
                 } else if (eventType === 1 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) {
                     $('#confirmOrRejectReservationId').val(info.event.id)

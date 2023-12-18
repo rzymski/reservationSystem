@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from .models import *
+from .functions import *
 from .forms import CreateUserForm, UpdateProfileForm, UpdateUserForm
 from .decorators import unauthenticatedUser, allowedUsers
 from django.contrib.auth import authenticate, login, logout
@@ -76,8 +77,12 @@ def confirmOrRejectReservation(request):
         action = request.POST.get('action')
         ic(action)
         if action == 'confirm':
-            reservation.isAccepted = True
-            reservation.save()
+            try:
+                reservation.isAccepted = True
+                reservation.save()
+            except ValidationError:
+                ic("WALIDACJA ZABRONILA")
+                messages.success(request, "Nie można zatwierdzić rezerwacji. Następuje kolizja terminów.")
         if action == 'reject':
             reservation.delete()
     return redirect('index')
@@ -136,36 +141,69 @@ def reserveEntireBookingDate(request):
     ic("Zarezerwowano dostepny termin")
     if request.method == 'POST':
         availableBookingDateId = request.POST.get('selectedBookingDateId')
+        availableBookingDateStart = request.POST.get('selectedBookingDateStart')
+        availableBookingDateEnd = request.POST.get('selectedBookingDateEnd')
+        startDatetime = datetime.fromisoformat(availableBookingDateStart[:-1])
+        endDatetime = datetime.fromisoformat(availableBookingDateEnd[:-1])
+        ic(availableBookingDateStart, startDatetime)
         selectedAvailableBookingDate = AvailableBookingDate.objects.get(pk=availableBookingDateId)
         reservation = Reservation.objects.create(
             bookingPerson=request.user,
             availableBookingDate=selectedAvailableBookingDate,
-            start=selectedAvailableBookingDate.start,
-            end=selectedAvailableBookingDate.end,
+            start=startDatetime,
+            end=endDatetime,
             isAccepted=False,
         )
     return redirect('index')
 
 
 def allAvailableBookingDates(request):
-    eventsObjects = AvailableBookingDate.objects.all()
+    availableBookingDates = AvailableBookingDate.objects.all()
     out = []
-    for event in eventsObjects:
-        out.append({
-            'title': f"{event.user.first_name} \n {event.user.last_name}",
-            'id': event.id,
-            'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
-            'end': event.end.strftime('%Y-%m-%dT%H:%M:%S'),
-            'backgroundColor': '#3ec336',
-            'borderColor': '#FFFFFF',
-            'display': 'block',
-            'serviceProviderId': event.user.id,
-            'serviceProviderNameAndSurname': f"{event.user.first_name} {event.user.last_name}",
-            'clientId': -1,
-            'clientNameAndSurname': "",
-            'eventType': 0,
-        })
+    for availableBookingDate in availableBookingDates:
+        freeTimesInAvailableBookingDate = getAvailableTimeRanges(availableBookingDate)
+        for freeTime in freeTimesInAvailableBookingDate:
+            out.append({
+                'title': f"{availableBookingDate.user.first_name} {availableBookingDate.user.last_name}",
+                'id': availableBookingDate.id,
+                'start': freeTime[0].strftime('%Y-%m-%dT%H:%M:%S'),
+                'end': freeTime[1].strftime('%Y-%m-%dT%H:%M:%S'),
+                'backgroundColor': '#3ec336',
+                'borderColor': '#FFFFFF',
+                'display': 'block',
+                'serviceProviderId': availableBookingDate.user.id,
+                'serviceProviderNameAndSurname': f"{availableBookingDate.user.first_name} {availableBookingDate.user.last_name}",
+                'clientId': -1,
+                'clientNameAndSurname': "",
+                'eventType': 0,
+            })
     return JsonResponse(out, safe=False)
+
+# def allAvailableBookingDates(request):
+#     eventsObjects = AvailableBookingDate.objects.all()
+#     out = []
+#
+#     a = AvailableBookingDate.objects.get(pk=74)
+#     ic(a)
+#     freeTimes = getAvailableTimeRanges(a)
+#     ic(freeTimes)
+#
+#     for event in eventsObjects:
+#         out.append({
+#             'title': f"{event.user.first_name} \n {event.user.last_name}",
+#             'id': event.id,
+#             'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
+#             'end': event.end.strftime('%Y-%m-%dT%H:%M:%S'),
+#             'backgroundColor': '#3ec336',
+#             'borderColor': '#FFFFFF',
+#             'display': 'block',
+#             'serviceProviderId': event.user.id,
+#             'serviceProviderNameAndSurname': f"{event.user.first_name} {event.user.last_name}",
+#             'clientId': -1,
+#             'clientNameAndSurname': "",
+#             'eventType': 0,
+#         })
+#     return JsonResponse(out, safe=False)
 
 
 def filterServiceProviders(request):
