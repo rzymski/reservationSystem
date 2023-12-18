@@ -88,6 +88,16 @@ def confirmOrRejectReservation(request):
     return redirect('index')
 
 
+def deleteReservation(request):
+    ic("Usunieto rezerwacje")
+    if request.method == 'POST':
+        reservationId = request.POST.get('selectedReservationId')
+        ic(reservationId)
+        reservation = Reservation.objects.get(pk=reservationId)
+        reservation.delete()
+    return redirect('index')
+
+
 def reservePartSingleDayBookingDate(request):
     ic("Zarezerwowano czesc dostepnego terminu z jednego dnia")
     if request.method == "POST":

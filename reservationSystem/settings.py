@@ -71,7 +71,7 @@ ROOT_URLCONF = 'reservationSystem.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates']
+        'DIRS': [BASE_DIR / 'partialTemplates']
         ,
         'APP_DIRS': True,
         'OPTIONS': {

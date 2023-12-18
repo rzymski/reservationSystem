@@ -28,7 +28,7 @@ urlpatterns = [
     path('reserveEntireBookingDate/', views.reserveEntireBookingDate, name='reserveEntireBookingDate'),
     path('reservePartSingleDayBookingDate/', views.reservePartSingleDayBookingDate, name='reservePartSingleDayBookingDate'),
     path('reservePartMultipleDaysBookingDate/', views.reservePartMultipleDaysBookingDate, name='reservePartMultipleDaysBookingDate'),
-
+    path('deleteReservation/', views.deleteReservation, name='deleteReservation'),
     path('confirmOrRejectReservation/', views.confirmOrRejectReservation, name='confirmOrRejectReservation'),
 
 

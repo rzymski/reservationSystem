@@ -14,7 +14,7 @@ def getAvailableTimeRanges(availableBookingDate):
         endFreeTime = reservations[i+1].start
         if startFreeTime < endFreeTime:
             availableTimeRanges.append((startFreeTime, endFreeTime))
-        else:
+        if startFreeTime > endFreeTime:
             ic("Wystapil error, ktory nie powinien miec miejsca. Kolejna rezerwacja zaczyna się zanim skończy się poprzednia.")
     # Dodanie czasu pomiędzy koncem ostatniej rezerwacji a końcem dostępnego czasu
     if reservations.last().end != availableBookingDate.end:

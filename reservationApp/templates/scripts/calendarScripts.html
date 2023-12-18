@@ -57,9 +57,19 @@
                     displayEventEnd: true,
                     dayHeaderContent: myMonthdayHeaderContent,
                     eventContent: function(arg) {
-                        return {
-                            html: '<div class="fc-title">' + arg.timeText + '</div><div class="fc-title">' + arg.event.title + '</div>',
-                        };
+                        const start = getDateDetails(arg.event.start, '.', 'YMD')
+                        const end = getDateDetails(arg.event.end, '.', 'YMD')
+                        if (start.dateWithoutTime === end.dateWithoutTime) {
+                            return {
+                                {#html: '<div class="fc-title">' + start.time + " - " + end.time + '</div><div class="fc-title">' + arg.event.title + '</div>',#}
+                                html: `<div class="fc-title">${start.time} - ${end.time}</div><div class="fc-title">${arg.event.title}</div>`,
+                            };
+                        }
+                        else {
+                            return {
+                                html: `<div class="fc-title">Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}</div><div class="fc-title">Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div><div class="fc-title">${arg.event.title}</div>`,
+                            };
+                        }
                     },
                 },
                 timeGridWeek:{
@@ -137,6 +147,10 @@
                 } else if (eventType === 1 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) {
                     $('#confirmOrRejectReservationId').val(info.event.id)
                     openModal('confirmOrRejectReservationModal', availableBookingData)
+                } else if ((eventType === 1 || eventType === 2) && (serviceProviderId === currentUserId || clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) {
+                    console.log("USUN TO")
+                    $('#deleteReservationId').val(selectedBookingDateId)
+                    openModal('deleteReservationModal')
                 } else{
                     console.log("Nie masz uprawnien, zeby to zrobic")
                 }
@@ -199,47 +213,51 @@
         $('#addAvailableBookingDateByCalendarModal').addClass('hidden');
         $('body').removeClass('overflow-hidden');
     };
-
+    function getDateDetails(date, dateSeparator = '-' , dateOrder = 'YMD'){
+        const day = date.getDate();
+        const month = date.getMonth();
+        const year = date.getFullYear();
+        const dayOfTheWeek = polishDaysOfWeek[date.getDay()];
+        const namedMonth = polishMonths[date.getMonth()];
+        let dateWithoutTime = date.toISOString().split('T')[0];
+        if (dateSeparator !== '-' || dateOrder !== 'YMD'){
+            if (dateOrder === 'YMD'){
+                dateWithoutTime = year + dateSeparator + month + dateSeparator + day;
+            }
+            if (dateOrder === 'DMY'){
+                dateWithoutTime = day + dateSeparator + month + dateSeparator + year;
+            }
+        }
+        let time = date.toISOString().split('T')[1].slice(0, 5);
+        return {dateWithoutTime, time, day, month, year, dayOfTheWeek, namedMonth};
+    };
     function myMonthTitleFormat(date) {
         const startDate = new Date(date.start.marker);
         const endDate = new Date(date.end.marker);
-        const startDay = startDate.getDate();
-        const startMonth = startDate.getMonth();
-        const startYear = startDate.getFullYear();
-        const endDay = endDate.getDate();
-        const endMonth = endDate.getMonth();
-        const endYear = endDate.getFullYear();
-        return polishMonths[startMonth] + " " + startYear;
+        const start = getDateDetails(startDate, '.', 'YMD')
+        const end = getDateDetails(endDate, '.', 'YMD')
+        return start.namedMonth + " " + start.year
     };
     function myWeekTitleFormat(date) {
         const startDate = new Date(date.start.marker);
         const endDate = new Date(date.end.marker);
-        const startDay = startDate.getDate();
-        const startMonth = startDate.getMonth();
-        const startYear = startDate.getFullYear();
-        const endDay = endDate.getDate();
-        const endMonth = endDate.getMonth();
-        const endYear = endDate.getFullYear();
-        const dateRangeString = startDay + " " + polishMonths[startMonth] + " " + startYear + " - " + endDay + " " + polishMonths[endMonth] + " " + endYear
-        return dateRangeString;
+        const start = getDateDetails(startDate, '.', 'YMD')
+        const end = getDateDetails(endDate, '.', 'YMD')
+        return start.day + " " + start.namedMonth + " " + start.year + " - " + end.day + " " + end.namedMonth + " " + end.year
     };
     function myDayTitleFormat(date) {
         const startDate = new Date(date.start.marker);
-        const startDay = startDate.getDate();
-        const startMonth = startDate.getMonth();
-        const startYear = startDate.getFullYear();
-        const dateRangeString = startDay + " " + polishMonths[startMonth] + " " + startYear
-        return dateRangeString;
+        const endDate = new Date(date.end.marker);
+        const start = getDateDetails(startDate, '.', 'YMD')
+        const end = getDateDetails(endDate, '.', 'YMD')
+        return start.day + " " + start.namedMonth + " " + start.year
     };
-
     function myMonthdayHeaderContent(date){
         return polishDaysOfWeek[date.date.getDay()];
     };
-
     function myWeekdayHeaderContent(date){
         return polishDaysOfWeek[date.date.getDay()]  + " " + date.date.getDate();
     };
-
     function myDaydayHeaderContent(date){
         {#return polishDaysOfWeek[date.date.getDay()]  + ", " + date.date.getDate() + " " + polishMonths[date.date.getMonth()] + " " + date.date.getFullYear();#}
         return polishDaysOfWeek[date.date.getDay()];
