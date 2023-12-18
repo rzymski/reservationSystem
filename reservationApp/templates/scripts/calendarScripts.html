@@ -75,19 +75,26 @@
             select: function (data){
                 if (currentUserRole !== "client")
                 {
+                    let selectedView = calendar.view.type;
                     console.log("Wykonalo sie dodanie")
                     console.log("D =", data)
-                    console.log(data.startStr)
                     const startDateTime = new Date(data.startStr)
                     let startDateOnly = startDateTime.toISOString().split('T')[0];
                     let startTimeOnly = startDateTime.toLocaleTimeString().slice(0, 5);
                     const endDateTime = new Date(data.endStr)
+                    if (selectedView === 'dayGridMonth') { endDateTime.setDate(endDateTime.getDate() - 1) }
+                    let endDateOnly = endDateTime.toISOString().split('T')[0];
                     let endTimeOnly = endDateTime.toLocaleTimeString().slice(0, 5);
-                    console.log("CZAS =", startTimeOnly)
-                    if (startTimeOnly != "01:00" || endTimeOnly != "01:00"){
+                    if (selectedView !== 'dayGridMonth'){
+                        {#dotyczy widoku kalendarza widoku tygodniowego/dniowego gdzie uzupelnia od razu godzine startu i konca#}
                         $('#addAvailableBookingDateByCalendarModal [name="startTime"]').val(startTimeOnly);
+                        $('#addAvailableBookingDateByCalendarModal [name="endTime"]').val(endTimeOnly);
+                    } else {
+                        {#$('#addAvailableBookingDateByCalendarModal [name="startTime"]').val('12:00');#}
+                        {#$('#addAvailableBookingDateByCalendarModal [name="endTime"]').val('23:00');#}
                     }
                     $('#startStrField').val(startDateOnly);
+                    $('#endStrField').val(endDateOnly);
                     $('#addAvailableBookingDateByCalendarModal').removeClass('hidden');
                     $('body').addClass('overflow-hidden');
                 }
