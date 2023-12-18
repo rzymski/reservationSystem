@@ -29,6 +29,8 @@ urlpatterns = [
     path('reservePartSingleDayBookingDate/', views.reservePartSingleDayBookingDate, name='reservePartSingleDayBookingDate'),
     path('reservePartMultipleDaysBookingDate/', views.reservePartMultipleDaysBookingDate, name='reservePartMultipleDaysBookingDate'),
 
+    path('confirmOrRejectReservation/', views.confirmOrRejectReservation, name='confirmOrRejectReservation'),
+
 
     path('test/main/', views.PostListView.as_view(), name='main'),
     path('test/<pk>/', views.PostDetailView.as_view(), name='detail'),

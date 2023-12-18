@@ -99,12 +99,17 @@
                 console.log("WYKONALO SIE klikniecie eventu");
                 //console.log('Event' + info.event.title + ' ' + info.event.start + ' : ' + info.event.end, "ServiceProvider userId", info.event.extendedProps.serviceProviderId);
                 let serviceProviderId = info.event.extendedProps.serviceProviderId;
+                let serviceProviderNameAndSurname = info.event.extendedProps.serviceProviderNameAndSurname;
+                let clientId = info.event.extendedProps.clientId;
+                let clientNameAndSurname = info.event.extendedProps.clientNameAndSurname;
                 let eventType = info.event.extendedProps.eventType;
                 availableBookingData = {
-                    serviceProviderNameAndSurname: info.event.title,
+                    serviceProviderNameAndSurname: serviceProviderNameAndSurname,
                     serviceProviderId: serviceProviderId,
                     startAvailableBookingDate: info.event.start,
                     endAvailableBookingDate: info.event.end,
+                    clientNameAndSurname: clientNameAndSurname,
+                    clientId: clientId,
                 };
                 selectedBookingDateId = info.event.id
                 selectedEventInfo = info
@@ -122,6 +127,9 @@
                     {#reservePartBtn.dataset = availableBookingData;#}
 
                     openModal('reservationOptionsModal', availableBookingData);
+                } else if (eventType === 1 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) {
+                    $('#confirmOrRejectReservationId').val(info.event.id)
+                    openModal('confirmOrRejectReservationModal', availableBookingData)
                 } else{
                     console.log("Nie masz uprawnien, zeby to zrobic")
                 }
@@ -375,7 +383,12 @@
             serviceProviderProfileElement.href = "/userProfile/"+data.serviceProviderId+"/";
             let serviceProviderNameAndSurnameElement = modal.querySelector('#serviceProviderNameAndSurname');
             serviceProviderNameAndSurnameElement.textContent = "Usługodawca: " + data.serviceProviderNameAndSurname;
-
+            if (data.clientId !== -1) {
+                let clientProfileElement = modal.querySelector('#clientProfileLink');
+                clientProfileElement.href = "/userProfile/"+data.clientId+"/";
+                let clientNameAndSurnameElement = modal.querySelector('#clientNameAndSurname');
+                clientNameAndSurnameElement.textContent = "Usługobiorca: " + data.clientNameAndSurname;
+            }
             let startDate = data.startAvailableBookingDate;
             let endDate = data.endAvailableBookingDate;
             {#uwzglednienie strefy czasowej#}

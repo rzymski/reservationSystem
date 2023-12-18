@@ -8,17 +8,17 @@
                 <span class="sr-only">Close modal</span>
             </button>
             <div class="p-4 md:p-5 text-center">
-                <svg class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-100" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
+                <svg class="mx-auto mb-4 text-gray-900 w-12 h-12 dark:text-gray-50" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                 </svg>
-                <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Czy na pewno chcesz usunąć ten dostępny termin?</h3>
+                <h3 class="mb-5 text-lg font-normal text-gray-900 dark:text-gray-50">Czy na pewno chcesz usunąć ten dostępny termin?</h3>
                 <form method="post" action="{% url 'deleteAvailableBookingDate' %}" id="deleteAvailableBookingDateForm">
                     {% csrf_token %}
                     <input type="hidden" name="selectedEvent" id="deleteSelectedEvent" value="">
-                    <button id="saveDeleteAvailableBookingDateBtn" type="submit" class="text-gray-50 bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center me-2">
+                    <button id="saveDeleteAvailableBookingDateBtn" type="submit" class="text-gray-50 bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-bold rounded-lg text-xl inline-flex items-center px-4 py-2.5 text-center me-2">
                         Tak, usuń go
                     </button>
-                    <button onclick="closeModal('deleteAvailableBookingDateModal')" type="button" class="text-gray-500 bg-gray-50 hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">Nie, nie usuwaj</button>
+                    <button onclick="closeModal('deleteAvailableBookingDateModal')" type="button" class="text-gray-500 bg-gray-50 hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-xl font-bold px-4 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">Nie, nie usuwaj</button>
                 </form>
             </div>
         </div>

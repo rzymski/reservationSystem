@@ -38,6 +38,9 @@ def allUnconfirmedReservations(request):
             'borderColor': '#FFFFFF',
             'display': 'block',
             'serviceProviderId': reservation.availableBookingDate.user.id,
+            'serviceProviderNameAndSurname': f"{reservation.availableBookingDate.user.first_name} {reservation.availableBookingDate.user.last_name}",
+            'clientId': reservation.bookingPerson.id,
+            'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
             'eventType': 1,
         })
     return JsonResponse(out, safe=False)
@@ -52,13 +55,32 @@ def allConfirmedReservations(request):
             'id': reservation.id,
             'start': reservation.start.strftime('%Y-%m-%dT%H:%M:%S'),
             'end': reservation.end.strftime('%Y-%m-%dT%H:%M:%S'),
-            'backgroundColor': '#795695',
+            'backgroundColor': '#BF40BF',
             'borderColor': '#FFFFFF',
             'display': 'block',
             'serviceProviderId': reservation.availableBookingDate.user.id,
+            'serviceProviderNameAndSurname': f"{reservation.availableBookingDate.user.first_name} {reservation.availableBookingDate.user.last_name}",
+            'clientId': reservation.bookingPerson.id,
+            'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
             'eventType': 2,
         })
     return JsonResponse(out, safe=False)
+
+
+def confirmOrRejectReservation(request):
+    ic("Potwierdzono lub usunieto rezerwacje")
+    if request.method == 'POST':
+        reservationId = request.POST.get('selectedReservationId')
+        ic(reservationId)
+        reservation = Reservation.objects.get(pk=reservationId)
+        action = request.POST.get('action')
+        ic(action)
+        if action == 'confirm':
+            reservation.isAccepted = True
+            reservation.save()
+        if action == 'reject':
+            reservation.delete()
+    return redirect('index')
 
 
 def reservePartSingleDayBookingDate(request):
@@ -138,6 +160,9 @@ def allAvailableBookingDates(request):
             'borderColor': '#FFFFFF',
             'display': 'block',
             'serviceProviderId': event.user.id,
+            'serviceProviderNameAndSurname': f"{event.user.first_name} {event.user.last_name}",
+            'clientId': -1,
+            'clientNameAndSurname': "",
             'eventType': 0,
         })
     return JsonResponse(out, safe=False)
