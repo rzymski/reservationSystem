@@ -82,7 +82,7 @@ def confirmOrRejectReservation(request):
                 reservation.save()
             except ValidationError:
                 ic("WALIDACJA ZABRONILA")
-                messages.success(request, "Nie można zatwierdzić rezerwacji. Następuje kolizja terminów.")
+                messages.error(request, "Nie można zatwierdzić rezerwacji. Następuje kolizja terminów.")
         if action == 'reject':
             reservation.delete()
     return redirect('index')

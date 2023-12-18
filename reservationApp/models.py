@@ -36,10 +36,10 @@ class Reservation(models.Model):
             if conflicting_reservations.exists():
                 raise ValidationError("Reservation conflicts with an existing accepted reservation.")
 
-    def save(self):
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
         ic("Wykonala sie zmiana/dodanie rezerwacji")
         self.clean()
-        super().save()
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
 
 class UserProfile(models.Model):
