@@ -1,7 +1,23 @@
-from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django import forms
 from .models import UserProfile
+from django.core.exceptions import ValidationError
+
+
+class LoginForm(AuthenticationForm):
+    username = forms.CharField(max_length=254, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nazwa użytkownika'}), required=True)
+    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Hasło'}), required=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'password']
+
+    def confirm_login_allowed(self, user):
+        if not user.is_active:
+            raise ValidationError("This account is inactive.", code="inactive")
+        # if user.username.startswith("b"):
+        #     raise ValidationError("Sorry, accounts starting with 'b' aren't welcome here.", code="no_b_users",)
 
 
 class CreateUserForm(UserCreationForm):
@@ -30,18 +46,6 @@ class CreateUserForm(UserCreationForm):
         self.fields['password2'].widget.attrs['placeholder'] = 'Potwierdź hasło'
         self.fields['password2'].label = ''
         self.fields['password2'].help_text = '<span class="form-text text-gray-950 dark:text-gray-50"><small>Takie same hasło jak wcześniej w celu weryfikacji.</small></span>'
-
-
-# class UpdateProfileForm(forms.ModelForm):
-#     age = forms.IntegerField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Wiek'}))
-#     sex = forms.CharField(label="", max_length=50, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Płeć'}))
-#     description = forms.CharField(label="", max_length=300, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Opis'}))
-#     profileImage = forms.ImageField(label="Zdjęcie profilowe")
-#
-#     class Meta:
-#         model = UserProfile
-#         fields = ['age', 'sex', 'description', 'profileImage']
-
 
 class UpdateUserForm(forms.ModelForm):
     username = forms.CharField(label="", max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nick'}))

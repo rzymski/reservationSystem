@@ -34,7 +34,7 @@ urlpatterns = [
 
     path('dragEvent/', views.dragEvent, name='dragEvent'),
 
-
     path('test/main/', views.PostListView.as_view(), name='main'),
     path('test/<pk>/', views.PostDetailView.as_view(), name='detail'),
+    path('test/myTest', views.myTest, name='myTest')
 ]

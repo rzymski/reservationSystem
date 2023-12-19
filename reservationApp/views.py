@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import *
 from .functions import *
-from .forms import CreateUserForm, UpdateProfileForm, UpdateUserForm
+from .forms import CreateUserForm, UpdateProfileForm, UpdateUserForm, LoginForm
 from .decorators import unauthenticatedUser, allowedUsers
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -421,7 +421,7 @@ def registerUser(request):
             clientGroup = Group.objects.get(name='client')
             user.groups.add(clientGroup)
             username = form.cleaned_data.get('username')
-            # messages.success(request, 'Account was createf for ' + username)
+            messages.success(request, 'Konto zostało utworzone dla: ' + username)
             # return redirect('login')
             username = form.cleaned_data['username']
             password = form.cleaned_data['password1']
@@ -431,22 +431,41 @@ def registerUser(request):
     return render(request, 'accounts/register.html', {'form': form})
 
 
+# @unauthenticatedUser
+# def loginUser(request):
+#     if request.method == "POST":
+#         username = request.POST.get('username')
+#         password = request.POST.get('password')
+#         user = authenticate(request, username=username, password=password)
+#         if user is not None:
+#             login(request, user)
+#             if 'next' in request.POST:
+#                 return redirect(request.POST['next'])
+#             return redirect('index')
+#         else:
+#             messages.info(request, 'Username or password is incorrect')
+#     context = {}
+#     return render(request, 'accounts/login.html', context)
+
 @unauthenticatedUser
 def loginUser(request):
+    errors = []
+    form = LoginForm()
     if request.method == "POST":
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            if 'next' in request.POST:
-                return redirect(request.POST['next'])
-            return redirect('index')
+        form = LoginForm(request, request.POST)
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                if 'next' in request.POST:
+                    return redirect(request.POST['next'])
+                return redirect('index')
         else:
-            messages.info(request, 'Username or password is incorrect')
-
-    context = {}
-    return render(request, 'accounts/login.html', context)
+            errors.append('Username or password is incorrect')
+            # messages.error(request, 'Username or password is incorrect')
+    return render(request, 'accounts/login.html', {'form': form, 'errors': errors})
 
 
 def logoutUser(request):
@@ -458,7 +477,9 @@ def logoutUser(request):
 
 
 
-
+# TESTY
+def myTest(request):
+    return render(request, 'test/myTest.html')
 # Wersja testowa THEME
 from django.views.generic import ListView, DetailView
 

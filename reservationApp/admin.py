@@ -25,7 +25,7 @@ class AvailableBookingDateAdmin(admin.ModelAdmin):
 class ReservationAdmin(admin.ModelAdmin):
     list_display = ('id', 'bookingPerson', 'availableBookingDate', 'start_display', 'end_display', 'isAccepted')
     list_filter = ('id', 'bookingPerson', 'isAccepted', 'start', 'end', 'availableBookingDate')
-    search_fields = ('id', 'start', 'end', 'isAccepted')
+    search_fields = ('id', 'bookingPerson__username', 'start', 'end', 'isAccepted')
     ordering = ('id', 'bookingPerson', 'availableBookingDate', 'start', 'end', 'isAccepted')
 
     def start_display(self, obj):
@@ -42,6 +42,9 @@ class ReservationAdmin(admin.ModelAdmin):
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'age', 'sex')
+    list_filter = ('user', 'age', 'sex')
+    search_fields = ('user__username', 'age', 'sex')
+    ordering = ('user', 'age', 'sex')
 
 # class UserProfileInline(admin.StackedInline):
 #     model = UserProfile
