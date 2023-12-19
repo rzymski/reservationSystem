@@ -6,10 +6,10 @@ from django.utils import timezone
 
 @admin.register(AvailableBookingDate)
 class AvailableBookingDateAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'start_display', 'end_display')
-    list_filter = ('id', 'user', 'start', 'end')
-    search_fields = ('id', 'start', 'end')
-    ordering = ('id', 'user', 'start', 'end')
+    list_display = ('id', 'user', 'start_display', 'end_display', 'intervalTime', 'breakBetweenIntervals')
+    list_filter = ('id', 'user', 'start', 'end', 'intervalTime', 'breakBetweenIntervals')
+    search_fields = ('id', 'start', 'end', 'intervalTime', 'breakBetweenIntervals')
+    ordering = ('id', 'user', 'start', 'end', 'intervalTime', 'breakBetweenIntervals')
 
     def start_display(self, obj):
         return obj.start.astimezone(timezone.get_current_timezone()).strftime('%H:%M  %a  %d/%m/%Y')
@@ -24,7 +24,7 @@ class AvailableBookingDateAdmin(admin.ModelAdmin):
 @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
     list_display = ('id', 'bookingPerson', 'availableBookingDate', 'start_display', 'end_display', 'isAccepted')
-    list_filter = ('id', 'bookingPerson', 'availableBookingDate', 'start', 'end', 'isAccepted')
+    list_filter = ('id', 'bookingPerson', 'isAccepted', 'start', 'end', 'availableBookingDate')
     search_fields = ('id', 'start', 'end', 'isAccepted')
     ordering = ('id', 'bookingPerson', 'availableBookingDate', 'start', 'end', 'isAccepted')
 

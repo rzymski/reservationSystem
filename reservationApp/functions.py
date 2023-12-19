@@ -20,3 +20,28 @@ def getAvailableTimeRanges(availableBookingDate):
     if reservations.last().end != availableBookingDate.end:
         availableTimeRanges.append((reservations.last().end, availableBookingDate.end))
     return availableTimeRanges
+
+
+def geRangeTimeStrings(start, end, increase):
+    values = []
+    for i in range(start, end+1, increase):
+        # value = f'{i//60} godzin {i%60} minut' if i//60 != 0 else f'{i%60} minut'
+        value = ''
+        if i // 60:
+            value += f'1 godzina' if i//60 == 1 else f'{i//60} godziny'
+        if i % 60:
+            value += f' {i%60} minut'
+        values.append((i, value))
+    return values
+
+
+def getTimeStringValue(timeIntValue):
+    if timeIntValue == None:
+        return None
+    timeStringValue = ''
+    if timeIntValue // 60:
+        timeStringValue += f'1 godzina' if timeIntValue // 60 == 1 else f'{timeIntValue // 60} godziny'
+    if timeIntValue % 60:
+        timeStringValue += f' {timeIntValue % 60} minut'
+    return timeStringValue
+

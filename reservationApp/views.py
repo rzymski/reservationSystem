@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User, Group
 from django.contrib import messages
 from django.http import JsonResponse
-from datetime import datetime
+from datetime import datetime, timedelta
 from icecream import ic
 import json
 
@@ -18,10 +18,10 @@ def index(request):
     # clientsGroup = Group.objects.get(name='client')
     # serviceProviders = User.objects.exclude(groups=clientsGroup)
     serviceProviders = User.objects.filter(availablebookingdate__isnull=False).distinct()
-
     context = {
         "events": allAvailableBookingDatesObjects,
         'serviceProviders': serviceProviders,
+        'rangeFrom15to180increasesBy15': geRangeTimeStrings(15, 180, 15)
     }
     return render(request, 'calendar/calendar.html', context)
 
@@ -30,6 +30,7 @@ def allUnconfirmedReservations(request):
     reservations = Reservation.objects.filter(isAccepted=False)
     out = []
     for reservation in reservations:
+        ic(reservation)
         out.append({
             'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
             'id': reservation.id,
@@ -43,6 +44,9 @@ def allUnconfirmedReservations(request):
             'clientId': reservation.bookingPerson.id,
             'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
             'eventType': 1,
+            'intervalTimeInt': None,
+            'intervalTimeString': None,
+            'breakBetweenIntervals': None,
         })
     return JsonResponse(out, safe=False)
 
@@ -64,10 +68,14 @@ def allConfirmedReservations(request):
             'clientId': reservation.bookingPerson.id,
             'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
             'eventType': 2,
+            'intervalTimeInt': None,
+            'intervalTimeString': None,
+            'breakBetweenIntervals': None,
         })
     return JsonResponse(out, safe=False)
 
 
+@allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def confirmOrRejectReservation(request):
     ic("Potwierdzono lub usunieto rezerwacje")
     if request.method == 'POST':
@@ -88,6 +96,7 @@ def confirmOrRejectReservation(request):
     return redirect('index')
 
 
+@login_required(login_url='login')
 def deleteReservation(request):
     ic("Usunieto rezerwacje")
     if request.method == 'POST':
@@ -98,6 +107,26 @@ def deleteReservation(request):
     return redirect('index')
 
 
+@login_required(login_url='login')
+def reserveIntervalOfBookingDate(request):
+    ic("Zarezerwowano przedzial")
+    if request.method == "POST":
+        availableBookingDateId = request.POST.get('selectedBookingDateId')
+        startTime = request.POST.get('availableIntervalTimes')
+        selectedAvailableBookingDate = AvailableBookingDate.objects.get(id=availableBookingDateId)
+        start = datetime.strptime(startTime, '%d/%m/%Y %H:%M')
+        end = start + timedelta(minutes=selectedAvailableBookingDate.intervalTime) + timedelta(minutes=selectedAvailableBookingDate.breakBetweenIntervals)
+        reservation = Reservation.objects.create(
+            bookingPerson=request.user,
+            availableBookingDate=selectedAvailableBookingDate,
+            start=start,
+            end=end,
+            isAccepted=False
+        )
+    return redirect('index')
+
+
+@login_required(login_url='login')
 def reservePartSingleDayBookingDate(request):
     ic("Zarezerwowano czesc dostepnego terminu z jednego dnia")
     if request.method == "POST":
@@ -121,6 +150,7 @@ def reservePartSingleDayBookingDate(request):
     return redirect('index')
 
 
+@login_required(login_url='login')
 def reservePartMultipleDaysBookingDate(request):
     ic("Zarezerwowano czesc dostepnego terminu z wielu dni")
     if request.method == "POST":
@@ -147,6 +177,7 @@ def reservePartMultipleDaysBookingDate(request):
     return redirect('index')
 
 
+@login_required(login_url='login')
 def reserveEntireBookingDate(request):
     ic("Zarezerwowano dostepny termin")
     if request.method == 'POST':
@@ -186,34 +217,11 @@ def allAvailableBookingDates(request):
                 'clientId': -1,
                 'clientNameAndSurname': "",
                 'eventType': 0,
+                'intervalTimeInt': availableBookingDate.intervalTime,
+                'intervalTimeString': getTimeStringValue(availableBookingDate.intervalTime),
+                'breakBetweenIntervals': availableBookingDate.breakBetweenIntervals,
             })
     return JsonResponse(out, safe=False)
-
-# def allAvailableBookingDates(request):
-#     eventsObjects = AvailableBookingDate.objects.all()
-#     out = []
-#
-#     a = AvailableBookingDate.objects.get(pk=74)
-#     ic(a)
-#     freeTimes = getAvailableTimeRanges(a)
-#     ic(freeTimes)
-#
-#     for event in eventsObjects:
-#         out.append({
-#             'title': f"{event.user.first_name} \n {event.user.last_name}",
-#             'id': event.id,
-#             'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
-#             'end': event.end.strftime('%Y-%m-%dT%H:%M:%S'),
-#             'backgroundColor': '#3ec336',
-#             'borderColor': '#FFFFFF',
-#             'display': 'block',
-#             'serviceProviderId': event.user.id,
-#             'serviceProviderNameAndSurname': f"{event.user.first_name} {event.user.last_name}",
-#             'clientId': -1,
-#             'clientNameAndSurname': "",
-#             'eventType': 0,
-#         })
-#     return JsonResponse(out, safe=False)
 
 
 def filterServiceProviders(request):
@@ -251,6 +259,10 @@ def addAvailableBookingDateByCalendar(request):
         endTimeSTR = request.POST.get('endTime')
         startDateSTR = request.POST.get('startStr')
         endDateSTR = request.POST.get('endStr')
+        intervalTime = request.POST.get('intervalTime')
+        breakBetweenIntervals = request.POST.get('breakBetweenIntervals')
+        intervalTime = intervalTime if intervalTime != "" else None
+        breakBetweenIntervals = breakBetweenIntervals if breakBetweenIntervals != "" else None
         startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
         endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
         startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
@@ -258,10 +270,10 @@ def addAvailableBookingDateByCalendar(request):
         start = datetime.combine(startDate, startTime)
         end = datetime.combine(endDate, endTime)
         currentUser = request.user
-        availableBookingDate = AvailableBookingDate(user=currentUser, start=start, end=end)
+        availableBookingDate = AvailableBookingDate(user=currentUser, start=start, end=end, intervalTime=intervalTime, breakBetweenIntervals=breakBetweenIntervals)
         availableBookingDate.save()
-
     return redirect('index')
+
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def addAvailableBookingDate(request):
@@ -284,6 +296,7 @@ def addAvailableBookingDate(request):
         availableBookingDate.save()
     ic("DZIALA")
     return redirect('index')
+
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def editAvailableBookingDate(request):
@@ -311,6 +324,7 @@ def editAvailableBookingDate(request):
     ic("DZIALA")
     return redirect('index')
 
+
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def deleteAvailableBookingDate(request):
     ic("Usunieto dostepny termin")
@@ -320,6 +334,7 @@ def deleteAvailableBookingDate(request):
         availableBookingDate = AvailableBookingDate.objects.get(pk=availableBookingDateId)
         availableBookingDate.delete()
     return redirect('index')
+
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def notForClients(request):
@@ -333,8 +348,7 @@ def userProfile(request, pk):
     return render(request, 'accounts/userProfile.html', {"userProfile": userProfileInstance})
 
 
-
-@login_required
+@login_required(login_url='login')
 def updateUser(request):
     if request.method == 'POST':
         userForm = UpdateUserForm(request.POST, instance=request.user)

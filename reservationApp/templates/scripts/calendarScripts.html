@@ -53,17 +53,31 @@
             allDayText: 'czas',
             eventContent: function(arg) {
                 const start = getDateDetails(arg.event.start, '.', 'YMD')
+
+                console.log(start)
+
                 const end = getDateDetails(arg.event.end, '.', 'YMD')
                 if (start.dateWithoutTime === end.dateWithoutTime) {
-                    return {
-                        {#html: '<div class="fc-title">' + start.time + " - " + end.time + '</div><div class="fc-title">' + arg.event.title + '</div>',#}
-                        html: `<div class="fc-title">${start.time} - ${end.time}</div><div class="fc-title">${arg.event.title}</div>`,
-                    };
+                    if (arg.event.extendedProps.intervalTimeInt) {
+                        return { {#html: '<div class="fc-title">' + start.time + " - " + end.time + '</div><div class="fc-title">' + arg.event.title + '</div>',#}
+                            html: `<div class="fc-title">${start.time} - ${end.time}</div><div class="fc-title">${arg.event.title}</div><div class="fc-title">Czas wizyty: ${arg.event.extendedProps.intervalTimeString}</div>`,
+                        };
+                    } else {
+                        return { {#html: '<div class="fc-title">' + start.time + " - " + end.time + '</div><div class="fc-title">' + arg.event.title + '</div>',#}
+                            html: `<div class="fc-title">${start.time} - ${end.time}</div><div class="fc-title">${arg.event.title}</div>`,
+                        };
+                    }
                 }
                 else {
-                    return {
-                        html: `<div class="fc-title">Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}</div><div class="fc-title">Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div><div class="fc-title">${arg.event.title}</div>`,
-                    };
+                    if (arg.event.extendedProps.intervalTimeInt) {
+                        return {
+                            html: `<div class="fc-title">Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}</div><div class="fc-title">Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div><div class="fc-title">${arg.event.title}</div><div class="fc-title">Czas wizyty: ${arg.event.extendedProps.intervalTimeString}</div>`,
+                        };
+                    } else {
+                        return {
+                            html: `<div class="fc-title">Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}</div><div class="fc-title">Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div><div class="fc-title">${arg.event.title}</div>`,
+                        };
+                    }
                 }
             },
             views: {
@@ -136,6 +150,10 @@
                 let clientId = info.event.extendedProps.clientId;
                 let clientNameAndSurname = info.event.extendedProps.clientNameAndSurname;
                 let eventType = info.event.extendedProps.eventType;
+                let intervalTimeInt = info.event.extendedProps.intervalTimeInt;
+                let intervalTimeString = info.event.extendedProps.intervalTimeString;
+                let breakBetweenIntervals = info.event.extendedProps.breakBetweenIntervals;
+                console.log("IntervalTime =", intervalTimeInt, intervalTimeString)
                 availableBookingData = {
                     serviceProviderNameAndSurname: serviceProviderNameAndSurname,
                     serviceProviderId: serviceProviderId,
@@ -143,6 +161,9 @@
                     endAvailableBookingDate: info.event.end,
                     clientNameAndSurname: clientNameAndSurname,
                     clientId: clientId,
+                    intervalTimeInt: intervalTimeInt,
+                    intervalTimeString: intervalTimeString,
+                    breakBetweenIntervals: breakBetweenIntervals
                 };
                 selectedBookingDateId = info.event.id
                 selectedEventInfo = info
@@ -150,7 +171,7 @@
                     $('#deleteSelectedEvent').val(selectedBookingDateId)
                     $('#editSelectedEvent').val(selectedBookingDateId)
                     openModal('changeOptionsAvailableBookingDateModal', availableBookingData);
-                }else if (eventType === 0 && currentUserRole === "client") { //proba rezerwacji
+                }else if (eventType === 0 && currentUserRole === "client" && intervalTimeInt === null) { //proba rezerwacji
                     // calosc
                     $('#reserveEntireSelectedBookingDateId').val(selectedBookingDateId)
                     $('#reserveEntireSelectedBookingDateStart').val(info.event.start.toISOString())
@@ -159,6 +180,10 @@
                     $('#reservePartSingleDaySelectedBookingDateId').val(selectedBookingDateId)
                     $('#reservePartMultipleDaysSelectedBookingDateId').val(selectedBookingDateId)
                     openModal('reservationOptionsModal', availableBookingData);
+                } else if (eventType === 0 && currentUserRole === "client" && intervalTimeInt){
+                    // dotepny termin z przedzialami
+                    $('#reserveIntervalOfBookingDateId').val(selectedBookingDateId)
+                    openModal('reserveIntervalOfBookingDateModal', availableBookingData);
                 } else if (eventType === 1 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) {
                     $('#confirmOrRejectReservationId').val(info.event.id)
                     openModal('confirmOrRejectReservationModal', availableBookingData)
@@ -285,7 +310,6 @@
         const hours = now.getHours().toString().padStart(2, '0');
         const minutes = now.getMinutes().toString().padStart(2, '0');
         const currentTime =  hours + ':' + minutes;
-        console.log(containerValue, currentTime)
         $('#' + containerValue + ' .' + inputValue).val(currentTime);
     };
 
@@ -411,37 +435,74 @@
         let modal = document.getElementById(modalId);
         {#$('#'+modal).removeClass('hidden');#}
         if(data){
-            let serviceProviderProfileElement = modal.querySelector('#serviceProviderProfileLink');
-            serviceProviderProfileElement.href = "/userProfile/"+data.serviceProviderId+"/";
-            let serviceProviderNameAndSurnameElement = modal.querySelector('#serviceProviderNameAndSurname');
-            serviceProviderNameAndSurnameElement.textContent = "Usługodawca: " + data.serviceProviderNameAndSurname;
+            openModalFillServiceProviderData(modal, data)
             if (data.clientId !== -1) {
-                let clientProfileElement = modal.querySelector('#clientProfileLink');
-                clientProfileElement.href = "/userProfile/"+data.clientId+"/";
-                let clientNameAndSurnameElement = modal.querySelector('#clientNameAndSurname');
-                clientNameAndSurnameElement.textContent = "Usługobiorca: " + data.clientNameAndSurname;
+                reserveOpenModalFillClientData(modal, data)
             }
-            let startDate = data.startAvailableBookingDate;
-            let endDate = data.endAvailableBookingDate;
-            {#uwzglednienie strefy czasowej#}
-            startDate.setMinutes(startDate.getMinutes() + startDate.getTimezoneOffset())
-            endDate.setMinutes(endDate.getMinutes() + endDate.getTimezoneOffset())
-            {#let startDateString = data.startAvailableBookingDate.toISOString().split('T')[0];#}
-            let startDayOfTheWeek = polishDaysOfWeek[startDate.getDay()]
-            let startDateString = startDate.getDate() + " " + polishMonths[startDate.getMonth()]
-            let startTimeString = startDate.getMinutes() < 10 ? startDate.getHours() + ":0" + startDate.getMinutes() : startDate.getHours() + ":" + startDate.getMinutes();
-            let endDateString = endDate.getDate() + " " + polishMonths[endDate.getMonth()]
-            let endTimeString = endDate.getMinutes() < 10 ? endDate.getHours() + ":0" + endDate.getMinutes() : endDate.getHours() + ":" + endDate.getMinutes();
-            let dateRangeAvailableBookingDateElement = modal.querySelector('#dateRangeAvailableBookingDate');
-            if (startDate.getDate() === endDate.getDate()){
-                dateRangeAvailableBookingDateElement.textContent = startDayOfTheWeek + ", " + startDateString + " " + startTimeString + " - " + endTimeString
-            }else{
-                dateRangeAvailableBookingDateElement.textContent = startDateString + " " + startTimeString + " - " + endDateString + " " + endTimeString
+            if (data.intervalTimeInt) {
+                reserveIntervalOpenModalFillInternalData(modal, data)
             }
+            openModalFillDateTimeData(modal, data)
         }
         {#$('body').addClass('overflow-hidden');#}
         modal.classList.remove('hidden');
         document.body.classList.add('overflow-hidden');
+    };
+    function openModalFillServiceProviderData(modal, data){
+        let serviceProviderProfileElement = modal.querySelector('#serviceProviderProfileLink');
+        serviceProviderProfileElement.href = "/userProfile/"+data.serviceProviderId+"/";
+        let serviceProviderNameAndSurnameElement = modal.querySelector('#serviceProviderNameAndSurname');
+        serviceProviderNameAndSurnameElement.textContent = "Usługodawca: " + data.serviceProviderNameAndSurname;
+    }
+    function openModalFillDateTimeData(modal, data){
+        let startDate = data.startAvailableBookingDate;
+        let endDate = data.endAvailableBookingDate;
+        {#uwzglednienie strefy czasowej#}
+        startDate.setMinutes(startDate.getMinutes() + startDate.getTimezoneOffset())
+        endDate.setMinutes(endDate.getMinutes() + endDate.getTimezoneOffset())
+        {#let startDateString = data.startAvailableBookingDate.toISOString().split('T')[0];#}
+        let startDayOfTheWeek = polishDaysOfWeek[startDate.getDay()]
+        let startDateString = startDate.getDate() + " " + polishMonths[startDate.getMonth()]
+        let startTimeString = startDate.getMinutes() < 10 ? startDate.getHours() + ":0" + startDate.getMinutes() : startDate.getHours() + ":" + startDate.getMinutes();
+        let endDateString = endDate.getDate() + " " + polishMonths[endDate.getMonth()]
+        let endTimeString = endDate.getMinutes() < 10 ? endDate.getHours() + ":0" + endDate.getMinutes() : endDate.getHours() + ":" + endDate.getMinutes();
+        let dateRangeAvailableBookingDateElement = modal.querySelector('#dateRangeAvailableBookingDate');
+        if (startDate.getDate() === endDate.getDate()){
+            dateRangeAvailableBookingDateElement.textContent = startDayOfTheWeek + ", " + startDateString + " " + startTimeString + " - " + endTimeString
+        }else{
+            dateRangeAvailableBookingDateElement.textContent = startDateString + " " + startTimeString + " - " + endDateString + " " + endTimeString
+        }
+    };
+    function reserveOpenModalFillClientData(modal, data) {
+        let clientProfileElement = modal.querySelector('#clientProfileLink');
+        clientProfileElement.href = "/userProfile/"+data.clientId+"/";
+        let clientNameAndSurnameElement = modal.querySelector('#clientNameAndSurname');
+        clientNameAndSurnameElement.textContent = "Usługobiorca: " + data.clientNameAndSurname
+    };
+    function reserveIntervalOpenModalFillInternalData(modal, data) {
+        let internalTimeElement = modal.querySelector('#internalTimeAvailableBookingDateVisitTime');
+        internalTimeElement.textContent = "Czas wiztyty: " + data.intervalTimeString;
+
+        let selectElement = modal.querySelector('#availableIntervalTimesReserveIntervalOfBookingDateModal');
+        selectElement.innerHTML = '<option value="" selected="">Dostępne terminy</option>';
+
+        console.log("WYKONAL SIE SZAJS")
+        // Generate options based on available terms
+        let startDateTerms = new Date(data.startAvailableBookingDate.setMinutes(data.startAvailableBookingDate.getMinutes() + data.startAvailableBookingDate.getTimezoneOffset()));
+        let endDateTerms  = new Date(data.endAvailableBookingDate.setMinutes(data.endAvailableBookingDate.getMinutes() + data.endAvailableBookingDate.getTimezoneOffset()));
+        let intervalTime = data.intervalTimeInt;
+        let breakBetweenIntervals = data.breakBetweenIntervals
+
+        while (startDateTerms < endDateTerms ) {
+            let option = document.createElement('option');
+            {#let startTimeStringValue = startDateTerms.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' });#}
+            {#let startDateStringValue = startDateTerms.toISOString().split('T')[0];#}
+            option.value = `${startDateTerms.getDate()}/${startDateTerms.getMonth()+1}/${startDateTerms.getFullYear()} ${startDateTerms.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`;
+            option.text = `${startDateTerms.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}   ${polishDaysOfWeek[startDateTerms.getDay()]}, ${startDateTerms.getDate()} ${polishMonths[startDateTerms.getMonth()]}`
+            selectElement.appendChild(option);
+            // Increment the startDate by the intervalTime minutes
+            startDateTerms.setMinutes(startDateTerms.getMinutes() + intervalTime + breakBetweenIntervals);
+        }
     };
     function closeModal(modalId) {
         {#$('#'+modal).addClass('hidden');#}

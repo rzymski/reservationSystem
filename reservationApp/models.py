@@ -11,6 +11,8 @@ class AvailableBookingDate(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     start = models.DateTimeField(null=True, blank=True)
     end = models.DateTimeField(null=True, blank=True)
+    intervalTime = models.IntegerField(null=True, blank=True)
+    breakBetweenIntervals = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.user} {self.start.strftime('%H:%M %d/%m/%Y')} - {self.end.strftime('%H:%M %d/%m/%Y')}"
