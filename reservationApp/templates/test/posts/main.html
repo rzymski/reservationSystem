@@ -1,19 +1,108 @@
-{% extends 'base.html' %}
+{#{% extends 'base.html' %}#}
+{##}
+{#{% block content %}#}
+{#    {% if object_list %}#}
+{#        <div class="grid grid-cols-4 gap-4">#}
+{#            {% for obj in object_list %}#}
+{#                <a href="{% url 'detail' obj.pk %}" class="p-6 dark:text-white bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-slate-700 duration-200 rounded-lg drop-shadow-xl">#}
+{#                    <h3 class="text-3xl">{{ obj.title }}</h3>#}
+{#                    <p>{{ obj.content }}</p>#}
+{#                </a>#}
+{#            {% endfor %}#}
+{#        </div>#}
+{#    {% else %}#}
+{#        <h3 class="text-3xl">NO POSTS</h3>#}
+{#    {% endif %}#}
+{#{% endblock %}#}
 
-{% block content %}
-    {% if object_list %}
-        <div class="grid grid-cols-4 gap-4">
-            {% for obj in object_list %}
-                <a href="{% url 'detail' obj.pk %}" class="p-6 dark:text-white bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-slate-700 duration-200 rounded-lg drop-shadow-xl">
-                    <h3 class="text-3xl">{{ obj.title }}</h3>
-                    <p>{{ obj.content }}</p>
-                </a>
-            {% endfor %}
-        </div>
-    {% else %}
-        <h3 class="text-3xl">NO POSTS</h3>
-    {% endif %}
-{% endblock %}
+
+<!-- TW Elements is free under AGPL, with commercial license required for specific uses. See more details: https://tw-elements.com/license/ and contact us for queries at tailwind@mdbootstrap.com -->
+
+<head>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/tw-elements.min.css" />
+</head>
+
+<body>
+  <select data-te-select-init data-te-select-placeholder="Example placeholder" multiple>
+      <option value="1">One</option>
+      <option value="2">Two</option>
+      <option value="3">Three</option>
+      <option value="4">Four</option>
+      <option value="5">Five</option>
+    </select>
+  <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/tw-elements.umd.min.js"></script>
+</body>
 
 
+{#<!DOCTYPE html>#}
+{#<html lang="en">#}
+{#<head>#}
+{#    <!-- TW Elements initialization for ES Users -->#}
+{#    {% load static %}#}
+{#    <script type="module" src="{% static 'myJS/myTwElements.js' %}"></script>#}
+{#</head>#}
+{#<body>#}
+{#    <!-- Your content here -->#}
+{#    <!-- TW Elements HTML code -->#}
+{#    <select#}
+{#      data-te-select-init#}
+{#      data-te-select-placeholder="Example placeholder"#}
+{#      multiple>#}
+{#      <option value="1">One</option>#}
+{#      <option value="2">Two</option>#}
+{#      <option value="3">Three</option>#}
+{#      <option value="4">Four</option>#}
+{#      <option value="5">Five</option>#}
+{#    </select>#}
+{#</body>#}
+{#</html>#}
 
+
+{#{% extends 'base.html' %}#}
+{#{% block content %}#}
+{#    <head>#}
+{#    <!-- TW Elements is free under AGPL, with commercial license required for specific uses. See more details: https://tw-elements.com/license/ and contact us for queries at tailwind@mdbootstrap.com -->#}
+{#    <link#}
+{#      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700,900&display=swap"#}
+{#      rel="stylesheet" />#}
+{#    <link#}
+{#      rel="stylesheet"#}
+{#      href="https://cdn.jsdelivr.net/npm/tw-elements/dist/css/tw-elements.min.css" />#}
+{#    <script src="https://cdn.tailwindcss.com/3.3.0"></script>#}
+{#    <script>#}
+{#      tailwind.config = {#}
+{#        darkMode: "class",#}
+{#        theme: {#}
+{#          fontFamily: {#}
+{#            sans: ["Roboto", "sans-serif"],#}
+{#            body: ["Roboto", "sans-serif"],#}
+{#            mono: ["ui-monospace", "monospace"],#}
+{#          },#}
+{#        },#}
+{#        corePlugins: {#}
+{#          preflight: false,#}
+{#        },#}
+{#      };#}
+{#      import { Select, initTE } from "tw-elements";#}
+{#      initTE({ Select });#}
+{#    </script>#}
+{#    </head>#}
+{#    <body>#}
+{#        <div>#}
+{#            OK#}
+{#            <!-- TW Elements is free under AGPL, with commercial license required for specific uses. See more details: https://tw-elements.com/license/ and contact us for queries at tailwind@mdbootstrap.com -->#}
+{#            <select#}
+{#              data-te-select-init#}
+{#              data-te-select-placeholder="Example placeholder"#}
+{#              multiple>#}
+{#              <option value="1">One</option>#}
+{#              <option value="2">Two</option>#}
+{#              <option value="3">Three</option>#}
+{#              <option value="4">Four</option>#}
+{#              <option value="5">Five</option>#}
+{#            </select>#}
+{#        </div>#}
+{#    <!-- TW Elements is free under AGPL, with commercial license required for specific uses. See more details: https://tw-elements.com/license/ and contact us for queries at tailwind@mdbootstrap.com -->#}
+{#    <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/tw-elements.umd.min.js"></script>#}
+{#    </body>#}
+{#{% endblock %}#}

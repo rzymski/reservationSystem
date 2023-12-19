@@ -192,7 +192,59 @@
                     console.log("Nie masz uprawnien, zeby to zrobic")
                 }
                 console.log(currentUserRole);
-            }
+            },
+            eventDrop: function (info) {
+                if ("{{ request.user }}" === 'AnonymousUser') { return; }
+                currentUserId = {{ request.user.id }}
+                console.log("Przeciągnieto event: ", info)
+                let serviceProviderId = info.event.extendedProps.serviceProviderId;
+                let eventType = info.event.extendedProps.eventType;
+                let clientId = info.event.extendedProps.clientId;
+                {% comment %}let serviceProviderNameAndSurname = info.event.extendedProps.serviceProviderNameAndSurname;
+                let clientNameAndSurname = info.event.extendedProps.clientNameAndSurname;
+                let intervalTimeInt = info.event.extendedProps.intervalTimeInt;
+                let intervalTimeString = info.event.extendedProps.intervalTimeString;
+                let breakBetweenIntervals = info.event.extendedProps.breakBetweenIntervals;
+                availableBookingData = {
+                    serviceProviderNameAndSurname: serviceProviderNameAndSurname,
+                    serviceProviderId: serviceProviderId,
+                    startAvailableBookingDate: info.event.start,
+                    endAvailableBookingDate: info.event.end,
+                    clientNameAndSurname: clientNameAndSurname,
+                    clientId: clientId,
+                    intervalTimeInt: intervalTimeInt,
+                    intervalTimeString: intervalTimeString,
+                    breakBetweenIntervals: breakBetweenIntervals
+                };{% endcomment %}
+                selectedBookingDateId = info.event.id
+                selectedEventInfo = info
+                console.log("S =", info.oldEvent.start, info.oldEvent.end)
+                console.log("N =", info.event.start, info.event.end)
+                let startDate = new Date(info.event.start.setMinutes(info.event.start.getMinutes() + info.event.start.getTimezoneOffset()));
+                let startString = `${startDate.getDate()}/${startDate.getMonth()+1}/${startDate.getFullYear()} ${startDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`
+                let endDate = new Date(info.event.end.setMinutes(info.event.end.getMinutes() + info.event.end.getTimezoneOffset()));
+                let endString = `${endDate.getDate()}/${endDate.getMonth()+1}/${endDate.getFullYear()} ${endDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`
+                if (eventType === 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ //edycja/usuwanie dostępnego terminu
+                    $('#deleteSelectedEvent').val(selectedBookingDateId)
+                    $('#editSelectedEvent').val(selectedBookingDateId)
+                    $.ajax({
+                        type: 'POST',
+                        url: '/dragEvent/',
+                        headers: {
+                            'X-CSRFToken': csrf_token
+                        },
+                        data: {
+                            'selectedEvent': JSON.stringify(info.event.id),
+                            'newStart': JSON.stringify(startString),
+                            'newEnd': JSON.stringify(endString),
+                            'eventType': JSON.stringify(eventType),
+                        },
+                        success: function(response) {
+                            console.log("POWINNO DZIALAC")
+                        }
+                    });
+                }
+            },
         });
         calendar.render();
         {#filtrowanie#}

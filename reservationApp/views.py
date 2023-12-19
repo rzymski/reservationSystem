@@ -168,6 +168,7 @@ def allUnconfirmedReservations(request, allServiceProviders=True, selectedIds=No
             'intervalTimeInt': None,
             'intervalTimeString': None,
             'breakBetweenIntervals': None,
+            'editable': False,
         })
     return JsonResponse(out, safe=False)
 
@@ -192,6 +193,7 @@ def allConfirmedReservations(request, allServiceProviders=True, selectedIds=None
             'intervalTimeInt': None,
             'intervalTimeString': None,
             'breakBetweenIntervals': None,
+            'editable': False,
         })
     return JsonResponse(out, safe=False)
 
@@ -202,6 +204,7 @@ def allAvailableBookingDates(request, allServiceProviders=True, selectedIds=None
     for availableBookingDate in availableBookingDates:
         freeTimesInAvailableBookingDate = getAvailableTimeRanges(availableBookingDate)
         for freeTime in freeTimesInAvailableBookingDate:
+            possibleDragging = True if Reservation.objects.filter(isAccepted=True, availableBookingDate=availableBookingDate).count() == 0 else False
             out.append({
                 'title': f"{availableBookingDate.user.first_name} {availableBookingDate.user.last_name}",
                 'id': availableBookingDate.id,
@@ -218,6 +221,7 @@ def allAvailableBookingDates(request, allServiceProviders=True, selectedIds=None
                 'intervalTimeInt': availableBookingDate.intervalTime,
                 'intervalTimeString': getTimeStringValue(availableBookingDate.intervalTime),
                 'breakBetweenIntervals': availableBookingDate.breakBetweenIntervals,
+                'editable': possibleDragging,
             })
     return JsonResponse(out, safe=False)
 
@@ -244,44 +248,33 @@ def filterServiceProviders(request):
     return redirect('index')
 
 
-# def filterServiceProviders(request):
-#     if request.method == 'POST':
-#         selectedOptionsJson = request.POST.get('selected_options')
-#         selectedOptions = json.loads(selectedOptionsJson)
-#         selectedIds = [option['id'] for option in selectedOptions]
-#         if len(selectedIds) == 0:
-#             return redirect('allAvailableBookingDates')
-#         ic(selectedIds)
-#         out = [json.loads(allAvailableBookingDates(request, selectedIds).content), json.loads(allUnconfirmedReservations(request, selectedIds).content), json.loads(allConfirmedReservations(request, selectedIds).content)]
-#         ic(out)
-#         return JsonResponse(out, safe=False)
-#     ic("NIGDY NIE POWINNO SIE ZDARZYC")
-#     return redirect('allAvailableBookingDates')
-
-# def filterServiceProviders(request):
-#     if request.method == 'POST':
-#         selectedOptionsJson = request.POST.get('selected_options')
-#         selectedOptions = json.loads(selectedOptionsJson)
-#         selectedIds = [option['id'] for option in selectedOptions]
-#         if len(selectedIds) == 0:
-#             return redirect('allAvailableBookingDates')
-#         ic(selectedIds)
-#         eventsObjects = AvailableBookingDate.objects.filter(user__id__in=selectedIds)
-#         ic(eventsObjects)
-#         out = []
-#         for event in eventsObjects:
-#             out.append({
-#                 'title': f"{event.user.first_name} {event.user.last_name}",
-#                 'id': event.id,
-#                 'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
-#                 'end': event.end.strftime('%Y-%m-%dT%H:%M:%S'),
-#                 'color': '#378006',
-#                 'serviceProviderId': event.user.id,
-#             })
-#         return JsonResponse(out, safe=False)
-#     ic("NIGDY NIE POWINNO SIE ZDARZYC")
-#     return redirect('allAvailableBookingDates')
-
+@allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
+def dragEvent(request):
+    messages.error(request, "CZEMU NIE WIDZE WIADOMOSCI? 0")
+    ic("Przeciagnieto")
+    if request.method == 'POST':
+        newStartJson = request.POST.get('newStart')
+        newStartString = json.loads(newStartJson)
+        newEndJson = request.POST.get('newEnd')
+        newEndString = json.loads(newEndJson)
+        newStartDate = datetime.strptime(newStartString, '%d/%m/%Y %H:%M')
+        newEndDate = datetime.strptime(newEndString, '%d/%m/%Y %H:%M')
+        eventIdJSON = request.POST.get('selectedEvent')
+        eventId = int(json.loads(eventIdJSON))
+        eventTypeJSON = request.POST.get('eventType')
+        eventType = int(json.loads(eventTypeJSON))
+        ic(newStartDate, newEndDate, eventId, eventType)
+        if eventType == 0:
+            availableBookingDate = AvailableBookingDate.objects.get(id=eventId)
+            availableBookingDate.start = newStartDate
+            availableBookingDate.end = newEndDate
+            try:
+                availableBookingDate.save()
+            except ValidationError as e:
+                ic("JEST ERROR?", e)
+                messages.error(request, e.message)
+        messages.error(request, "CZEMU NIE WIDZE WIADOMOSCI?")
+    return redirect('index')
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def addAvailableBookingDateByCalendar(request):
