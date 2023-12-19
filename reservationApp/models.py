@@ -4,6 +4,7 @@ from PIL import Image
 from django.db.models.signals import post_save
 from django.core.exceptions import ValidationError
 from icecream import ic
+from datetime import timedelta
 
 
 class AvailableBookingDate(models.Model):
@@ -15,11 +16,32 @@ class AvailableBookingDate(models.Model):
     breakBetweenIntervals = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        return f"{self.user} {self.start.strftime('%H:%M %d/%m/%Y')} - {self.end.strftime('%H:%M %d/%m/%Y')}"
+        if self.intervalTime:
+            return f"{self.user} {self.start.strftime('%H:%M %d/%m/%Y')} - {self.end.strftime('%H:%M %d/%m/%Y')} interval={self.intervalTime} break={self.breakBetweenIntervals}"
+        else:
+            return f"{self.user} {self.start.strftime('%H:%M %d/%m/%Y')} - {self.end.strftime('%H:%M %d/%m/%Y')}"
 
     def clean(self):
         if self.start and self.end and self.start >= self.end:
-            raise ValidationError("End date must be after start date.")
+            raise ValidationError("Nie można zatwierdzić terminu. Koniec jest przed startem.", code="EndBeforeStart")
+        if self.intervalTime:
+            helpStartDate = self.start
+            helpInterval = timedelta(minutes=int(self.intervalTime))
+            helpBreakBetweenIntervals = timedelta(minutes=int(self.breakBetweenIntervals))
+            condition = False
+            while helpStartDate < self.end:
+                helpStartDate += helpInterval + helpBreakBetweenIntervals
+                if helpStartDate == self.end:
+                    condition = True
+            if not condition:
+                raise ValidationError("Nie można zatwierdzić terminu. Start wraz z czasami pracy nie równa się Końcowi.", code="wrongIntervals")
+            # Check consistency with related reservations
+            if self.id:
+                for reservation in self.reservation_set.filter(isAccepted=True):
+                    if (reservation.end - reservation.start) != timedelta(minutes=(int(self.intervalTime) + int(self.breakBetweenIntervals))):
+                        raise ValidationError(f"Dostepny termin posiada zatwierdzoną rezerwację z innym przedziałem czasowym.", code="durationMismatchWithReservation")
+                    if self.start > reservation.start or self.end < reservation.end:
+                        raise ValidationError(f"Nie można zatwierdzić terminu. Dostepny termin posiada zatwierdzoną rezerwację z większym zakresem czasowym.", code="existReservationWithBiggerRange")
 
     def save(self, *args, **kwargs):
         self.clean()
@@ -46,7 +68,14 @@ class Reservation(models.Model):
                 end__gt=self.start,
             ).exclude(pk=self.pk)  # Exclude self if instance is being updated
             if conflicting_reservations.exists():
-                raise ValidationError("Reservation conflicts with an existing accepted reservation.")
+                raise ValidationError("Nie można zatwierdzić rezerwacji. Następuje kolizja terminów.", code="conflict")
+            # Check for mismatch between interval+break and duration time
+            if self.availableBookingDate.intervalTime:
+                if self.end - self.start != timedelta(minutes=(int(self.availableBookingDate.intervalTime) + int(self.availableBookingDate.breakBetweenIntervals))):
+                    raise ValidationError("Nie można zatwierdzić rezerwacji. Czas rezerwacji nie pokrywa się z przedziałem czasowym dostępnego terminu.", code="durationMismatch")
+            # Check if reservation time is in available bookind date range time
+            if self.availableBookingDate.end < self.end or self.start < self.availableBookingDate.start:
+                raise ValidationError("Nie można zatwierdzić rezerwacji. Zakres rezerwacji przekracza zakres dostępnego terminu.", code="reservationExceedRange")
 
     def save(self, *args, **kwargs):
         self.clean()

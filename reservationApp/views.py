@@ -30,7 +30,6 @@ def allUnconfirmedReservations(request):
     reservations = Reservation.objects.filter(isAccepted=False)
     out = []
     for reservation in reservations:
-        ic(reservation)
         out.append({
             'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
             'id': reservation.id,
@@ -88,9 +87,8 @@ def confirmOrRejectReservation(request):
             try:
                 reservation.isAccepted = True
                 reservation.save()
-            except ValidationError:
-                ic("WALIDACJA ZABRONILA")
-                messages.error(request, "Nie można zatwierdzić rezerwacji. Następuje kolizja terminów.")
+            except ValidationError as e:
+                messages.error(request, e.message)
         if action == 'reject':
             reservation.delete()
     return redirect('index')
@@ -271,7 +269,10 @@ def addAvailableBookingDateByCalendar(request):
         end = datetime.combine(endDate, endTime)
         currentUser = request.user
         availableBookingDate = AvailableBookingDate(user=currentUser, start=start, end=end, intervalTime=intervalTime, breakBetweenIntervals=breakBetweenIntervals)
-        availableBookingDate.save()
+        try:
+            availableBookingDate.save()
+        except ValidationError as e:
+            messages.error(request, e.message)
     return redirect('index')
 
 
@@ -285,6 +286,10 @@ def addAvailableBookingDate(request):
         endTimeSTR = request.POST.get('endTime')
         startDateSTR = request.POST.get('startDate')
         endDateSTR = request.POST.get('endDate')
+        intervalTime = request.POST.get('intervalTime')
+        breakBetweenIntervals = request.POST.get('breakBetweenIntervals')
+        intervalTime = intervalTime if intervalTime != "" else None
+        breakBetweenIntervals = breakBetweenIntervals if breakBetweenIntervals != "" else None
         startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
         endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
         startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
@@ -292,8 +297,11 @@ def addAvailableBookingDate(request):
         start = datetime.combine(startDate, startTime)
         end = datetime.combine(endDate, endTime)
         currentUser = request.user
-        availableBookingDate = AvailableBookingDate(user=currentUser, start=start, end=end)
-        availableBookingDate.save()
+        availableBookingDate = AvailableBookingDate(user=currentUser, start=start, end=end, intervalTime=intervalTime, breakBetweenIntervals=breakBetweenIntervals)
+        try:
+            availableBookingDate.save()
+        except ValidationError as e:
+            messages.error(request, e.message)
     ic("DZIALA")
     return redirect('index')
 
@@ -307,6 +315,10 @@ def editAvailableBookingDate(request):
         endTimeSTR = request.POST.get('endTime')
         startDateSTR = request.POST.get('startDate')
         endDateSTR = request.POST.get('endDate')
+        intervalTime = request.POST.get('intervalTime')
+        breakBetweenIntervals = request.POST.get('breakBetweenIntervals')
+        intervalTime = intervalTime if intervalTime != "" else None
+        breakBetweenIntervals = breakBetweenIntervals if breakBetweenIntervals != "" else None
         startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
         endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
         startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
@@ -320,7 +332,12 @@ def editAvailableBookingDate(request):
         # availableBookingDate.user = currentUser
         availableBookingDate.start = start
         availableBookingDate.end = end
-        availableBookingDate.save()
+        availableBookingDate.intervalTime = intervalTime
+        availableBookingDate.breakBetweenIntervals = breakBetweenIntervals
+        try:
+            availableBookingDate.save()
+        except ValidationError as e:
+            messages.error(request, e.message)
     ic("DZIALA")
     return redirect('index')
 
