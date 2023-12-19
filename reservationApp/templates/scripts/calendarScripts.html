@@ -233,16 +233,23 @@
                 'X-CSRFToken': csrf_token
             },
             data: {
-                'selected_options': JSON.stringify(selectedOptions)
+                'selectedOptions': JSON.stringify(selectedOptions)
             },
             success: function(response) {
-                console.log("POWINNO DZIALAC")
                 console.log(response);
-                {#calendar.refetchEvents();#}
-                calendar.getEventSources().forEach(function(source) {
-                    source.remove();
-                });
-                calendar.addEventSource(response)
+                if ('error' in response) {
+                    console.error("Error:", response.error)
+                } else {
+                    calendar.getEventSources().forEach(function(source) {
+                        source.remove();
+                    });
+                    calendar.addEventSource(response.availableDates);
+                    calendar.addEventSource(response.unconfirmedReservations);
+                    calendar.addEventSource(response.confirmedReservations);
+                }
+            },
+            error: function(error) {
+                console.error("Error:", error.responseText);
             }
         });
     };

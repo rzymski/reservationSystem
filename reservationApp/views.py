@@ -26,54 +26,6 @@ def index(request):
     return render(request, 'calendar/calendar.html', context)
 
 
-def allUnconfirmedReservations(request):
-    reservations = Reservation.objects.filter(isAccepted=False)
-    out = []
-    for reservation in reservations:
-        out.append({
-            'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
-            'id': reservation.id,
-            'start': reservation.start.strftime('%Y-%m-%dT%H:%M:%S'),
-            'end': reservation.end.strftime('%Y-%m-%dT%H:%M:%S'),
-            'backgroundColor': '#FFA500',
-            'borderColor': '#FFFFFF',
-            'display': 'block',
-            'serviceProviderId': reservation.availableBookingDate.user.id,
-            'serviceProviderNameAndSurname': f"{reservation.availableBookingDate.user.first_name} {reservation.availableBookingDate.user.last_name}",
-            'clientId': reservation.bookingPerson.id,
-            'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
-            'eventType': 1,
-            'intervalTimeInt': None,
-            'intervalTimeString': None,
-            'breakBetweenIntervals': None,
-        })
-    return JsonResponse(out, safe=False)
-
-
-def allConfirmedReservations(request):
-    reservations = Reservation.objects.filter(isAccepted=True)
-    out = []
-    for reservation in reservations:
-        out.append({
-            'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
-            'id': reservation.id,
-            'start': reservation.start.strftime('%Y-%m-%dT%H:%M:%S'),
-            'end': reservation.end.strftime('%Y-%m-%dT%H:%M:%S'),
-            'backgroundColor': '#BF40BF',
-            'borderColor': '#FFFFFF',
-            'display': 'block',
-            'serviceProviderId': reservation.availableBookingDate.user.id,
-            'serviceProviderNameAndSurname': f"{reservation.availableBookingDate.user.first_name} {reservation.availableBookingDate.user.last_name}",
-            'clientId': reservation.bookingPerson.id,
-            'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
-            'eventType': 2,
-            'intervalTimeInt': None,
-            'intervalTimeString': None,
-            'breakBetweenIntervals': None,
-        })
-    return JsonResponse(out, safe=False)
-
-
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def confirmOrRejectReservation(request):
     ic("Potwierdzono lub usunieto rezerwacje")
@@ -196,8 +148,56 @@ def reserveEntireBookingDate(request):
     return redirect('index')
 
 
-def allAvailableBookingDates(request):
-    availableBookingDates = AvailableBookingDate.objects.all()
+def allUnconfirmedReservations(request, allServiceProviders=True, selectedIds=None):
+    reservations = Reservation.objects.filter(isAccepted=False) if allServiceProviders else Reservation.objects.filter(isAccepted=False, availableBookingDate__user__id__in=selectedIds)
+    out = []
+    for reservation in reservations:
+        out.append({
+            'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
+            'id': reservation.id,
+            'start': reservation.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end': reservation.end.strftime('%Y-%m-%dT%H:%M:%S'),
+            'backgroundColor': '#FFA500',
+            'borderColor': '#FFFFFF',
+            'display': 'block',
+            'serviceProviderId': reservation.availableBookingDate.user.id,
+            'serviceProviderNameAndSurname': f"{reservation.availableBookingDate.user.first_name} {reservation.availableBookingDate.user.last_name}",
+            'clientId': reservation.bookingPerson.id,
+            'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
+            'eventType': 1,
+            'intervalTimeInt': None,
+            'intervalTimeString': None,
+            'breakBetweenIntervals': None,
+        })
+    return JsonResponse(out, safe=False)
+
+
+def allConfirmedReservations(request, allServiceProviders=True, selectedIds=None):
+    reservations = Reservation.objects.filter(isAccepted=True) if allServiceProviders else Reservation.objects.filter(isAccepted=True, availableBookingDate__user__id__in=selectedIds)
+    out = []
+    for reservation in reservations:
+        out.append({
+            'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
+            'id': reservation.id,
+            'start': reservation.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end': reservation.end.strftime('%Y-%m-%dT%H:%M:%S'),
+            'backgroundColor': '#BF40BF',
+            'borderColor': '#FFFFFF',
+            'display': 'block',
+            'serviceProviderId': reservation.availableBookingDate.user.id,
+            'serviceProviderNameAndSurname': f"{reservation.availableBookingDate.user.first_name} {reservation.availableBookingDate.user.last_name}",
+            'clientId': reservation.bookingPerson.id,
+            'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
+            'eventType': 2,
+            'intervalTimeInt': None,
+            'intervalTimeString': None,
+            'breakBetweenIntervals': None,
+        })
+    return JsonResponse(out, safe=False)
+
+
+def allAvailableBookingDates(request, allServiceProviders=True, selectedIds=None):
+    availableBookingDates = AvailableBookingDate.objects.all() if allServiceProviders else AvailableBookingDate.objects.filter(user__id__in=selectedIds)
     out = []
     for availableBookingDate in availableBookingDates:
         freeTimesInAvailableBookingDate = getAvailableTimeRanges(availableBookingDate)
@@ -224,27 +224,63 @@ def allAvailableBookingDates(request):
 
 def filterServiceProviders(request):
     if request.method == 'POST':
-        selectedOptionsJson = request.POST.get('selected_options')
+        selectedOptionsJson = request.POST.get('selectedOptions')
         selectedOptions = json.loads(selectedOptionsJson)
         selectedIds = [option['id'] for option in selectedOptions]
         if len(selectedIds) == 0:
-            return redirect('allAvailableBookingDates')
-        ic(selectedIds)
-        eventsObjects = AvailableBookingDate.objects.filter(user__id__in=selectedIds)
-        ic(eventsObjects)
-        out = []
-        for event in eventsObjects:
-            out.append({
-                'title': f"{event.user.first_name} {event.user.last_name}",
-                'id': event.id,
-                'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
-                'end': event.end.strftime('%Y-%m-%dT%H:%M:%S'),
-                'color': '#378006',
-                'serviceProviderId': event.user.id,
-            })
-        return JsonResponse(out, safe=False)
-    ic("NIGDY NIE POWINNO SIE ZDARZYC")
-    return redirect('allAvailableBookingDates')
+            selectedIds = [user.id for user in User.objects.filter(availablebookingdate__isnull=False).distinct()]
+            ic(selectedIds)
+            # return JsonResponse({'error': 'No selected options'})
+        allAvailableBookingDatesJSON = allAvailableBookingDates(request, allServiceProviders=False, selectedIds=selectedIds)
+        allUnconfirmedReservationsJSON = allUnconfirmedReservations(request, allServiceProviders=False, selectedIds=selectedIds)
+        allConfirmedReservationsJSON = allConfirmedReservations(request, allServiceProviders=False, selectedIds=selectedIds)
+        combinedResponse = {
+            'availableDates': json.loads(allAvailableBookingDatesJSON.content),
+            'unconfirmedReservations': json.loads(allUnconfirmedReservationsJSON.content),
+            'confirmedReservations': json.loads(allConfirmedReservationsJSON.content),
+        }
+        return JsonResponse(combinedResponse, safe=False)
+    ic("Nie powinno nigdy miec miejsca")
+    return redirect('index')
+
+
+# def filterServiceProviders(request):
+#     if request.method == 'POST':
+#         selectedOptionsJson = request.POST.get('selected_options')
+#         selectedOptions = json.loads(selectedOptionsJson)
+#         selectedIds = [option['id'] for option in selectedOptions]
+#         if len(selectedIds) == 0:
+#             return redirect('allAvailableBookingDates')
+#         ic(selectedIds)
+#         out = [json.loads(allAvailableBookingDates(request, selectedIds).content), json.loads(allUnconfirmedReservations(request, selectedIds).content), json.loads(allConfirmedReservations(request, selectedIds).content)]
+#         ic(out)
+#         return JsonResponse(out, safe=False)
+#     ic("NIGDY NIE POWINNO SIE ZDARZYC")
+#     return redirect('allAvailableBookingDates')
+
+# def filterServiceProviders(request):
+#     if request.method == 'POST':
+#         selectedOptionsJson = request.POST.get('selected_options')
+#         selectedOptions = json.loads(selectedOptionsJson)
+#         selectedIds = [option['id'] for option in selectedOptions]
+#         if len(selectedIds) == 0:
+#             return redirect('allAvailableBookingDates')
+#         ic(selectedIds)
+#         eventsObjects = AvailableBookingDate.objects.filter(user__id__in=selectedIds)
+#         ic(eventsObjects)
+#         out = []
+#         for event in eventsObjects:
+#             out.append({
+#                 'title': f"{event.user.first_name} {event.user.last_name}",
+#                 'id': event.id,
+#                 'start': event.start.strftime('%Y-%m-%dT%H:%M:%S'),
+#                 'end': event.end.strftime('%Y-%m-%dT%H:%M:%S'),
+#                 'color': '#378006',
+#                 'serviceProviderId': event.user.id,
+#             })
+#         return JsonResponse(out, safe=False)
+#     ic("NIGDY NIE POWINNO SIE ZDARZYC")
+#     return redirect('allAvailableBookingDates')
 
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])

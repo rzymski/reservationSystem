@@ -35,13 +35,14 @@ class AvailableBookingDate(models.Model):
                     condition = True
             if not condition:
                 raise ValidationError("Nie można zatwierdzić terminu. Start wraz z czasami pracy nie równa się Końcowi.", code="wrongIntervals")
-            # Check consistency with related reservations
-            if self.id:
-                for reservation in self.reservation_set.filter(isAccepted=True):
-                    if (reservation.end - reservation.start) != timedelta(minutes=(int(self.intervalTime) + int(self.breakBetweenIntervals))):
-                        raise ValidationError(f"Dostepny termin posiada zatwierdzoną rezerwację z innym przedziałem czasowym.", code="durationMismatchWithReservation")
-                    if self.start > reservation.start or self.end < reservation.end:
-                        raise ValidationError(f"Nie można zatwierdzić terminu. Dostepny termin posiada zatwierdzoną rezerwację z większym zakresem czasowym.", code="existReservationWithBiggerRange")
+        # Check consistency with related reservations
+        if self.id:
+            for reservation in self.reservation_set.filter(isAccepted=True):
+                if self.intervalTime and ((reservation.end - reservation.start) != timedelta(minutes=(int(self.intervalTime) + int(self.breakBetweenIntervals)))):
+                    raise ValidationError(f"Dostepny termin posiada zatwierdzoną rezerwację z innym przedziałem czasowym.", code="durationMismatchWithReservation")
+                # Check if the is reservation with bigger range
+                if self.start > reservation.start or self.end < reservation.end:
+                    raise ValidationError(f"Nie można zatwierdzić terminu. Dostepny termin posiada zatwierdzoną rezerwację z większym zakresem czasowym.", code="existReservationWithBiggerRange")
 
     def save(self, *args, **kwargs):
         self.clean()
