@@ -15,7 +15,7 @@
                 </div>
                 <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                     <div class="w-full">
-                        <select id="selectServiceProviders" data-te-select-init multiple data-te-select-placeholder="Filtruj usługodawców" data-te-select-displayed-labels="2" data-te-select-filter="true"  data-te-select-no-result-text="Brak wyników">
+                        <select id="selectServiceProviders" data-te-select-init multiple data-te-select-placeholder="Filtruj usługodawców" data-te-select-displayed-labels="3" data-te-select-filter="true"  data-te-select-no-result-text="Brak wyników">
                             {% for user, image in serviceProvidersWithImages %}
                                 <option value="{{ user.id }}" data-te-select-icon="{{ image }}">{{ user.first_name }} {{ user.last_name }}</option>
                             {% endfor %}
