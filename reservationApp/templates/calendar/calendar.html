@@ -50,6 +50,10 @@
                               <div class="text-right items-center">
                                   <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="m-2 py-3 px-5 text-2xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Dodaj dostepny termin</button>
                               </div>
+                          {% else %}
+                              <div class="text-right items-center">
+                                  <button id="btnAddAvailableBookingDate" onclick="openModal('addDesiredReservationDateModal')" type="button" class="m-2 py-3 px-5 text-2xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Zaproponuj termin</button>
+                              </div>
                           {% endif %}
                       </div>
                 </div>
@@ -75,6 +79,7 @@
                 {% include 'desiredReservationDate/changeOptionsDesiredReservationDate.html' %}
                 {% include 'desiredReservationDate/deleteDesiredReservationDate.html' %}
                 {% include 'desiredReservationDate/editDesiredReservationDate.html' %}
+                {% include 'desiredReservationDate/addDesiredReservationDate.html' %}
             </div>
             <div class="bg-green-400" style="height: calc(100vh - 10rem)">
                 <div id='calendar' class="dark:text-white bg-gray-100 dark:bg-gray-600"></div>

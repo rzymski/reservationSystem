@@ -1,18 +1,18 @@
-<div id="editDesiredReservationDateModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+<div id="addDesiredReservationDateModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative p-4 w-full max-w-lg max-h-full">
         <div class="relative bg-gray-50 rounded-lg shadow dark:bg-gray-700">
             <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                    Edytuj propozycje nowego termin
+                    Dodaj propozycje nowego termin
                 </h3>
-                <button onclick="closeModal('editDesiredReservationDateModal')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crud-modal">
+                <button onclick="closeModal('addDesiredReservationDateModal')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crud-modal">
                     <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                     </svg>
                     <span class="sr-only">Close modal</span>
                 </button>
             </div>
-            <form method="post" action="{% url 'editDesiredReservationDate' %}" id="editDesiredReservationDateForm" class="p-4 md:p-5">
+            <form method="post" action="{% url 'addDesiredReservationDate' %}" id="addDesiredReservationDateForm" class="p-4 md:p-5">
                 {% csrf_token %}
                 <div class="grid gap-4 mb-4 grid-cols-2 input-control">
 {#                    <div class="col-span-2">#}
@@ -30,7 +30,7 @@
                         <div class="relative inputTime">
                             <input id="startTimeEditDesiredReservationDateModal" type="time" name="startTime" class="startTime bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Czas początkowy" required>
                             <div class="inputCurrentTime">
-                                <a href="javascript:void(0);" onclick="fillCurrentTime('editDesiredReservationDateModal', 'startTime')" class="text-blue-500 text-sm mr-6">teraz</a>
+                                <a href="javascript:void(0);" onclick="fillCurrentTime('addDesiredReservationDateModal', 'startTime')" class="text-blue-500 text-sm mr-6">teraz</a>
                             </div>
                         </div>
                     </div>
@@ -45,7 +45,7 @@
                         <div class="relative inputTime">
                             <input id="endTimeEditDesiredReservationDateModal" type="time" name="endTime" class="endTime bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Czas końcowy" required>
                             <div class="inputCurrentTime">
-                                <a href="javascript:void(0);" onclick="fillCurrentTime('editDesiredReservationDateModal', 'endTime')" class="text-blue-500 text-sm mr-6">teraz</a>
+                                <a href="javascript:void(0);" onclick="fillCurrentTime('addDesiredReservationDateModal', 'endTime')" class="text-blue-500 text-sm mr-6">teraz</a>
                             </div>
                         </div>
                     </div>
@@ -54,7 +54,7 @@
                     <div class="col-span-2">
                         <button id="ssaveEditDesiredReservationDateBtn" type="submit" class="text-gray-50 flex items-center w-full justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-lg px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                             <i class="fa-solid fa-plus"></i>
-                            <span class="ms-3 whitespace-nowrap">Edytuj propozycje nowego termin</span>
+                            <span class="ms-3 whitespace-nowrap">Dodaj propozycje nowego termin</span>
                         </button>
                     </div>
                 </div>

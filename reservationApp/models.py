@@ -83,14 +83,6 @@ class Reservation(models.Model):
         super().save(*args, **kwargs)
 
 
-# class ClientTermProposition(models.Model):
-#     client = models.ForeignKey(User, on_delete=models.CASCADE)
-#     serviceProvider = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
-#     start = models.DateTimeField(null=True, blank=True)
-#     end = models.DateTimeField(null=True, blank=True)
-
-
-
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     age = models.IntegerField(null=True, blank=True)

@@ -228,9 +228,13 @@
                 let startString = `${startDate.getDate()}/${startDate.getMonth()+1}/${startDate.getFullYear()} ${startDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`
                 let endDate = new Date(info.event.end.setMinutes(info.event.end.getMinutes() + info.event.end.getTimezoneOffset()));
                 let endString = `${endDate.getDate()}/${endDate.getMonth()+1}/${endDate.getFullYear()} ${endDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`
-                if (eventType === 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ //edycja/usuwanie dostępnego terminu
-                    $('#deleteSelectedEvent').val(selectedBookingDateId)
-                    $('#editSelectedEvent').val(selectedBookingDateId)
+
+                if (eventType === 3 && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller"))
+                { console.log("IF SPELNIONY")}
+                console.log(eventType, clientId, currentUserId, currentUserRole)
+
+                if ((eventType === 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) || (eventType === 3 && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller"))){ //edycja/usuwanie dostępnego terminu
+                    console.log("WYKONAL SIE IF", info.event)
                     $.ajax({
                         type: 'POST',
                         url: '/dragEvent/',

@@ -47,6 +47,7 @@ class CreateUserForm(UserCreationForm):
         self.fields['password2'].label = ''
         self.fields['password2'].help_text = '<span class="form-text text-gray-950 dark:text-gray-50"><small>Takie same hasło jak wcześniej w celu weryfikacji.</small></span>'
 
+
 class UpdateUserForm(forms.ModelForm):
     username = forms.CharField(label="", max_length=100, required=True, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nick'}))
     email = forms.EmailField(label="", required=True, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Adres email'}))

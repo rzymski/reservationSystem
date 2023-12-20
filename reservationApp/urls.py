@@ -39,6 +39,7 @@ urlpatterns = [
     path('confirmDesiredReservationProposition/', views.confirmDesiredReservationProposition, name="confirmDesiredReservationProposition"),
     path('editDesiredReservationDate/', views.editDesiredReservationDate, name='editDesiredReservationDate'),
     path('deleteDesiredReservationDate/', views.deleteDesiredReservationDate, name='deleteDesiredReservationDate'),
+    path('addDesiredReservationDate/', views.addDesiredReservationDate, name='addDesiredReservationDate'),
 
     path('test/main/', views.PostListView.as_view(), name='main'),
     path('test/<pk>/', views.PostDetailView.as_view(), name='detail'),

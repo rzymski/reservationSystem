@@ -304,9 +304,8 @@ def filterServiceProviders(request):
     return redirect('index')
 
 
-@allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
+@login_required(login_url='login')
 def dragEvent(request):
-    messages.error(request, "CZEMU NIE WIDZE WIADOMOSCI? 0")
     ic("Przeciagnieto")
     if request.method == 'POST':
         newStartJson = request.POST.get('newStart')
@@ -322,14 +321,22 @@ def dragEvent(request):
         ic(newStartDate, newEndDate, eventId, eventType)
         if eventType == 0:
             availableBookingDate = AvailableBookingDate.objects.get(id=eventId)
-            availableBookingDate.start = newStartDate
-            availableBookingDate.end = newEndDate
             try:
+                availableBookingDate.start = newStartDate
+                availableBookingDate.end = newEndDate
                 availableBookingDate.save()
             except ValidationError as e:
                 ic("JEST ERROR?", e)
                 messages.error(request, e.message)
-        messages.error(request, "CZEMU NIE WIDZE WIADOMOSCI?")
+        if eventType == 3:
+            reservation = Reservation.objects.get(id=eventId)
+            try:
+                reservation.start = newStartDate
+                reservation.end = newEndDate
+                reservation.save()
+            except ValidationError as e:
+                ic("JEST ERROR?", e)
+                messages.error(request, e.message)
     return redirect('index')
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
@@ -466,6 +473,34 @@ def deleteAvailableBookingDate(request):
         availableBookingDate.delete()
     return redirect('index')
 
+
+@login_required(login_url='login')
+def addDesiredReservationDate(request):
+    ic("Dodaj dostepny termin")
+    if request.method == 'POST':
+        startTimeSTR = request.POST.get('startTime')
+        endTimeSTR = request.POST.get('endTime')
+        startDateSTR = request.POST.get('startDate')
+        endDateSTR = request.POST.get('endDate')
+        startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
+        endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
+        startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
+        endDate = datetime.strptime(endDateSTR, '%Y-%m-%d').date()
+        start = datetime.combine(startDate, startTime)
+        end = datetime.combine(endDate, endTime)
+        ic(startTimeSTR, endTimeSTR)
+        # currentUser = request.user
+        try:
+            reservation = Reservation.objects.create(
+                bookingPerson=request.user,
+                availableBookingDate=None,
+                start=start,
+                end=end,
+                isAccepted=False)
+        except ValidationError as e:
+            messages.error(request, e.message)
+    ic("DZIALA")
+    return redirect('index')
 
 @login_required(login_url='login')
 def editDesiredReservationDate(request):
