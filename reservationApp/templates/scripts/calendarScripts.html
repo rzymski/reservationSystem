@@ -9,6 +9,7 @@
     let polishDaysOfWeek = ["Niedziela", "Poniedziałek", "Wtorek", "Środa", "Czwartek", "Piątek", "Sobota"];
     let polishMonths = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
     let availableBookingData;
+    let dragEventData;
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
         calendar = new FullCalendar.Calendar(calendarEl, {
@@ -50,7 +51,10 @@
             {#contentHeight: 1500,#}
 
             height: '100%',
+
             {#aspectRatio: 2.5,#}
+
+
             expandRows: true,
             allDayText: 'czas',
             eventContent: function(arg) {
@@ -138,24 +142,15 @@
 
                 //console.log('Event' + info.event.title + ' ' + info.event.start + ' : ' + info.event.end, "ServiceProvider userId", info.event.extendedProps.serviceProviderId);
                 let serviceProviderId = info.event.extendedProps.serviceProviderId;
-                let serviceProviderNameAndSurname = info.event.extendedProps.serviceProviderNameAndSurname;
+                {#let serviceProviderNameAndSurname = info.event.extendedProps.serviceProviderNameAndSurname;#}
                 let clientId = info.event.extendedProps.clientId;
-                let clientNameAndSurname = info.event.extendedProps.clientNameAndSurname;
+                {#let clientNameAndSurname = info.event.extendedProps.clientNameAndSurname;#}
                 let eventType = info.event.extendedProps.eventType;
                 let intervalTimeInt = info.event.extendedProps.intervalTimeInt;
-                let intervalTimeString = info.event.extendedProps.intervalTimeString;
-                let breakBetweenIntervals = info.event.extendedProps.breakBetweenIntervals;
-                availableBookingData = {
-                    serviceProviderNameAndSurname: serviceProviderNameAndSurname,
-                    serviceProviderId: serviceProviderId,
-                    startAvailableBookingDate: info.event.start,
-                    endAvailableBookingDate: info.event.end,
-                    clientNameAndSurname: clientNameAndSurname,
-                    clientId: clientId,
-                    intervalTimeInt: intervalTimeInt,
-                    intervalTimeString: intervalTimeString,
-                    breakBetweenIntervals: breakBetweenIntervals
-                };
+                {#let intervalTimeString = info.event.extendedProps.intervalTimeString;#}
+                {#let breakBetweenIntervals = info.event.extendedProps.breakBetweenIntervals;#}
+
+                availableBookingData = fillAvailableBookingData(info)
                 selectedBookingDateId = info.event.id
                 selectedEventInfo = info
 
@@ -204,58 +199,51 @@
                 let serviceProviderId = info.event.extendedProps.serviceProviderId;
                 let eventType = info.event.extendedProps.eventType;
                 let clientId = info.event.extendedProps.clientId;
-                {% comment %}let serviceProviderNameAndSurname = info.event.extendedProps.serviceProviderNameAndSurname;
-                let clientNameAndSurname = info.event.extendedProps.clientNameAndSurname;
-                let intervalTimeInt = info.event.extendedProps.intervalTimeInt;
-                let intervalTimeString = info.event.extendedProps.intervalTimeString;
-                let breakBetweenIntervals = info.event.extendedProps.breakBetweenIntervals;
-                availableBookingData = {
-                    serviceProviderNameAndSurname: serviceProviderNameAndSurname,
-                    serviceProviderId: serviceProviderId,
-                    startAvailableBookingDate: info.event.start,
-                    endAvailableBookingDate: info.event.end,
-                    clientNameAndSurname: clientNameAndSurname,
-                    clientId: clientId,
-                    intervalTimeInt: intervalTimeInt,
-                    intervalTimeString: intervalTimeString,
-                    breakBetweenIntervals: breakBetweenIntervals
-                };{% endcomment %}
+                availableBookingData = fillAvailableBookingData(info)
                 selectedBookingDateId = info.event.id
                 selectedEventInfo = info
-                console.log("S =", info.oldEvent.start, info.oldEvent.end)
-                console.log("N =", info.event.start, info.event.end)
+                let oldDate = new Date(info.oldEvent.start.setMinutes(info.oldEvent.start.getMinutes() + info.oldEvent.start.getTimezoneOffset()));
+                let oldString = `${oldDate.getDate()}/${oldDate.getMonth()+1}/${oldDate.getFullYear()} ${oldDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`
                 let startDate = new Date(info.event.start.setMinutes(info.event.start.getMinutes() + info.event.start.getTimezoneOffset()));
                 let startString = `${startDate.getDate()}/${startDate.getMonth()+1}/${startDate.getFullYear()} ${startDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`
                 let endDate = new Date(info.event.end.setMinutes(info.event.end.getMinutes() + info.event.end.getTimezoneOffset()));
                 let endString = `${endDate.getDate()}/${endDate.getMonth()+1}/${endDate.getFullYear()} ${endDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`
-
-                if (eventType === 3 && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller"))
-                { console.log("IF SPELNIONY")}
-                console.log(eventType, clientId, currentUserId, currentUserRole)
-
                 if ((eventType === 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) || (eventType === 3 && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller"))){ //edycja/usuwanie dostępnego terminu
-                    console.log("WYKONAL SIE IF", info.event)
-                    $.ajax({
-                        type: 'POST',
-                        url: '/dragEvent/',
-                        headers: {
-                            'X-CSRFToken': csrf_token
-                        },
-                        data: {
-                            'selectedEvent': JSON.stringify(info.event.id),
-                            'newStart': JSON.stringify(startString),
-                            'newEnd': JSON.stringify(endString),
-                            'eventType': JSON.stringify(eventType),
-                        },
-                        success: function(response) {
-                            console.log("POWINNO DZIALAC")
-                        }
-                    });
+                    dragEventData = {
+                        'selectedDragEventId': info.event.id,
+                        'newStart': startString,
+                        'newEnd': endString,
+                        'eventType': eventType,
+                    }
+                    openModalFillDateTimeData('confirmOrRejectDragModal', data = {startAvailableBookingDate: info.oldEvent.start, endAvailableBookingDate: info.oldEvent.end}, 'oldDateRangeconfirmOrRejectDragModal')
+                    openModal('confirmOrRejectDragModal', availableBookingData)
                 }
             },
         });
         calendar.render();
     });
+    function fillAvailableBookingData(info) {
+        let serviceProviderId = info.event.extendedProps.serviceProviderId;
+        let serviceProviderNameAndSurname = info.event.extendedProps.serviceProviderNameAndSurname;
+        let clientId = info.event.extendedProps.clientId;
+        let clientNameAndSurname = info.event.extendedProps.clientNameAndSurname;
+        let eventType = info.event.extendedProps.eventType;
+        let intervalTimeInt = info.event.extendedProps.intervalTimeInt;
+        let intervalTimeString = info.event.extendedProps.intervalTimeString;
+        let breakBetweenIntervals = info.event.extendedProps.breakBetweenIntervals;
+        availableBookingData = {
+            serviceProviderNameAndSurname: serviceProviderNameAndSurname,
+            serviceProviderId: serviceProviderId,
+            startAvailableBookingDate: info.event.start,
+            endAvailableBookingDate: info.event.end,
+            clientNameAndSurname: clientNameAndSurname,
+            clientId: clientId,
+            intervalTimeInt: intervalTimeInt,
+            intervalTimeString: intervalTimeString,
+            breakBetweenIntervals: breakBetweenIntervals
+        };
+        return availableBookingData;
+    };
     function filter() {
         console.log("DZIALA")
         var selectedOptions = $('#selectServiceProviders').val();
@@ -340,6 +328,22 @@
         return polishDaysOfWeek[date.date.getDay()];
     };
 
+    function passDataByAJAX(url, data) {
+        $.ajax({
+            type: 'POST',
+            url: url,
+            headers: {
+                'X-CSRFToken': csrf_token
+            },
+            data: data,
+            success: function(response) {
+                console.log("POWINNO DZIALAC")
+            },
+            error: function (response) {
+                console.log("Cos poszło nie tak")
+            }
+        });
+    };
     function fillCurrentTime(containerValue, inputValue) {
         const now = new Date();
         const hours = now.getHours().toString().padStart(2, '0');
@@ -517,8 +521,8 @@
     function openModal(modalId, data) {
         let modal = document.getElementById(modalId);
         {#$('#'+modal).removeClass('hidden');#}
+        console.log("Data = ", data)
         if(data){
-            console.log(data)
             if (data.serviceProviderId !== -1){
                 openModalFillServiceProviderData(modal, data, modalId)
             }
@@ -528,7 +532,7 @@
             if (data.intervalTimeInt && modalId !== 'changeOptionsAvailableBookingDateModal') {
                 reserveIntervalOpenModalFillInternalData(modal, data, modalId)
             }
-            openModalFillDateTimeData(modal, data, modalId)
+            openModalFillDateTimeData(modalId, data, 'dateRange'+modalId)
         }
         {#$('body').addClass('overflow-hidden');#}
         modal.classList.remove('hidden');
@@ -540,7 +544,8 @@
         let serviceProviderNameAndSurnameElement = modal.querySelector('#serviceProviderNameAndSurname');
         serviceProviderNameAndSurnameElement.textContent = "Usługodawca: " + data.serviceProviderNameAndSurname;
     }
-    function openModalFillDateTimeData(modal, data, modalId){
+    function openModalFillDateTimeData(modalId, data, elementName){
+        let modal = document.getElementById(modalId);
         let startDate = data.startAvailableBookingDate;
         let endDate = data.endAvailableBookingDate;
         {#uwzglednienie strefy czasowej#}
@@ -552,8 +557,8 @@
         let startTimeString = startDate.getMinutes() < 10 ? startDate.getHours() + ":0" + startDate.getMinutes() : startDate.getHours() + ":" + startDate.getMinutes();
         let endDateString = endDate.getDate() + " " + polishMonths[endDate.getMonth()]
         let endTimeString = endDate.getMinutes() < 10 ? endDate.getHours() + ":0" + endDate.getMinutes() : endDate.getHours() + ":" + endDate.getMinutes();
-        console.log(modalId)
-        let dateRangeElement = modal.querySelector('#dateRange'+modalId);
+        console.log("Modal id = " ,modalId)
+        let dateRangeElement = modal.querySelector('#'+elementName);
         if (startDate.getDate() === endDate.getDate()){
             dateRangeElement.textContent = startDayOfTheWeek + ", " + startDateString + " " + startTimeString + " - " + endTimeString
         }else{
@@ -594,11 +599,19 @@
         }
     };
     function closeModal(modalId) {
-        {#$('#'+modal).addClass('hidden');#}
-        {#$('body').removeClass('overflow-hidden');#}
         let modal = document.getElementById(modalId);
         modal.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
+    };
+    function dragEventConfirmOrReject(modalId, confirm) {
+        closeModal(modalId)
+        if(confirm) {
+            console.log("Potwierdzono")
+            passDataByAJAX('/dragEvent/', dragEventData)
+        } else {
+            selectedEventInfo.revert()
+            console.log("Tu powinno przywrocic pozycje eventu")
+        }
     };
     function editAvailableBookingDate() {
         {#console.log(selectedEventInfo)#}

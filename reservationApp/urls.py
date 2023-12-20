@@ -34,6 +34,7 @@ urlpatterns = [
 
     path('dragEvent/', views.dragEvent, name='dragEvent'),
 
+
     path('allReservationsWithoutServiceProvider/', views.allReservationsWithoutServiceProvider, name='allReservationsWithoutServiceProvider'),
     path('addDesiredReservationDateByCalendar/', views.addDesiredReservationDateByCalendar, name="addDesiredReservationDateByCalendar"),
     path('confirmDesiredReservationProposition/', views.confirmDesiredReservationProposition, name="confirmDesiredReservationProposition"),

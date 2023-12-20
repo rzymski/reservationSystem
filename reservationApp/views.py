@@ -27,6 +27,7 @@ def index(request):
     }
     return render(request, 'calendar/calendar.html', context)
 
+
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def confirmDesiredReservationProposition(request):
     ic("Potwierdzono rezerwacje przyjeto termin")
@@ -178,7 +179,6 @@ def reserveEntireBookingDate(request):
 def allReservationsWithoutServiceProvider(request, allServiceProviders=True, selectedIds=None):
     reservations = Reservation.objects.filter(availableBookingDate__isnull=True) if allServiceProviders else Reservation.objects.filter(availableBookingDate__isnull=True, availableBookingDate__user__id__in=selectedIds)
     out = []
-    ic(reservations)
     for reservation in reservations:
         out.append({
             'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
@@ -304,20 +304,55 @@ def filterServiceProviders(request):
     return redirect('index')
 
 
+# @login_required(login_url='login')
+# def dragEvent(request):
+#     ic("Przeciagnieto")
+#     if request.method == 'POST':
+#         ic(request.POST)
+#         newStartJson = request.POST.get('newStart')
+#         newStartString = json.loads(newStartJson)
+#         newEndJson = request.POST.get('newEnd')
+#         newEndString = json.loads(newEndJson)
+#         newStartDate = datetime.strptime(newStartString, '%d/%m/%Y %H:%M')
+#         newEndDate = datetime.strptime(newEndString, '%d/%m/%Y %H:%M')
+#         eventIdJSON = request.POST.get('selectedEvent')
+#         eventId = int(json.loads(eventIdJSON))
+#         eventTypeJSON = request.POST.get('eventType')
+#         eventType = int(json.loads(eventTypeJSON))
+#         ic(newStartDate, newEndDate, eventId, eventType)
+#         if eventType == 0:
+#             availableBookingDate = AvailableBookingDate.objects.get(id=eventId)
+#             try:
+#                 availableBookingDate.start = newStartDate
+#                 availableBookingDate.end = newEndDate
+#                 availableBookingDate.save()
+#             except ValidationError as e:
+#                 ic("JEST ERROR?", e)
+#                 messages.error(request, e.message)
+#         if eventType == 3:
+#             reservation = Reservation.objects.get(id=eventId)
+#             try:
+#                 reservation.start = newStartDate
+#                 reservation.end = newEndDate
+#                 reservation.save()
+#             except ValidationError as e:
+#                 ic("JEST ERROR?", e)
+#                 messages.error(request, e.message)
+#     return redirect('index')
+
 @login_required(login_url='login')
 def dragEvent(request):
     ic("Przeciagnieto")
     if request.method == 'POST':
-        newStartJson = request.POST.get('newStart')
-        newStartString = json.loads(newStartJson)
-        newEndJson = request.POST.get('newEnd')
-        newEndString = json.loads(newEndJson)
+        ic(request.POST)
+        newStartString = request.POST.get('newStart')
+        newEndString = request.POST.get('newEnd')
         newStartDate = datetime.strptime(newStartString, '%d/%m/%Y %H:%M')
         newEndDate = datetime.strptime(newEndString, '%d/%m/%Y %H:%M')
-        eventIdJSON = request.POST.get('selectedEvent')
-        eventId = int(json.loads(eventIdJSON))
-        eventTypeJSON = request.POST.get('eventType')
-        eventType = int(json.loads(eventTypeJSON))
+        eventIdString = request.POST.get('selectedDragEventId')
+        eventId = int(eventIdString)
+        eventTypeString = request.POST.get('eventType')
+        eventType = int(eventTypeString)
         ic(newStartDate, newEndDate, eventId, eventType)
         if eventType == 0:
             availableBookingDate = AvailableBookingDate.objects.get(id=eventId)
