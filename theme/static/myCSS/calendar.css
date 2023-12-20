@@ -19,3 +19,12 @@
     margin-top: 8px;
     color: red;
 }
+
+.fc-title {
+    font-weight: bold;
+    color: white;
+}
+
+.fc-title a:hover {
+    color: blue;
+}

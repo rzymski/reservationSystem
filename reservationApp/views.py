@@ -196,7 +196,7 @@ def allReservationsWithoutServiceProvider(request, allServiceProviders=True, sel
             'intervalTimeInt': None,
             'intervalTimeString': None,
             'breakBetweenIntervals': 0,
-            'editable': False,
+            'editable': True,
         })
     return JsonResponse(out, safe=False)
 

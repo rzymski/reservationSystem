@@ -57,28 +57,15 @@
                 //console.log(arg.event.title, arg.event.start, arg.event.end)
                 const start = getDateDetails(arg.event.start, '.', 'YMD')
                 const end = getDateDetails(arg.event.end, '.', 'YMD')
-                if (start.dateWithoutTime === end.dateWithoutTime) {
-                    if (arg.event.extendedProps.intervalTimeInt) {
-                        return { {#html: '<div class="fc-title">' + start.time + " - " + end.time + '</div><div class="fc-title">' + arg.event.title + '</div>',#}
-                            html: `<div class="fc-title">${start.time} - ${end.time}</div><div class="fc-title">${arg.event.title}</div><div class="fc-title">Czas wizyty: ${arg.event.extendedProps.intervalTimeString}</div>`,
-                        };
-                    } else {
-                        return { {#html: '<div class="fc-title">' + start.time + " - " + end.time + '</div><div class="fc-title">' + arg.event.title + '</div>',#}
-                            html: `<div class="fc-title">${start.time} - ${end.time}</div><div class="fc-title">${arg.event.title}</div>`,
-                        };
-                    }
-                }
-                else {
-                    if (arg.event.extendedProps.intervalTimeInt) {
-                        return {
-                            html: `<div class="fc-title">Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}</div><div class="fc-title">Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div><div class="fc-title">${arg.event.title}</div><div class="fc-title">Czas wizyty: ${arg.event.extendedProps.intervalTimeString}</div>`,
-                        };
-                    } else {
-                        return {
-                            html: `<div class="fc-title">Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}</div><div class="fc-title">Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div><div class="fc-title">${arg.event.title}</div>`,
-                        };
-                    }
-                }
+                let title = '';
+                if (start.dateWithoutTime === end.dateWithoutTime) { title += `<div class="fc-title">${start.time} - ${end.time}</div>`}
+                if (start.dateWithoutTime !== end.dateWithoutTime) { title += `<div class="fc-title">Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}</div><div class="fc-title">Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div>`}
+                {#if (arg.event.extendedProps.serviceProviderId != -1) {title += `<div class="fc-title">${arg.event.extendedProps.serviceProviderNameAndSurname}</div>`}#}
+                if (arg.event.extendedProps.serviceProviderId != -1) {title += `<div class="fc-title"><a href="/userProfile/${arg.event.extendedProps.serviceProviderId}/">${arg.event.extendedProps.serviceProviderNameAndSurname}</a></div>`}
+                {#if (arg.event.extendedProps.clientId != -1) {title += `<div class="fc-title">${arg.event.extendedProps.clientNameAndSurname}</div>`}#}
+                if (arg.event.extendedProps.clientId != -1) {title += `<div class="fc-title"><a href="/userProfile/${arg.event.extendedProps.clientId}/">${arg.event.extendedProps.clientNameAndSurname}</a></div>`}
+                if (arg.event.extendedProps.intervalTimeInt) {title += `<div class="fc-title">Czas wizyty: ${arg.event.extendedProps.intervalTimeString}</div>`}
+                return { html: title}
             },
             views: {
                 dayGridMonth: {
