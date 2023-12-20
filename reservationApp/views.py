@@ -18,9 +18,17 @@ def index(request):
     # clientsGroup = Group.objects.get(name='client')
     # serviceProviders = User.objects.exclude(groups=clientsGroup)
     serviceProviders = User.objects.filter(availablebookingdate__isnull=False).distinct()
+    serviceProvidersWithImages = []
+    for serviceProvider in serviceProviders:
+        userProfileObject = UserProfile.objects.get(user=serviceProvider)
+        profileImageUrl = userProfileObject.profileImage.url if userProfile and userProfileObject.profileImage else None
+        serviceProvidersWithImages.append((serviceProvider, profileImageUrl))
+
+    ic(serviceProvidersWithImages)
+
     context = {
         "events": allAvailableBookingDatesObjects,
-        'serviceProviders': serviceProviders,
+        'serviceProvidersWithImages': serviceProvidersWithImages,
         'rangeFrom15to180increasesBy15': geRangeTimeStrings(15, 180, 15)
     }
     return render(request, 'calendar/calendar.html', context)
@@ -230,7 +238,8 @@ def filterServiceProviders(request):
     if request.method == 'POST':
         selectedOptionsJson = request.POST.get('selectedOptions')
         selectedOptions = json.loads(selectedOptionsJson)
-        selectedIds = [option['id'] for option in selectedOptions]
+        ic(selectedOptions)
+        selectedIds = [option for option in selectedOptions]
         if len(selectedIds) == 0:
             selectedIds = [user.id for user in User.objects.filter(availablebookingdate__isnull=False).distinct()]
             ic(selectedIds)

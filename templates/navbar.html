@@ -45,10 +45,10 @@
                 </div>
             </div>
         {% else %}
-            <a href="{% url 'login' %}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Login</a>
-            <a href="{% url 'register' %}" class="bg-blue-500 hover-bg-blue-700 text-white font-bold py-2 px-4 rounded">Register</a>
+            <a href="{% url 'login' %}" class="bg-blue-500 hover:bg-blue-700 text-gray-50 font-bold py-2 px-4 mr-2 rounded">Zaloguj się</a>
+            <a href="{% url 'register' %}" class="bg-blue-500 hover:bg-blue-700 text-gray-50 font-bold py-2 px-4 mr-4 rounded">Zarejestruj się</a>
         {% endif %}
-        <a href="{% url 'change-theme' %}" class="bg-gray-100 px-5 py-3 mr-2 rounded-2xl hover:bg-gray-300 duration-300 dark:bg-slate-600">
+        <a href="{% url 'change-theme' %}" class="bg-gray-100 px-5 py-3 mr-2 rounded-2xl hover:bg-gray-300 duration-300 dark:bg-slate-600 dark:hover:bg-slate-400">
             {% if is_dark_theme %}
                 <i class="fa-solid fa-sun fa-xl"></i>
             {% else %}

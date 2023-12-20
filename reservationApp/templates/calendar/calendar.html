@@ -11,44 +11,66 @@
 {#            Flowbite nie wiem czy potrzebny czy tailwind nie wystarcza, ale niech zostatnie XD#}
             <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/datepicker.min.js"></script>
 {#            Select2#}
-            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+{#            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />#}
+{#            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>#}
 
             {% load static %}
             <link rel="stylesheet" type="text/css" href="{% static 'myCSS/calendar.css' %}">
         </head>
         <body>
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div style="text-align: left; vertical-align: center; display: flex; align-items: center;">
-                    <button id="filterButton" onclick="filter()" class="my-2 ml-2 mr-1 py-1 px-1 text-2xl font-semibold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Filtruj</button>
-                    <select class="js-example-basic-multiple" name="serviceProviders[]" multiple="multiple">
+            <div class="h-20">
+                {% comment %}<div class="flex justify-between items-center text-center align-middle">
+                    <div class="text-left flex items-center">
+                        <button id="filterButton" onclick="filter()" class="ml-2 mr-1 py-1 px-1 text-2xl font-semibold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Filtruj</button>
+                    </div>
+                    <select id="filterServiceProviders" multiple data-te-select-init data-te-select-placeholder="Filtruj usługodawców" data-te-select-filter="true" data-te-select-clear-button="true">
                         {% for user in serviceProviders %}
                             <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
                         {% endfor %}
                     </select>
-                </div>
-                {% if userRole != 'client' %}
-                    <div style="text-align: right; vertical-align: center">
-                        <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="m-2 py-1 px-1 text-2xl font-semibold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Dodaj dostepny termin</button>
-{#                        <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-bold rounded-lg text-lg px-2.5 py-2.5 me-2 mb-2 dark:bg-gray-900 dark:hover:bg-gray-800 dark:focus:ring-gray-700 dark:border-gray-700">Dodaj dostepny termin</button>#}
+                    <div style="text-align: left; vertical-align: center; display: flex; align-items: center;">
+                        <button id="filterOpenModalButton" onclick="openModal('filterModal')" class="my-2 ml-2 mr-1 py-1 px-1 text-2xl font-semibold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Filtruj</button>
                     </div>
-                {% endif %}
+                    {% if userRole != 'client' %}
+                        <div class="text-right flex items-center">
+                            <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="m-2 py-1 px-1 text-2xl font-semibold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Dodaj dostepny termin</button>
+                        </div>
+                    {% endif %}
+                </div>{% endcomment %}
+                <div class="grid grid-flow-row-dense grid-cols-12">
+                      <div class="col-span-2">
+                          <div>
+                              <button id="filterOpenModalButton" onclick="openModal('filterModal')" class="my-2 ml-2 mr-1 py-2 px-5 text-3xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Filtruj</button>
+                          </div>
+                      </div>
+                      <div class="col-span-7">
+                      </div>
+                      <div class="col-span-3">
+                          {% if userRole != 'client' %}
+                              <div class="text-right flex items-center">
+                                  <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="m-2 py-3 px-5 text-2xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Dodaj dostepny termin</button>
+                              </div>
+                          {% endif %}
+                      </div>
+                </div>
+
+
+                {% include 'availableBookingDate/addAvailableBookingDateByCalendar.html' %}
+                {% include 'availableBookingDate/addAvailableBookingDate.html' %}
+                {% include 'availableBookingDate/editAvailableBookingDate.html' %}
+                {% include 'availableBookingDate/deleteAvailableBookingDate.html' %}
+                {% include 'availableBookingDate/changeOptionsAvailableBookingDate.html' %}
+
+                {% include 'reservation/reservationOptions.html' %}
+                {% include 'reservation/reservePartSingleDayBookingDate.html' %}
+                {% include 'reservation/reservePartMultipleDaysBookingDate.html' %}
+                {% include 'reservation/confirmorRejectReservation.html' %}
+                {% include 'reservation/deleteReservation.html' %}
+                {% include 'reservation/reserveIntervalOfBookingDate.html' %}
+
+                {% include 'filter/filterServiceProviders.html' %}
             </div>
-
-            {% include 'availableBookingDate/addAvailableBookingDateByCalendar.html' %}
-            {% include 'availableBookingDate/addAvailableBookingDate.html' %}
-            {% include 'availableBookingDate/editAvailableBookingDate.html' %}
-            {% include 'availableBookingDate/deleteAvailableBookingDate.html' %}
-            {% include 'availableBookingDate/changeOptionsAvailableBookingDate.html' %}
-
-            {% include 'reservation/reservationOptions.html' %}
-            {% include 'reservation/reservePartSingleDayBookingDate.html' %}
-            {% include 'reservation/reservePartMultipleDaysBookingDate.html' %}
-            {% include 'reservation/confirmorRejectReservation.html' %}
-            {% include 'reservation/deleteReservation.html' %}
-            {% include 'reservation/reserveIntervalOfBookingDate.html' %}
-
-            <div class="col-md-12">
+            <div class="bg-green-400" style="height: calc(100vh - 10rem)">
                 <div id='calendar' class="dark:text-white bg-gray-100 dark:bg-gray-600"></div>
             </div>
         </body>
