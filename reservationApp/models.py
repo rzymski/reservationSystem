@@ -13,7 +13,7 @@ class AvailableBookingDate(models.Model):
     start = models.DateTimeField(null=True, blank=True)
     end = models.DateTimeField(null=True, blank=True)
     intervalTime = models.IntegerField(null=True, blank=True)
-    breakBetweenIntervals = models.IntegerField(null=True, blank=True)
+    breakBetweenIntervals = models.IntegerField(default=0)
 
     def __str__(self):
         if self.intervalTime:
@@ -27,7 +27,7 @@ class AvailableBookingDate(models.Model):
         if self.intervalTime:
             helpStartDate = self.start
             helpInterval = timedelta(minutes=int(self.intervalTime))
-            helpBreakBetweenIntervals = timedelta(minutes=int(self.breakBetweenIntervals))
+            helpBreakBetweenIntervals = timedelta(minutes=int(self.breakBetweenIntervals)) if self.breakBetweenIntervals else timedelta(minutes=0)
             condition = False
             while helpStartDate < self.end:
                 helpStartDate += helpInterval + helpBreakBetweenIntervals
@@ -52,14 +52,14 @@ class AvailableBookingDate(models.Model):
 class Reservation(models.Model):
     id = models.AutoField(primary_key=True)
     bookingPerson = models.ForeignKey(User, on_delete=models.CASCADE)
-    availableBookingDate = models.ForeignKey(AvailableBookingDate, on_delete=models.CASCADE)
+    availableBookingDate = models.ForeignKey(AvailableBookingDate, on_delete=models.CASCADE, null=True, blank=True)
     start = models.DateTimeField(null=True, blank=True)
     end = models.DateTimeField(null=True, blank=True)
     isAccepted = models.BooleanField(default=False)
 
     def clean(self):
         if self.start and self.end and self.start >= self.end:
-            raise ValidationError("End date must be after start date.")
+            raise ValidationError("Nie można zatwierdzić rezerwacji. Data końcowa nie może być przed początkową.")
         # Check for conflicts only if both reservations are accepted
         if self.isAccepted:
             conflicting_reservations = Reservation.objects.filter(
@@ -81,6 +81,14 @@ class Reservation(models.Model):
     def save(self, *args, **kwargs):
         self.clean()
         super().save(*args, **kwargs)
+
+
+# class ClientTermProposition(models.Model):
+#     client = models.ForeignKey(User, on_delete=models.CASCADE)
+#     serviceProvider = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
+#     start = models.DateTimeField(null=True, blank=True)
+#     end = models.DateTimeField(null=True, blank=True)
+
 
 
 class UserProfile(models.Model):

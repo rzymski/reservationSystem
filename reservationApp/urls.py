@@ -18,9 +18,9 @@ urlpatterns = [
     path('filterServiceProviders/', views.filterServiceProviders, name='filterServiceProviders'),
 
     path('addAvailableBookingDateByCalendar/', views.addAvailableBookingDateByCalendar, name='addAvailableBookingDateByCalendar'),
-    path('availableBookingDate/addAvailableBookingDate/', views.addAvailableBookingDate, name='addAvailableBookingDate'),
-    path('availableBookingDate/editAvailableBookingDate/', views.editAvailableBookingDate, name='editAvailableBookingDate'),
-    path('availableBookingDate/deleteAvailableBookingDate/', views.deleteAvailableBookingDate, name='deleteAvailableBookingDate'),
+    path('addAvailableBookingDate/', views.addAvailableBookingDate, name='addAvailableBookingDate'),
+    path('editAvailableBookingDate/', views.editAvailableBookingDate, name='editAvailableBookingDate'),
+    path('deleteAvailableBookingDate/', views.deleteAvailableBookingDate, name='deleteAvailableBookingDate'),
 
     path('allUnconfirmedReservations/', views.allUnconfirmedReservations, name='allUnconfirmedReservations'),
     path('allConfirmedReservations/', views.allConfirmedReservations, name='allConfirmedReservations'),
@@ -33,6 +33,12 @@ urlpatterns = [
     path('reserveIntervalOfBookingDate/', views.reserveIntervalOfBookingDate, name='reserveIntervalOfBookingDate'),
 
     path('dragEvent/', views.dragEvent, name='dragEvent'),
+
+    path('allReservationsWithoutServiceProvider/', views.allReservationsWithoutServiceProvider, name='allReservationsWithoutServiceProvider'),
+    path('addDesiredReservationDateByCalendar/', views.addDesiredReservationDateByCalendar, name="addDesiredReservationDateByCalendar"),
+    path('confirmDesiredReservationProposition/', views.confirmDesiredReservationProposition, name="confirmDesiredReservationProposition"),
+    path('editDesiredReservationDate/', views.editDesiredReservationDate, name='editDesiredReservationDate'),
+    path('deleteDesiredReservationDate/', views.deleteDesiredReservationDate, name='deleteDesiredReservationDate'),
 
     path('test/main/', views.PostListView.as_view(), name='main'),
     path('test/<pk>/', views.PostDetailView.as_view(), name='detail'),

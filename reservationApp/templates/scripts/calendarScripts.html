@@ -32,11 +32,11 @@
                 end: 'prev,next'
             },
             slotLabelFormat: {hour: 'numeric', minute: '2-digit', hour12: false},
-            {#events: '/allEvents',#}
             eventSources: [
                 '/allAvailableBookingDates',
                 '/allUnconfirmedReservations',
                 '/allConfirmedReservations',
+                '/allReservationsWithoutServiceProvider',
             ],
             eventTimeFormat: {
                 hour: '2-digit',
@@ -112,30 +112,36 @@
             },
             {#dodawanie dostepnych terminow#}
             select: function (data){
+                if ("{{ request.user }}" === 'AnonymousUser') { return; }
+                let modalName = ""
                 if (currentUserRole !== "client")
                 {
-                    let selectedView = calendar.view.type;
-                    console.log("Wykonalo sie dodanie")
-                    const startDateTime = new Date(data.startStr)
-                    let startDateOnly = startDateTime.toISOString().split('T')[0];
-                    let startTimeOnly = startDateTime.toLocaleTimeString().slice(0, 5);
-                    const endDateTime = new Date(data.endStr)
-                    if (selectedView === 'dayGridMonth') { endDateTime.setDate(endDateTime.getDate() - 1) }
-                    let endDateOnly = endDateTime.toISOString().split('T')[0];
-                    let endTimeOnly = endDateTime.toLocaleTimeString().slice(0, 5);
-                    if (selectedView !== 'dayGridMonth'){
-                        {#dotyczy widoku kalendarza widoku tygodniowego/dniowego gdzie uzupelnia od razu godzine startu i konca#}
-                        $('#addAvailableBookingDateByCalendarModal [name="startTime"]').val(startTimeOnly);
-                        $('#addAvailableBookingDateByCalendarModal [name="endTime"]').val(endTimeOnly);
-                    } else {
-                        {#$('#addAvailableBookingDateByCalendarModal [name="startTime"]').val('12:00');#}
-                        {#$('#addAvailableBookingDateByCalendarModal [name="endTime"]').val('23:00');#}
-                    }
-                    $('#startStrField').val(startDateOnly);
-                    $('#endStrField').val(endDateOnly);
-                    $('#addAvailableBookingDateByCalendarModal').removeClass('hidden');
-                    $('body').addClass('overflow-hidden');
+                    console.log("Wykonalo sie dodanie dostepnego terminu")
+                    modalName = "addAvailableBookingDateByCalendarModal"
+                } else {
+                    console.log("Dodaj propozycje rezerwacji")
+                    modalName = "addDesiredReservationDateByCalendarModal"
                 }
+                let selectedView = calendar.view.type;
+                const startDateTime = new Date(data.startStr)
+                let startDateOnly = startDateTime.toISOString().split('T')[0];
+                let startTimeOnly = startDateTime.toLocaleTimeString().slice(0, 5);
+                const endDateTime = new Date(data.endStr)
+                if (selectedView === 'dayGridMonth') { endDateTime.setDate(endDateTime.getDate() - 1) }
+                let endDateOnly = endDateTime.toISOString().split('T')[0];
+                let endTimeOnly = endDateTime.toLocaleTimeString().slice(0, 5);
+                if (selectedView !== 'dayGridMonth'){
+                    console.log("OK")
+                    {#dotyczy widoku kalendarza widoku tygodniowego/dniowego gdzie uzupelnia od razu godzine startu i konca#}
+                    $('#'+modalName+' [name="startTime"]').val(startTimeOnly);
+                    $('#'+modalName+' [name="endTime"]').val(endTimeOnly);
+                } else {
+                    {#$('#addAvailableBookingDateByCalendarModal [name="startTime"]').val('12:00');#}
+                    {#$('#addAvailableBookingDateByCalendarModal [name="endTime"]').val('23:00');#}
+                }
+                $('#startStrField'+modalName).val(startDateOnly);
+                $('#endStrField'+modalName).val(endDateOnly);
+                openModal(modalName)
             },
             {#edycja/usuwanie dostepnych terminow#}
             eventClick: function (info) {
@@ -190,6 +196,15 @@
                     console.log("USUN TO")
                     $('#deleteReservationId').val(selectedBookingDateId)
                     openModal('deleteReservationModal')
+                } else if (eventType === 3 && (currentUserRole !== "client")) {
+                    console.log("Można zaakceptować propozycje rezerwacji terminu klienta")
+                    $('#confirmDesiredReservationPropositionId').val(selectedBookingDateId)
+                    openModal('confirmDesiredReservationPropositionModal', availableBookingData)
+                } else if (eventType == 3 && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) {
+                    console.log("EDYTUJ LUB USUN SWOJA PROPOZYCJE")
+                    $('#deleteSelectedDesiredReservationDate').val(selectedBookingDateId)
+                    $('#editSelectedDesiredReservationDate').val(selectedBookingDateId)
+                    openModal('changeOptionsDesiredReservationDateModal', availableBookingData);
                 } else{
                     console.log("Nie masz uprawnien, zeby to zrobic")
                 }
@@ -274,6 +289,7 @@
                     calendar.addEventSource(response.availableDates);
                     calendar.addEventSource(response.unconfirmedReservations);
                     calendar.addEventSource(response.confirmedReservations);
+                    calendar.addEventSource(response.reservationsWithoutServiceProvider);
                 }
             },
             error: function(error) {
@@ -368,9 +384,12 @@
         inputControl.classList.remove('error');
     };
     function checkIfStartPlusIntervalsEqualEnd(startDateValue, startTimeValue, endDateValue, endTimeValue, interval, breakBetweenIntervals) {
-        if (interval == "") { return true }
+        if (interval == "" || interval === null || interval === 0) { return true }
+        let breakBetweenIntervalsValue = 0;
+        if ( breakBetweenIntervals ) {
+            breakBetweenIntervalsValue = parseInt(breakBetweenIntervals, 10)
+        }
         const intervalTimeValue = parseInt(interval, 10);
-        const breakBetweenIntervalsValue = parseInt(breakBetweenIntervals, 10);
         const totalMinutes = (intervalTimeValue + breakBetweenIntervalsValue);
         let validationCondition = false;
         let startDateHelp = new Date(startDateValue + ' ' + startTimeValue)
@@ -383,14 +402,15 @@
                 validationCondition = true
             }
         }
+        console.log("SPRAWDZONO")
         return validationCondition
     };
     {#Skrypt odpowiadajacy za walidacje czasow w dodawaniu wolnego terminu przez kalendarz#}
     const formAddAvailableBookingDateByCalendar = document.getElementById('addAvailableBookingDateByCalendarForm')
     const startTimeAddAvailableBookingDateByCalendar = document.getElementById('startTimeAddAvailableBookingDateByCalendarModal')
     const endTimeAddAvailableBookingDateByCalendar = document.getElementById('endTimeAddAvailableBookingDateByCalendarModal')
-    const startDateAddAvailableBookingDateByCalendar = document.getElementById('startStrField')
-    const endDateAddAvailableBookingDateByCalendar = document.getElementById('endStrField')
+    const startDateAddAvailableBookingDateByCalendar = document.getElementById('startStrFieldaddAvailableBookingDateByCalendarModal')
+    const endDateAddAvailableBookingDateByCalendar = document.getElementById('endStrFieldaddAvailableBookingDateByCalendarModal')
     const intervalTimeAddAvailableBookingDateByCalendar = document.getElementById('intervalTimeaddAvailableBookingDateByCalendarModal')
     const breakBetweenIntervalsAddAvailableBookingDateByCalendar = document.getElementById('breakBetweenIntervalsaddAvailableBookingDateByCalendarModal')
     formAddAvailableBookingDateByCalendar.addEventListener('submit', (e) => {
@@ -507,7 +527,10 @@
         let modal = document.getElementById(modalId);
         {#$('#'+modal).removeClass('hidden');#}
         if(data){
-            openModalFillServiceProviderData(modal, data, modalId)
+            console.log(data)
+            if (data.serviceProviderId !== -1){
+                openModalFillServiceProviderData(modal, data, modalId)
+            }
             if (data.clientId !== -1) {
                 reserveOpenModalFillClientData(modal, data, modalId)
             }
@@ -538,11 +561,12 @@
         let startTimeString = startDate.getMinutes() < 10 ? startDate.getHours() + ":0" + startDate.getMinutes() : startDate.getHours() + ":" + startDate.getMinutes();
         let endDateString = endDate.getDate() + " " + polishMonths[endDate.getMonth()]
         let endTimeString = endDate.getMinutes() < 10 ? endDate.getHours() + ":0" + endDate.getMinutes() : endDate.getHours() + ":" + endDate.getMinutes();
-        let dateRangeAvailableBookingDateElement = modal.querySelector('#dateRangeAvailableBookingDate'+modalId);
+        console.log(modalId)
+        let dateRangeElement = modal.querySelector('#dateRange'+modalId);
         if (startDate.getDate() === endDate.getDate()){
-            dateRangeAvailableBookingDateElement.textContent = startDayOfTheWeek + ", " + startDateString + " " + startTimeString + " - " + endTimeString
+            dateRangeElement.textContent = startDayOfTheWeek + ", " + startDateString + " " + startTimeString + " - " + endTimeString
         }else{
-            dateRangeAvailableBookingDateElement.textContent = startDateString + " " + startTimeString + " - " + endDateString + " " + endTimeString
+            dateRangeElement.textContent = startDateString + " " + startTimeString + " - " + endDateString + " " + endTimeString
         }
     };
     function reserveOpenModalFillClientData(modal, data, modalId) {
@@ -601,16 +625,34 @@
         $('#editAvailableBookingDateModal [name="endTime"]').val(endTime);
         $('#editAvailableBookingDateModal [name="intervalTime"]').val(selectedEventInfo.event.extendedProps.intervalTimeInt);
         $('#editAvailableBookingDateModal [name="breakBetweenIntervals"]').val(selectedEventInfo.event.extendedProps.breakBetweenIntervals);
-
         openModal('editAvailableBookingDateModal')
     };
     function openDeleteAvailableBookingDateModal() {
         closeModal('changeOptionsAvailableBookingDateModal');
         openModal('deleteAvailableBookingDateModal');
     };
+    function editDesiredReservationDate() {
+        {#console.log(selectedEventInfo)#}
+        console.log("DATETIME nieprzetworzone: ", selectedEventInfo.event.start)
+        closeModal('changeOptionsDesiredReservationDateModal');
+        $('#editDesiredReservationDateModal [name="title"]').val(selectedEventInfo.event.title);
+        let startDate = selectedEventInfo.event.start.toISOString().split('T')[0];
+        let startTime = selectedEventInfo.event.start.toISOString().split('T')[1].slice(0, 5);
+        let endDate = selectedEventInfo.event.end.toISOString().split('T')[0];
+        let endTime = selectedEventInfo.event.end.toISOString().split('T')[1].slice(0, 5);
+        console.log(startDate, startTime, endDate, endTime)
+        $('#editDesiredReservationDateModal [name="startDate"]').val(startDate);
+        $('#editDesiredReservationDateModal [name="startTime"]').val(startTime);
+        $('#editDesiredReservationDateModal [name="endDate"]').val(endDate);
+        $('#editDesiredReservationDateModal [name="endTime"]').val(endTime);
+        openModal('editDesiredReservationDateModal')
+    };
+    function openDeleteDesiredReservationDateModal() {
+        closeModal('changeOptionsDesiredReservationDateModal');
+        openModal('deleteDesiredReservationDateModal');
+    };
     function openReservePartBookingDateModal() {
         closeModal('reservationOptionsModal');
-
         let startDate = selectedEventInfo.event.start.toISOString().split('T')[0];
         let startTime = selectedEventInfo.event.start.toISOString().split('T')[1].slice(0, 5);
         let endDate = selectedEventInfo.event.end.toISOString().split('T')[0];

@@ -38,16 +38,16 @@
                     {% endif %}
                 </div>{% endcomment %}
                 <div class="grid grid-flow-row-dense grid-cols-12">
-                      <div class="col-span-2">
+                      <div class="col-span-2 flex items-center">
                           <div>
                               <button id="filterOpenModalButton" onclick="openModal('filterModal')" class="my-2 ml-2 mr-1 py-2 px-5 text-3xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Filtruj</button>
                           </div>
                       </div>
-                      <div class="col-span-7">
+                      <div class="col-span-4">
                       </div>
-                      <div class="col-span-3">
+                      <div class="col-span-6">
                           {% if userRole != 'client' %}
-                              <div class="text-right flex items-center">
+                              <div class="text-right items-center">
                                   <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="m-2 py-3 px-5 text-2xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Dodaj dostepny termin</button>
                               </div>
                           {% endif %}
@@ -69,6 +69,12 @@
                 {% include 'reservation/reserveIntervalOfBookingDate.html' %}
 
                 {% include 'filter/filterServiceProviders.html' %}
+
+                {% include 'desiredReservationDate/addDesiredReservationDateByCalendar.html' %}
+                {% include 'desiredReservationDate/confirmDesiredReservationProposition.html' %}
+                {% include 'desiredReservationDate/changeOptionsDesiredReservationDate.html' %}
+                {% include 'desiredReservationDate/deleteDesiredReservationDate.html' %}
+                {% include 'desiredReservationDate/editDesiredReservationDate.html' %}
             </div>
             <div class="bg-green-400" style="height: calc(100vh - 10rem)">
                 <div id='calendar' class="dark:text-white bg-gray-100 dark:bg-gray-600"></div>

@@ -14,9 +14,6 @@ import json
 
 
 def index(request):
-    allAvailableBookingDatesObjects = AvailableBookingDate.objects.all()
-    # clientsGroup = Group.objects.get(name='client')
-    # serviceProviders = User.objects.exclude(groups=clientsGroup)
     serviceProviders = User.objects.filter(availablebookingdate__isnull=False).distinct()
     serviceProvidersWithImages = []
     for serviceProvider in serviceProviders:
@@ -24,14 +21,36 @@ def index(request):
         profileImageUrl = userProfileObject.profileImage.url if userProfile and userProfileObject.profileImage else None
         serviceProvidersWithImages.append((serviceProvider, profileImageUrl))
 
-    ic(serviceProvidersWithImages)
-
     context = {
-        "events": allAvailableBookingDatesObjects,
         'serviceProvidersWithImages': serviceProvidersWithImages,
         'rangeFrom15to180increasesBy15': geRangeTimeStrings(15, 180, 15)
     }
     return render(request, 'calendar/calendar.html', context)
+
+@allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
+def confirmDesiredReservationProposition(request):
+    ic("Potwierdzono rezerwacje przyjeto termin")
+    if request.method == 'POST':
+        reservationId = request.POST.get('selectedReservationId')
+        ic(reservationId)
+        reservation = Reservation.objects.get(pk=reservationId)
+        try:
+            newAvailableBookingDate = AvailableBookingDate.objects.create(
+                user=request.user,
+                start=reservation.start,
+                end=reservation.end,
+                intervalTime=None,
+                breakBetweenIntervals=0
+            )
+        except ValidationError as e:
+            messages.error(request, e.message)
+        try:
+            reservation.availableBookingDate = newAvailableBookingDate
+            reservation.isAccepted = True
+            reservation.save()
+        except ValidationError as e:
+            messages.error(request, e.message)
+    return redirect('index')
 
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
@@ -156,8 +175,34 @@ def reserveEntireBookingDate(request):
     return redirect('index')
 
 
+def allReservationsWithoutServiceProvider(request, allServiceProviders=True, selectedIds=None):
+    reservations = Reservation.objects.filter(availableBookingDate__isnull=True) if allServiceProviders else Reservation.objects.filter(availableBookingDate__isnull=True, availableBookingDate__user__id__in=selectedIds)
+    out = []
+    ic(reservations)
+    for reservation in reservations:
+        out.append({
+            'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
+            'id': reservation.id,
+            'start': reservation.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end': reservation.end.strftime('%Y-%m-%dT%H:%M:%S'),
+            'backgroundColor': '#FFA500',
+            'borderColor': '#FFFFFF',
+            'display': 'block',
+            'serviceProviderId': -1,
+            'serviceProviderNameAndSurname': f"",
+            'clientId': reservation.bookingPerson.id,
+            'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
+            'eventType': 3,
+            'intervalTimeInt': None,
+            'intervalTimeString': None,
+            'breakBetweenIntervals': 0,
+            'editable': False,
+        })
+    return JsonResponse(out, safe=False)
+
+
 def allUnconfirmedReservations(request, allServiceProviders=True, selectedIds=None):
-    reservations = Reservation.objects.filter(isAccepted=False) if allServiceProviders else Reservation.objects.filter(isAccepted=False, availableBookingDate__user__id__in=selectedIds)
+    reservations = Reservation.objects.filter(isAccepted=False, availableBookingDate__isnull=False) if allServiceProviders else Reservation.objects.filter(isAccepted=False, availableBookingDate__isnull=False, availableBookingDate__user__id__in=selectedIds)
     out = []
     for reservation in reservations:
         out.append({
@@ -175,7 +220,7 @@ def allUnconfirmedReservations(request, allServiceProviders=True, selectedIds=No
             'eventType': 1,
             'intervalTimeInt': None,
             'intervalTimeString': None,
-            'breakBetweenIntervals': None,
+            'breakBetweenIntervals': 0,
             'editable': False,
         })
     return JsonResponse(out, safe=False)
@@ -200,7 +245,7 @@ def allConfirmedReservations(request, allServiceProviders=True, selectedIds=None
             'eventType': 2,
             'intervalTimeInt': None,
             'intervalTimeString': None,
-            'breakBetweenIntervals': None,
+            'breakBetweenIntervals': 0,
             'editable': False,
         })
     return JsonResponse(out, safe=False)
@@ -247,10 +292,12 @@ def filterServiceProviders(request):
         allAvailableBookingDatesJSON = allAvailableBookingDates(request, allServiceProviders=False, selectedIds=selectedIds)
         allUnconfirmedReservationsJSON = allUnconfirmedReservations(request, allServiceProviders=False, selectedIds=selectedIds)
         allConfirmedReservationsJSON = allConfirmedReservations(request, allServiceProviders=False, selectedIds=selectedIds)
+        allReservationsWithoutServiceProviderJSON = allReservationsWithoutServiceProvider(request, allServiceProviders=False, selectedIds=selectedIds)
         combinedResponse = {
             'availableDates': json.loads(allAvailableBookingDatesJSON.content),
             'unconfirmedReservations': json.loads(allUnconfirmedReservationsJSON.content),
             'confirmedReservations': json.loads(allConfirmedReservationsJSON.content),
+            'reservationsWithoutServiceProvider': json.loads(allReservationsWithoutServiceProviderJSON.content),
         }
         return JsonResponse(combinedResponse, safe=False)
     ic("Nie powinno nigdy miec miejsca")
@@ -298,7 +345,7 @@ def addAvailableBookingDateByCalendar(request):
         intervalTime = request.POST.get('intervalTime')
         breakBetweenIntervals = request.POST.get('breakBetweenIntervals')
         intervalTime = intervalTime if intervalTime != "" else None
-        breakBetweenIntervals = breakBetweenIntervals if breakBetweenIntervals != "" else None
+        breakBetweenIntervals = breakBetweenIntervals if breakBetweenIntervals != "" else 0
         startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
         endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
         startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
@@ -311,6 +358,35 @@ def addAvailableBookingDateByCalendar(request):
             availableBookingDate.save()
         except ValidationError as e:
             messages.error(request, e.message)
+    return redirect('index')
+
+
+@login_required(login_url='login')
+def addDesiredReservationDateByCalendar(request):
+    ic("Dodano pozadany czas rezerwacji")
+    if request.method == 'POST':
+        ic(request.POST)
+        # title = request.POST.get('title')
+        startTimeSTR = request.POST.get('startTime')
+        endTimeSTR = request.POST.get('endTime')
+        startDateSTR = request.POST.get('startStr')
+        endDateSTR = request.POST.get('endStr')
+        ic(startTimeSTR, endTimeSTR, startDateSTR, endDateSTR)
+        startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
+        endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
+        startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
+        endDate = datetime.strptime(endDateSTR, '%Y-%m-%d').date()
+        start = datetime.combine(startDate, startTime)
+        end = datetime.combine(endDate, endTime)
+        currentUser = request.user
+        # availableBookingDate = AvailableBookingDate(user=currentUser, start=start, end=end, intervalTime=intervalTime,
+        #                                             breakBetweenIntervals=breakBetweenIntervals)
+        reservation = Reservation(bookingPerson=currentUser, availableBookingDate=None, start=start, end=end, isAccepted=False)
+        try:
+            reservation.save()
+        except ValidationError as e:
+            messages.error(request, e.message)
+    ic("DZIALA")
     return redirect('index')
 
 
@@ -327,7 +403,7 @@ def addAvailableBookingDate(request):
         intervalTime = request.POST.get('intervalTime')
         breakBetweenIntervals = request.POST.get('breakBetweenIntervals')
         intervalTime = intervalTime if intervalTime != "" else None
-        breakBetweenIntervals = breakBetweenIntervals if breakBetweenIntervals != "" else None
+        breakBetweenIntervals = breakBetweenIntervals if breakBetweenIntervals != "" else 0
         startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
         endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
         startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
@@ -356,7 +432,7 @@ def editAvailableBookingDate(request):
         intervalTime = request.POST.get('intervalTime')
         breakBetweenIntervals = request.POST.get('breakBetweenIntervals')
         intervalTime = intervalTime if intervalTime != "" else None
-        breakBetweenIntervals = breakBetweenIntervals if breakBetweenIntervals != "" else None
+        breakBetweenIntervals = breakBetweenIntervals if breakBetweenIntervals != "" else 0
         startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
         endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
         startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
@@ -390,6 +466,46 @@ def deleteAvailableBookingDate(request):
         availableBookingDate.delete()
     return redirect('index')
 
+
+@login_required(login_url='login')
+def editDesiredReservationDate(request):
+    ic("Edytuj dostepny termin")
+    if request.method == 'POST':
+        # title = request.POST.get('title')
+        startTimeSTR = request.POST.get('startTime')
+        endTimeSTR = request.POST.get('endTime')
+        startDateSTR = request.POST.get('startDate')
+        endDateSTR = request.POST.get('endDate')
+        startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
+        endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
+        startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
+        endDate = datetime.strptime(endDateSTR, '%Y-%m-%d').date()
+        start = datetime.combine(startDate, startTime)
+        end = datetime.combine(endDate, endTime)
+        ic(startTimeSTR, endTimeSTR)
+        # currentUser = request.user
+        reservationId = request.POST.get('selectedEvent')
+        reservation = Reservation.objects.get(id=reservationId)
+        # reservation.user = currentUser
+        reservation.start = start
+        reservation.end = end
+        try:
+            reservation.save()
+        except ValidationError as e:
+            messages.error(request, e.message)
+    ic("DZIALA")
+    return redirect('index')
+
+
+@login_required(login_url='login')
+def deleteDesiredReservationDate(request):
+    ic("Usunieto propozycje terminu")
+    if request.method == 'POST':
+        reservationId = request.POST.get('selectedEvent')
+        ic(reservationId)
+        reservation = Reservation.objects.get(pk=reservationId)
+        reservation.delete()
+    return redirect('index')
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def notForClients(request):
