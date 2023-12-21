@@ -43,6 +43,15 @@ class AvailableBookingDate(models.Model):
                 # Check if the is reservation with bigger range
                 if self.start > reservation.start or self.end < reservation.end:
                     raise ValidationError(f"Nie można zatwierdzić terminu. Dostepny termin posiada zatwierdzoną rezerwację z większym zakresem czasowym.", code="existReservationWithBiggerRange")
+        # One user could have only one AvailableBookingDate in the same time
+        if self.start and self.end and self.user:
+            conflictDates = AvailableBookingDate.objects.filter(
+                user=self.user,
+                start__lt=self.end,
+                end__gt=self.start,
+            ).exclude(id=self.id)
+            if conflictDates.exists():
+                raise ValidationError(f"Nie można zatwierdzić terminu. Użytkownik już ma dostępny termin w tym czasie.", code="userAlreadyHaveExistingAvailableBookingDateInThisTime")
 
     def save(self, *args, **kwargs):
         self.clean()
@@ -78,6 +87,16 @@ class Reservation(models.Model):
             # Check if reservation time is in available bookind date range time
             if self.availableBookingDate.end < self.end or self.start < self.availableBookingDate.start:
                 raise ValidationError("Nie można zatwierdzić rezerwacji. Zakres rezerwacji przekracza zakres dostępnego terminu.", code="reservationExceedRange")
+            # One user could have only one Reservation in the same time
+            if self.start and self.end and self.bookingPerson:
+                conflictDates = Reservation.objects.filter(
+                    bookingPerson=self.bookingPerson,
+                    availableBookingDate=self.availableBookingDate,
+                    start__lt=self.end,
+                    end__gt=self.start,
+                ).exclude(id=self.id)
+                if conflictDates.exists():
+                    raise ValidationError(f"Nie można dodac rezerwacji. Użytkownik już ma rezerwacje w tym czasie w tym dostepnym terminie.", code="userAlreadyHaveExistingReservationInThisAvailableBookingDateInThisTime")
 
     def save(self, *args, **kwargs):
         self.clean()
