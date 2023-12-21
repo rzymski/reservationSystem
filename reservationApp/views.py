@@ -41,8 +41,7 @@ def confirmDesiredReservationProposition(request):
                 start=reservation.start,
                 end=reservation.end,
                 intervalTime=None,
-                breakBetweenIntervals=0
-            )
+                breakBetweenIntervals=0)
         except ValidationError as e:
             messages.error(request, e.message)
         try:
@@ -92,13 +91,15 @@ def reserveIntervalOfBookingDate(request):
         selectedAvailableBookingDate = AvailableBookingDate.objects.get(id=availableBookingDateId)
         start = datetime.strptime(startTime, '%d/%m/%Y %H:%M')
         end = start + timedelta(minutes=selectedAvailableBookingDate.intervalTime) + timedelta(minutes=selectedAvailableBookingDate.breakBetweenIntervals)
-        reservation = Reservation.objects.create(
-            bookingPerson=request.user,
-            availableBookingDate=selectedAvailableBookingDate,
-            start=start,
-            end=end,
-            isAccepted=False
-        )
+        try:
+            reservation = Reservation.objects.create(
+                bookingPerson=request.user,
+                availableBookingDate=selectedAvailableBookingDate,
+                start=start,
+                end=end,
+                isAccepted=False)
+        except ValidationError as e:
+            messages.error(request, e.message)
     return redirect('index')
 
 
@@ -115,13 +116,15 @@ def reservePartSingleDayBookingDate(request):
         start = datetime.combine(selectedAvailableBookingDate.start.date(), startTime)
         end = datetime.combine(selectedAvailableBookingDate.end.date(), endTime)
         ic(startTimeSTR, endTimeSTR)
-        reservation = Reservation.objects.create(
-            bookingPerson=request.user,
-            availableBookingDate=selectedAvailableBookingDate,
-            start=start,
-            end=end,
-            isAccepted=False,
-        )
+        try:
+            reservation = Reservation.objects.create(
+                bookingPerson=request.user,
+                availableBookingDate=selectedAvailableBookingDate,
+                start=start,
+                end=end,
+                isAccepted=False)
+        except ValidationError as e:
+            messages.error(request, e.message)
     ic("DZIALA")
     return redirect('index')
 
@@ -143,13 +146,15 @@ def reservePartMultipleDaysBookingDate(request):
         endDate = datetime.strptime(endDateSTR, '%Y-%m-%d').date()
         start = datetime.combine(startDate, startTime)
         end = datetime.combine(endDate, endTime)
-        reservation = Reservation.objects.create(
-            bookingPerson=request.user,
-            availableBookingDate=selectedAvailableBookingDate,
-            start=start,
-            end=end,
-            isAccepted=False,
-        )
+        try:
+            reservation = Reservation.objects.create(
+                bookingPerson=request.user,
+                availableBookingDate=selectedAvailableBookingDate,
+                start=start,
+                end=end,
+                isAccepted=False)
+        except ValidationError as e:
+            messages.error(request, e.message)
     return redirect('index')
 
 
@@ -164,13 +169,15 @@ def reserveEntireBookingDate(request):
         endDatetime = datetime.fromisoformat(availableBookingDateEnd[:-1])
         ic(availableBookingDateStart, startDatetime)
         selectedAvailableBookingDate = AvailableBookingDate.objects.get(pk=availableBookingDateId)
-        reservation = Reservation.objects.create(
-            bookingPerson=request.user,
-            availableBookingDate=selectedAvailableBookingDate,
-            start=startDatetime,
-            end=endDatetime,
-            isAccepted=False,
-        )
+        try:
+            reservation = Reservation.objects.create(
+                bookingPerson=request.user,
+                availableBookingDate=selectedAvailableBookingDate,
+                start=startDatetime,
+                end=endDatetime,
+                isAccepted=False)
+        except ValidationError as e:
+            messages.error(request, e.message)
     return redirect('index')
 
 

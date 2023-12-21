@@ -119,10 +119,6 @@
                 let clientId = info.event.extendedProps.clientId;
                 let eventType = info.event.extendedProps.eventType;
                 let intervalTimeInt = info.event.extendedProps.intervalTimeInt;
-                {#let intervalTimeInt = null;#}
-                {#console.log(intervalTime, typeof(intervalTime))#}
-                {#if (intervalTime > 0 ) { intervalTimeInt = intervalTime; }#}
-
 
                 availableBookingData = fillAvailableBookingData(info)
                 selectedBookingDateId = info.event.id
@@ -376,7 +372,8 @@
         inputControl.classList.remove('error');
     };
     function checkIfStartPlusIntervalsEqualEnd(startDateValue, startTimeValue, endDateValue, endTimeValue, interval, breakBetweenIntervals) {
-        if (interval == "" || interval === null || interval === 0 || interval === '0') { return true }
+        //console.log("DANE CHECK =", startDateValue, startTimeValue, endDateValue, endTimeValue, interval, breakBetweenIntervals)
+        if (typeof interval == undefined || interval == "" || interval === null || interval === 0 || interval === '0') { return true }
         let breakBetweenIntervalsValue = 0;
         if ( breakBetweenIntervals ) {
             breakBetweenIntervalsValue = parseInt(breakBetweenIntervals, 10)
@@ -390,69 +387,132 @@
         while (startDateHelp < endDateHelp) {
             startDateHelp.setMinutes(startDateHelp.getMinutes() + totalMinutes);
             if (startDateHelp.getTime() === endDateHelp.getTime()) {
-                console.log("ROWNA SIE", startDateHelp, endDateHelp)
+                //console.log("ROWNA SIE", startDateHelp, endDateHelp)
                 validationCondition = true
             }
         }
-        console.log("SPRAWDZONO")
         return validationCondition
     };
-    function validationModalForm(modalId, e) {
-        const startTimeAddAvailableBookingDateByCalendar = document.getElementById('startTime'+modalId)
-        const endTimeAddAvailableBookingDateByCalendar = document.getElementById('endTime'+modalId)
-        const startDateAddAvailableBookingDateByCalendar = document.getElementById('startDate'+modalId)
-        const endDateAddAvailableBookingDateByCalendar = document.getElementById('endDate'+modalId)
-        const intervalTimeAddAvailableBookingDateByCalendar = document.getElementById('intervalTime'+modalId)
-        const breakBetweenIntervalsAddAvailableBookingDateByCalendar = document.getElementById('breakBetweenIntervals'+modalId)
-        const startTimeValue = startTimeAddAvailableBookingDateByCalendar.value;
-        const endTimeValue = endTimeAddAvailableBookingDateByCalendar.value;
-        const startDateValue = startDateAddAvailableBookingDateByCalendar.value;
-        const endDateValue = endDateAddAvailableBookingDateByCalendar.value;
-        const intervalTimeValue = intervalTimeAddAvailableBookingDateByCalendar.value;
-        const breakBetweenIntervalsValue = breakBetweenIntervalsAddAvailableBookingDateByCalendar.value
-        //console.log(startTimeValue, endTimeValue, startDateValue, endDateValue, intervalTimeValue, breakBetweenIntervalsValue)
-        if (compareDate(endDateValue, startDateValue) < 0){
-            e.preventDefault();
-            setError(startDateAddAvailableBookingDateByCalendar, "Data końcowa nie może być przed datą początku.")
-            return;
-        } else {
-            setSuccess(startDateAddAvailableBookingDateByCalendar);
-        }
-        if (compareDate(endDateValue, startDateValue) === 0 && compareTime(endTimeValue, startTimeValue) <= 0) {
-            e.preventDefault();
-            setError(startTimeAddAvailableBookingDateByCalendar, "Czas końcowy nie może być przed czasem początku.")
-            return;
-        } else {
-            setSuccess(startTimeAddAvailableBookingDateByCalendar);
-        }
-        //sprawdzenie czy start + n interwałów z przerwami = koniec
-        if (checkIfStartPlusIntervalsEqualEnd(startDateValue, startTimeValue, endDateValue, endTimeValue, intervalTimeValue, breakBetweenIntervalsValue)) {
-            setSuccess(endDateAddAvailableBookingDateByCalendar);
-        } else {
-            console.log("Zle przedzialy addCal: ", startDateValue, startTimeValue, endDateValue, endTimeValue, intervalTimeValue, breakBetweenIntervalsValue)
-            e.preventDefault();
-            setError(endDateAddAvailableBookingDateByCalendar, "Nieprawidłowy podział czasu.");
-            return;
-        }
-    };
     {#Skrypt odpowiadajacy za walidacje czasow w dodawaniu wolnego terminu przez kalendarz#}
-    const formAddAvailableBookingDateByCalendar = document.getElementById('addAvailableBookingDateByCalendarForm')
-    formAddAvailableBookingDateByCalendar.addEventListener('submit', (e) => {
-        validationModalForm('addAvailableBookingDateByCalendarModal', e)
-        console.log("WYSZEDL")
+    const formaddAvailableBookingDateByCalendar = document.getElementById('addAvailableBookingDateByCalendarForm')
+    formaddAvailableBookingDateByCalendar.addEventListener('submit', (e) => {
+        console.log("Wykonala sie walidacja add calendar")
+        validationModalForm('addAvailableBookingDateByCalendarModal', e, false)
     });
     {#Skrypt odpowiadajacy za walidacje dat i czasow w w dodawaniu wolnego terminu przez przycisk#}
-    const formAddAvailableBookingDateModal = document.getElementById('addAvailableBookingDateForm')
-    formAddAvailableBookingDateModal.addEventListener('submit', (e) => {
-        validationModalForm('addAvailableBookingDateModal', e)
-        console.log("WYSZEDL przycisk")
+    const formaddAvailableBookingDateModal = document.getElementById('addAvailableBookingDateForm')
+    formaddAvailableBookingDateModal.addEventListener('submit', (e) => {
+        console.log("Wykonala sie walidacja addBtn")
+        validationModalForm('addAvailableBookingDateModal', e, false)
     });
     {#Skrypt odpowiadajacy za walidacje dat i czasow w w edytowaniu wolnego terminu#}
-    const formEditAvailableBookingDateModal = document.getElementById('editAvailableBookingDateForm')
-    formEditAvailableBookingDateModal.addEventListener('submit', (e) => {
-        validationModalForm('editAvailableBookingDateModal', e)
-        console.log("WYKONALO SIE edit")
+    const formeditAvailableBookingDateModal = document.getElementById('editAvailableBookingDateForm')
+    formeditAvailableBookingDateModal.addEventListener('submit', (e) => {
+        console.log("Wykonala sie walidacja edit")
+        validationModalForm('editAvailableBookingDateModal', e, false)
     });
+    {#Skrypt odpowiadajacy za walidacje czasow i dat przy rezerwacji terminu skladajacego sie z kilku dni#}
+    const formreservePartMultipleDaysBookingDateModal = document.getElementById('reservePartMultipleDaysBookingDateForm')
+    formreservePartMultipleDaysBookingDateModal.addEventListener('submit', (e) => {
+        console.log("Wykonala sie walidacja wiely dni reservePartMultipleDaysBookingDateModal")
+        validationModalForm('reservePartMultipleDaysBookingDateModal', e, true)
+    });
+    {#Skrypt odpowiadajacy za walidacje czasow przy rezerwacji terminu skladajacego sie z pojedynczego dnia#}
+    const formreservePartSingleDayBookingDateModal = document.getElementById('reservePartSingleDayBookingDateForm')
+    formreservePartSingleDayBookingDateModal.addEventListener('submit', (e) => {
+        console.log("Wykonala sie walidacja reservePartSingleDayBookingDateModal")
+        validationModalForm('reservePartSingleDayBookingDateModal', e, true)
+    });
+    {#Skrypt odpowiadajacy za walidacje czasow przy proponowaniu terminu przez kalendarz#}
+    const formaddDesiredReservationDateByCalendarModal = document.getElementById('addDesiredReservationDateByCalendarForm')
+    formaddDesiredReservationDateByCalendarModal.addEventListener('submit', (e) => {
+        console.log("Wykonala sie walidacja addDesiredReservationDateByCalendarModal")
+        validationModalForm('addDesiredReservationDateByCalendarModal', e, false)
+    });
+    {#Skrypt odpowiadajacy za walidacje czasow przy proponowaniu terminu przez kalendarz#}
+    const formaddDesiredReservationDateModal = document.getElementById('addDesiredReservationDateForm')
+    formaddDesiredReservationDateModal.addEventListener('submit', (e) => {
+        console.log("Wykonala sie walidacja addDesiredReservationDateModal")
+        validationModalForm('addDesiredReservationDateModal', e, false)
+    });
+    {#Skrypt odpowiadajacy za walidacje czasow przy proponowaniu terminu przez kalendarz#}
+    const formeditDesiredReservationDateModal = document.getElementById('editDesiredReservationDateForm')
+    formeditDesiredReservationDateModal.addEventListener('submit', (e) => {
+        console.log("Wykonala sie walidacja editDesiredReservationDate")
+        validationModalForm('editDesiredReservationDateModal', e, false)
+    });
+    function validationModalForm(modalId, e, reservationValidation) {
+        const startTimeElement = document.getElementById('startTime'+modalId)
+        const endTimeElement = document.getElementById('endTime'+modalId)
+        const startDateElement = document.getElementById('startDate'+modalId)
+        const endDateElement = document.getElementById('endDate'+modalId)
+        const intervalTimeElement = document.getElementById('intervalTime'+modalId)
+        const breakBetweenIntervalsElement = document.getElementById('breakBetweenIntervals'+modalId)
+        const startTimeValue = startTimeElement.value;
+        const endTimeValue = endTimeElement.value;
+        let startDateValue = null;
+        if (startDateElement) { startDateValue = startDateElement.value; }
+        let endDateValue = null;
+        if (endDateElement) { endDateValue = endDateElement.value; }
+        let intervalTimeValue = null;
+        if (intervalTimeElement) { intervalTimeValue = intervalTimeElement.value; }
+        let breakBetweenIntervalsValue = null;
+        if (breakBetweenIntervalsElement) { breakBetweenIntervalsValue = breakBetweenIntervalsElement.value; }
+        console.log("DANE VALIDACI: ", startTimeValue, endTimeValue, startDateValue, endDateValue, intervalTimeValue, breakBetweenIntervalsValue)
+        let availableBookingStartTimeString;
+        let availableBookingEndTimeString;
+        if (reservationValidation) {
+            availableBookingStartTimeString = availableBookingData.startAvailableBookingDate.getHours() + ':' + availableBookingData.startAvailableBookingDate.getMinutes();
+            availableBookingEndTimeString = availableBookingData.endAvailableBookingDate.getHours() + ':' + availableBookingData.endAvailableBookingDate.getMinutes();
+        }
+        if( endDateValue && startDateValue){
+            if (compareDate(endDateValue, startDateValue) < 0){
+                e.preventDefault();
+                setError(startDateElement, "Data końcowa nie może być przed datą początku.")
+                return;
+            } else if (reservationValidation && (compareDate(startDateValue, availableBookingData.startAvailableBookingDate.toISOString().split('T')[0]) < 0 || compareDate(availableBookingData.endAvailableBookingDate.toISOString().split('T')[0], endDateValue) < 0)){
+                console.error('Data rezerwacji nie moze przekraczac daty dostepnego terminu');
+                e.preventDefault();
+                setError(startDateElement, "Data wykracza poza date dotępnego terminu.")
+                return;
+            } else {
+                setSuccess(startDateElement);
+            }
+            if (compareDate(endDateValue, startDateValue) === 0 && compareTime(endTimeValue, startTimeValue) <= 0) {
+                e.preventDefault();
+                setError(startTimeElement, "Czas końcowy nie może być przed czasem początku.")
+                return;
+            } else if (reservationValidation && (compareTime(startTimeValue, availableBookingStartTimeString) < 0 || compareTime(availableBookingEndTimeString, endTimeValue) < 0)){
+                console.error('Czas rezerwacji nie moze przekraczac czasu dostepnego terminu');
+                e.preventDefault();
+                setError(startTimeElement, "Czas wykracza poza czas dotępnego terminu.")
+                return;
+            } else {
+                setSuccess(startTimeElement);
+            }
+            //sprawdzenie czy start + n interwałów z przerwami = koniec
+            if (checkIfStartPlusIntervalsEqualEnd(startDateValue, startTimeValue, endDateValue, endTimeValue, intervalTimeValue, breakBetweenIntervalsValue)) {
+                setSuccess(endDateElement);
+            } else{
+                console.error("Zle przedzialy addCal: ", startDateValue, startTimeValue, endDateValue, endTimeValue, intervalTimeValue, breakBetweenIntervalsValue)
+                e.preventDefault();
+                setError(endDateElement, "Nieprawidłowy podział czasu.");
+                return;
+            }
+        } else {
+            if (compareTime(endTimeValue, startTimeValue) <= 0) {
+                console.error('End time cannot be earlier than start time or equal');
+                e.preventDefault();
+                setError(startTimeReservePartSingleDayBookingDateModal, "Czas końcowy nie może być przed czasem początku.")
+            } else if (compareTime(startTimeValue, availableBookingStartTimeString) < 0 || compareTime(availableBookingEndTimeString, endTimeValue) < 0){
+                console.error('Czas rezerwacji nie moze przekraczac czasu dostepnego terminu');
+                e.preventDefault();
+                setError(startTimeReservePartSingleDayBookingDateModal, "Czas wykracza poza czas dotępnego terminu.")
+            } else {
+                setSuccess(startTimeReservePartSingleDayBookingDateModal);
+            }
+        }
+    };
     {#    Script to add/close new available booking date or used to changeOptions with data then#}
     function openModal(modalId, data) {
         let modal = document.getElementById(modalId);
@@ -556,33 +616,11 @@
         openCloseModalAndFillInputsWithData('editDesiredReservationDateModal', 'changeOptionsDesiredReservationDateModal', false)
     };
     function openReservePartBookingDateModal() {
-
         if (availableBookingData.startAvailableBookingDate.getDate() === availableBookingData.endAvailableBookingDate.getDate()) {
             openCloseModalAndFillInputsWithData('reservePartSingleDayBookingDateModal', 'reservationOptionsModal', false)
         } else {
             openCloseModalAndFillInputsWithData('reservePartMultipleDaysBookingDateModal', 'reservationOptionsModal', false)
         }
-
-
-        {% comment %}closeModal('reservationOptionsModal');
-        let startDate = selectedEventInfo.event.start.toISOString().split('T')[0];
-        let startTime = selectedEventInfo.event.start.toISOString().split('T')[1].slice(0, 5);
-        let endDate = selectedEventInfo.event.end.toISOString().split('T')[0];
-        let endTime = selectedEventInfo.event.end.toISOString().split('T')[1].slice(0, 5);
-
-        if (availableBookingData.startAvailableBookingDate.getDate() === availableBookingData.endAvailableBookingDate.getDate()) {
-            $('#reservePartSingleDayBookingDateModal [name="startTime"]').val(startTime);
-            $('#reservePartSingleDayBookingDateModal [name="endTime"]').val(endTime);
-            openModal('reservePartSingleDayBookingDateModal');
-
-        } else {
-            $('#reservePartMultipleDaysBookingDateModal [name="startTime"]').val(startTime);
-            $('#reservePartMultipleDaysBookingDateModal [name="endTime"]').val(endTime);
-            $('#reservePartMultipleDaysBookingDateModal [name="startDate"]').val(startDate);
-            $('#reservePartMultipleDaysBookingDateModal [name="endDate"]').val(endDate);
-            openModal('reservePartMultipleDaysBookingDateModal');
-        }{% endcomment %}
-
     };
     function openCloseModalAndFillInputsWithData(openModalId, closeModalId, intervalsToo) {
         closeModal(closeModalId);
@@ -611,70 +649,4 @@
         closeModal('changeOptionsDesiredReservationDateModal');
         openModal('deleteDesiredReservationDateModal');
     };
-    {#Skrypt odpowiadajacy za walidacje czasow przy rezerwacji terminu skladajacego sie z pojedynczego dnia#}
-    const formReservePartSingleDayBookingDateModal = document.getElementById('reservePartSingleDayBookingDateForm')
-    const startTimeReservePartSingleDayBookingDateModal = document.getElementById('startTimeReservePartSingleDayBookingDateModal')
-    const endTimeReservePartSingleDayBookingDateModal = document.getElementById('endTimeReservePartSingleDayBookingDateModal')
-    formReservePartSingleDayBookingDateModal.addEventListener('submit', (e) => {
-        console.log("WYKONALa SIE walidacja")
-        const startTimeValue = startTimeReservePartSingleDayBookingDateModal.value;
-        const endTimeValue = endTimeReservePartSingleDayBookingDateModal.value;
-        const availableBookingStartTimeString = availableBookingData.startAvailableBookingDate.getHours() + ':' + availableBookingData.startAvailableBookingDate.getMinutes();
-        const availableBookingEndTimeString = availableBookingData.endAvailableBookingDate.getHours() + ':' + availableBookingData.endAvailableBookingDate.getMinutes();
-        if (compareTime(endTimeValue, startTimeValue) <= 0) {
-            console.error('End time cannot be earlier than start time or equal');
-            e.preventDefault();
-            setError(startTimeReservePartSingleDayBookingDateModal, "Czas końcowy nie może być przed czasem początku.")
-        } else if (compareTime(startTimeValue, availableBookingStartTimeString) < 0 || compareTime(availableBookingEndTimeString, endTimeValue) < 0){
-            console.error('Czas rezerwacji nie moze przekraczac czasu dostepnego terminu');
-            e.preventDefault();
-            setError(startTimeReservePartSingleDayBookingDateModal, "Czas wykracza poza czas dotępnego terminu.")
-        } else {
-            setSuccess(startTimeReservePartSingleDayBookingDateModal);
-        }
-    });
-    {#Skrypt odpowiadajacy za walidacje czasow i dat przy rezerwacji terminu skladajacego sie z kilku dni#}
-    const formReservePartMultipleDaysBookingDateModal = document.getElementById('reservePartMultipleDaysBookingDateForm')
-    const startTimeReservePartMultipleDaysBookingDateModal = document.getElementById('startTimeReservePartMultipleDaysBookingDateModal')
-    const endTimeReservePartMultipleDaysBookingDateModal = document.getElementById('endTimeReservePartMultipleDaysBookingDateModal')
-    const startDateReservePartMultipleDaysBookingDateModal = document.getElementById('startDateReservePartMultipleDaysBookingDateModal')
-    const endDateReservePartMultipleDaysBookingDateModal = document.getElementById('endDateReservePartMultipleDaysBookingDateModal')
-    formReservePartMultipleDaysBookingDateModal.addEventListener('submit', (e) => {
-        console.log("WYKONALa SIE walidacja")
-        const startTimeValue = startTimeReservePartMultipleDaysBookingDateModal.value;
-        const endTimeValue = endTimeReservePartMultipleDaysBookingDateModal.value;
-        const startDateValue = startDateReservePartMultipleDaysBookingDateModal.value;
-        const endDateValue = endDateReservePartMultipleDaysBookingDateModal.value;
-        const availableBookingStartTimeString = availableBookingData.startAvailableBookingDate.getHours() + ':' + availableBookingData.startAvailableBookingDate.getMinutes();
-        const availableBookingEndTimeString = availableBookingData.endAvailableBookingDate.getHours() + ':' + availableBookingData.endAvailableBookingDate.getMinutes();
-
-        console.log("Test")
-        console.log(startDateValue)
-        console.log(availableBookingData.startAvailableBookingDate.getDate())
-
-        if (compareDate(endDateValue, startDateValue) < 0){
-            e.preventDefault();
-            setError(startDateReservePartMultipleDaysBookingDateModal, "Data końcowa nie może być przed datą początku.")
-            return;
-        } else if (compareDate(startDateValue, availableBookingData.startAvailableBookingDate.toISOString().split('T')[0]) < 0 || compareDate(availableBookingData.endAvailableBookingDate.toISOString().split('T')[0], endDateValue) < 0){
-            console.error('Data rezerwacji nie moze przekraczac daty dostepnego terminu');
-            e.preventDefault();
-            setError(startTimeReservePartMultipleDaysBookingDateModal, "Data wykracza poza date dotępnego terminu.")
-            return;
-        } else {
-            setSuccess(startDateReservePartMultipleDaysBookingDateModal);
-        }
-
-        if (compareDate(endDateValue, startDateValue) === 0 && compareTime(endTimeValue, startTimeValue) <= 0) {
-            console.error('End time cannot be earlier than start time or equal');
-            e.preventDefault();
-            setError(startTimeReservePartMultipleDaysBookingDateModal, "Czas końcowy nie może być przed czasem początku.")
-        } else if (compareTime(startTimeValue, availableBookingStartTimeString) < 0 || compareTime(availableBookingEndTimeString, endTimeValue) < 0){
-            console.error('Czas rezerwacji nie moze przekraczac czasu dostepnego terminu');
-            e.preventDefault();
-            setError(startTimeReservePartMultipleDaysBookingDateModal, "Czas wykracza poza czas dotępnego terminu.")
-        } else {
-            setSuccess(startTimeReservePartMultipleDaysBookingDateModal);
-        }
-    });
 </script>
