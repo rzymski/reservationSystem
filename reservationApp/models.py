@@ -24,7 +24,7 @@ class AvailableBookingDate(models.Model):
     def clean(self):
         if self.start and self.end and self.start >= self.end:
             raise ValidationError("Nie można zatwierdzić terminu. Koniec jest przed startem.", code="EndBeforeStart")
-        if self.intervalTime:
+        if self.intervalTime and int(self.intervalTime) > 0:
             helpStartDate = self.start
             helpInterval = timedelta(minutes=int(self.intervalTime))
             helpBreakBetweenIntervals = timedelta(minutes=int(self.breakBetweenIntervals)) if self.breakBetweenIntervals else timedelta(minutes=0)
@@ -38,7 +38,7 @@ class AvailableBookingDate(models.Model):
         # Check consistency with related reservations
         if self.id:
             for reservation in self.reservation_set.filter(isAccepted=True):
-                if self.intervalTime and ((reservation.end - reservation.start) != timedelta(minutes=(int(self.intervalTime) + int(self.breakBetweenIntervals)))):
+                if self.intervalTime and int(self.intervalTime) > 0 and ((reservation.end - reservation.start) != timedelta(minutes=(int(self.intervalTime) + int(self.breakBetweenIntervals)))):
                     raise ValidationError(f"Dostepny termin posiada zatwierdzoną rezerwację z innym przedziałem czasowym.", code="durationMismatchWithReservation")
                 # Check if the is reservation with bigger range
                 if self.start > reservation.start or self.end < reservation.end:
@@ -71,7 +71,7 @@ class Reservation(models.Model):
             if conflicting_reservations.exists():
                 raise ValidationError("Nie można zatwierdzić rezerwacji. Następuje kolizja terminów.", code="conflict")
             # Check for mismatch between interval+break and duration time
-            if self.availableBookingDate.intervalTime:
+            if self.availableBookingDate.intervalTime and int(self.availableBookingDate.intervalTime) > 0:
                 if self.end - self.start != timedelta(minutes=(int(self.availableBookingDate.intervalTime) + int(self.availableBookingDate.breakBetweenIntervals))):
                     raise ValidationError("Nie można zatwierdzić rezerwacji. Czas rezerwacji nie pokrywa się z przedziałem czasowym dostępnego terminu.", code="durationMismatch")
             # Check if reservation time is in available bookind date range time
