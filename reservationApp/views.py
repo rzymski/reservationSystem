@@ -435,7 +435,6 @@ def addAvailableBookingDate(request):
             availableBookingDate.save()
         except ValidationError as e:
             messages.error(request, e.message)
-    ic("DZIALA")
     return redirect('index')
 
 

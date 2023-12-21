@@ -8,11 +8,8 @@
             <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 {#            Kalendarz z https://fullcalendar.io/docs/initialize-globals #}
             <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js'></script>
-{#            Flowbite nie wiem czy potrzebny czy tailwind nie wystarcza, ale niech zostatnie XD#}
-            <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/datepicker.min.js"></script>
-{#            Select2#}
-{#            <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />#}
-{#            <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>#}
+{#            Flowbite chyba i tak nie dziala wiec zaakomentuje nie wiem czy potrzebny czy tailwind nie wystarcza, ale niech zostatnie XD#}
+{#            <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/datepicker.min.js"></script>#}
 
             {% load static %}
             <link rel="stylesheet" type="text/css" href="{% static 'myCSS/calendar.css' %}">
@@ -82,6 +79,8 @@
                 {% include 'desiredReservationDate/addDesiredReservationDate.html' %}
 
                 {% include 'dragEvent/confirmOrRejectDrag.html' %}
+
+                {% include 'ajax/addEdit.html' %}
             </div>
             <div style="height: calc(100vh - 10rem)">
                 <div id='calendar' class="dark:text-white bg-gray-100 dark:bg-gray-600"></div>

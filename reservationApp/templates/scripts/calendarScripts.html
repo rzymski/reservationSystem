@@ -10,6 +10,7 @@
     let polishMonths = ["Styczeń", "Luty", "Marzec", "Kwiecień", "Maj", "Czerwiec", "Lipiec", "Sierpień", "Wrzesień", "Październik", "Listopad", "Grudzień"];
     let availableBookingData;
     let dragEventData;
+    let ajaxUrl;
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
         calendar = new FullCalendar.Calendar(calendarEl, {
@@ -77,8 +78,42 @@
                     dayHeaderContent: myDaydayHeaderContent,
                 },
             },
-            {#dodawanie dostepnych terminow#}
+
             select: function (data){
+                if ("{{ request.user }}" === 'AnonymousUser') { return; }
+                let modalId = "AddEditModal"
+                if (currentUserRole !== "client")
+                {
+                    console.log("Wykonalo sie dodanie dostepnego terminu")
+                    openModalNewVersion(modalId, '/addAvailableBookingDate/', null, 'Dodaj dostępny termin świadczenie usług', 'Dodaj dostępny termin świadczenie usług', true)
+                } else {
+                    console.log("Dodaj propozycje rezerwacji")
+                    openModalNewVersion(modalId, '/addDesiredReservationDate/', null, 'Dodaj propozycje nowego terminu', 'Dodaj propozycje nowego terminu', false)
+                }
+                let selectedView = calendar.view.type;
+                const startDateTime = new Date(data.startStr)
+                let startDateOnly = startDateTime.toISOString().split('T')[0];
+                let startTimeOnly = startDateTime.toLocaleTimeString().slice(0, 5);
+                const endDateTime = new Date(data.endStr)
+                if (selectedView === 'dayGridMonth') { endDateTime.setDate(endDateTime.getDate() - 1) }
+                let endDateOnly = endDateTime.toISOString().split('T')[0];
+                let endTimeOnly = endDateTime.toLocaleTimeString().slice(0, 5);
+                if (selectedView !== 'dayGridMonth'){
+                    console.log("OK")
+                    {#dotyczy widoku kalendarza widoku tygodniowego/dniowego gdzie uzupelnia od razu godzine startu i konca#}
+                    $('#'+modalId+' [name="startTime"]').val(startTimeOnly);
+                    $('#'+modalId+' [name="endTime"]').val(endTimeOnly);
+                } else {
+                    {#$('#addAvailableBookingDateByCalendarModal [name="startTime"]').val('12:00');#}
+                    {#$('#addAvailableBookingDateByCalendarModal [name="endTime"]').val('23:00');#}
+                }
+                $('#startDate'+modalId).val(startDateOnly);
+                $('#endDate'+modalId).val(endDateOnly);
+                openModal(modalId)
+            },
+
+            {#dodawanie dostepnych terminow#}
+            {% comment %}select: function (data){
                 if ("{{ request.user }}" === 'AnonymousUser') { return; }
                 let modalName = ""
                 if (currentUserRole !== "client")
@@ -109,7 +144,8 @@
                 $('#startDate'+modalName).val(startDateOnly);
                 $('#endDate'+modalName).val(endDateOnly);
                 openModal(modalName)
-            },
+            },{% endcomment %}
+
             {#edycja/usuwanie dostepnych terminow#}
             eventClick: function (info) {
                 if ("{{ request.user }}" === 'AnonymousUser') { return; }
@@ -393,6 +429,95 @@
             }
         });
     };
+
+
+    function openModalNewVersion(modalId, url, data=null, titleText="", buttonText="", datesDisplay=false) {
+        let modal = document.getElementById(modalId);
+        ajaxUrl = url
+        let title = modal.querySelector('#title'+modalId);
+        title.textContent = titleText
+        let btnText = modal.querySelector('#btnText'+modalId);
+        btnText.textContent = buttonText
+        console.log("Dates display =", datesDisplay)
+        if (datesDisplay) {
+            document.getElementById('endDateContainer'+modalId).classList.remove("hidden");
+            document.getElementById('startDateContainer'+modalId).classList.remove("hidden");
+            document.getElementById('endTimeContainer'+modalId).classList.remove("col-span-2","sm:col-span-2");
+            document.getElementById('startTimeContainer'+modalId).classList.remove("col-span-2","sm:col-span-2");
+
+            document.getElementById('endDateContainer'+modalId).classList.add("col-span-2","sm:col-span-1");
+            document.getElementById('startDateContainer'+modalId).classList.add("col-span-2","sm:col-span-1");
+            document.getElementById('endTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-1");
+            document.getElementById('startTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-1");
+        } else {
+            document.getElementById('endDateContainer'+modalId).classList.add("hidden");
+            document.getElementById('startDateContainer'+modalId).classList.add("hidden");
+            document.getElementById('endTimeContainer'+modalId).classList.remove("col-span-2","sm:col-span-2");
+            document.getElementById('startTimeContainer'+modalId).classList.remove("col-span-2","sm:col-span-2");
+            document.getElementById('endTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-1");
+            document.getElementById('startTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-1");
+        }
+        if(data){
+            if (data.serviceProviderId !== -1){
+                openModalFillServiceProviderData(modal, data, modalId)
+            }
+            if (data.clientId !== -1) {
+                reserveOpenModalFillClientData(modal, data, modalId)
+            }
+            if (data.intervalTimeInt && data.intervalTimeInt != 0 && modalId !== 'changeOptionsAvailableBookingDateModal' && modalId !== 'confirmOrRejectReservationModal' && modalId !== 'confirmOrRejectDragModal') {
+                console.log("DOSTALES =", modalId, modal)
+                reserveIntervalOpenModalFillIntervalData(modal, data, modalId)
+            }
+            openModalFillDateTimeData(modalId, data, 'dateRange'+modalId)
+        }
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    };
+    {#Skrypt walidujący addEdit #}
+    {% comment %}const formaddEditModal = document.getElementById('addEditModal')
+    formaddEditModal.addEventListener('submit', (e) => {
+        console.log("Wykonala sie walidacja addEdit")
+        validationModalForm('addEditModal', e, false)
+    });{% endcomment %}
+    function addEdit(modalId) {
+        let con = validationModalForm(modalId, null, false)
+        if (con) {
+            closeModal(modalId)
+            let data = getAllDataFromTemplate(modalId)
+            passDataByAJAX(ajaxUrl, data)
+            //calendar.refetchEvents();
+            setTimeout(function () { calendar.refetchEvents(); }, 250);
+        }
+    }
+    function getAllDataFromTemplate(modalId){
+        const startTimeElement = document.getElementById('startTime'+modalId)
+        const endTimeElement = document.getElementById('endTime'+modalId)
+        const startDateElement = document.getElementById('startDate'+modalId)
+        const endDateElement = document.getElementById('endDate'+modalId)
+        const intervalTimeElement = document.getElementById('intervalTime'+modalId)
+        const breakBetweenIntervalsElement = document.getElementById('breakBetweenIntervals'+modalId)
+        const startTimeValue = startTimeElement.value;
+        const endTimeValue = endTimeElement.value;
+        let startDateValue = null;
+        if (startDateElement) { startDateValue = startDateElement.value; }
+        let endDateValue = null;
+        if (endDateElement) { endDateValue = endDateElement.value; }
+        let intervalTimeValue = null;
+        if (intervalTimeElement) { intervalTimeValue = intervalTimeElement.value; }
+        let breakBetweenIntervalsValue = null;
+        if (breakBetweenIntervalsElement) { breakBetweenIntervalsValue = breakBetweenIntervalsElement.value; }
+        console.log("DANE VALIDACI: ", startTimeValue, endTimeValue, startDateValue, endDateValue, intervalTimeValue, breakBetweenIntervalsValue)
+        data = {
+            'startTime': startTimeValue,
+            'endTime': endTimeValue,
+            'startDate': startDateValue,
+            'endDate': endDateValue,
+            'intervalTime': intervalTimeValue,
+            'breakBetweenIntervals': breakBetweenIntervalsValue,
+        }
+        return data
+    }
+
     function fillCurrentTime(containerValue, inputValue) {
         const now = new Date();
         const hours = now.getHours().toString().padStart(2, '0');
@@ -413,7 +538,7 @@
         return date1.localeCompare(date2);
     }
     const setError = (element, message) => {
-        console.log("Ser error work")
+        console.log("Set error work")
         const inputControl = element.parentElement.parentElement.parentElement;
         const errorDisplay = inputControl.querySelector('.error');
         errorDisplay.innerText = message;
@@ -523,26 +648,26 @@
         }
         if( endDateValue && startDateValue){
             if (compareDate(endDateValue, startDateValue) < 0){
-                e.preventDefault();
+                if (e) { e.preventDefault(); }
                 setError(startDateElement, "Data końcowa nie może być przed datą początku.")
-                return;
+                return false;
             } else if (reservationValidation && (compareDate(startDateValue, availableBookingData.startAvailableBookingDate.toISOString().split('T')[0]) < 0 || compareDate(availableBookingData.endAvailableBookingDate.toISOString().split('T')[0], endDateValue) < 0)){
                 console.error('Data rezerwacji nie moze przekraczac daty dostepnego terminu');
-                e.preventDefault();
+                if (e) { e.preventDefault(); }
                 setError(startDateElement, "Data wykracza poza date dotępnego terminu.")
-                return;
+                return false;
             } else {
                 setSuccess(startDateElement);
             }
             if (compareDate(endDateValue, startDateValue) === 0 && compareTime(endTimeValue, startTimeValue) <= 0) {
-                e.preventDefault();
+                if (e) { e.preventDefault(); }
                 setError(startTimeElement, "Czas końcowy nie może być przed czasem początku.")
-                return;
+                return false;
             } else if (reservationValidation && (compareTime(startTimeValue, availableBookingStartTimeString) < 0 || compareTime(availableBookingEndTimeString, endTimeValue) < 0)){
                 console.error('Czas rezerwacji nie moze przekraczac czasu dostepnego terminu');
-                e.preventDefault();
+                if (e) { e.preventDefault(); }
                 setError(startTimeElement, "Czas wykracza poza czas dotępnego terminu.")
-                return;
+                return false;
             } else {
                 setSuccess(startTimeElement);
             }
@@ -551,23 +676,26 @@
                 setSuccess(endDateElement);
             } else{
                 console.error("Zle przedzialy addCal: ", startDateValue, startTimeValue, endDateValue, endTimeValue, intervalTimeValue, breakBetweenIntervalsValue)
-                e.preventDefault();
+                if (e) { e.preventDefault(); }
                 setError(endDateElement, "Nieprawidłowy podział czasu.");
-                return;
+                return false;
             }
         } else {
             if (compareTime(endTimeValue, startTimeValue) <= 0) {
                 console.error('End time cannot be earlier than start time or equal');
-                e.preventDefault();
+                if (e) { e.preventDefault(); }
                 setError(startTimeReservePartSingleDayBookingDateModal, "Czas końcowy nie może być przed czasem początku.")
+                return false;
             } else if (compareTime(startTimeValue, availableBookingStartTimeString) < 0 || compareTime(availableBookingEndTimeString, endTimeValue) < 0){
                 console.error('Czas rezerwacji nie moze przekraczac czasu dostepnego terminu');
-                e.preventDefault();
+                if (e) { e.preventDefault(); }
                 setError(startTimeReservePartSingleDayBookingDateModal, "Czas wykracza poza czas dotępnego terminu.")
+                return false;
             } else {
                 setSuccess(startTimeReservePartSingleDayBookingDateModal);
             }
         }
+        return true;
     };
     {#    Script to add/close new available booking date or used to changeOptions with data then#}
     function openModal(modalId, data) {
@@ -681,6 +809,8 @@
             $('#'+openModalId+' [name="breakBetweenIntervals"]').val(selectedEventInfo.event.extendedProps.breakBetweenIntervals);
             console.log("ISTNIEJE =", selectedEventInfo.event.extendedProps.intervalTimeInt, selectedEventInfo.event.extendedProps.breakBetweenIntervals)
         }
+
+        {#openModalNewVersion('AddEditModal', '/addAvailableBookingDate/', null, 'Abra kadabra', 'Czary', false)#}
         openModal(openModalId)
     }
     function openDeleteAvailableBookingDateModal() {
