@@ -70,6 +70,7 @@ class Reservation(models.Model):
             ).exclude(pk=self.pk)  # Exclude self if instance is being updated
             if conflicting_reservations.exists():
                 raise ValidationError("Nie można zatwierdzić rezerwacji. Następuje kolizja terminów.", code="conflict")
+        if self.availableBookingDate:
             # Check for mismatch between interval+break and duration time
             if self.availableBookingDate.intervalTime and int(self.availableBookingDate.intervalTime) > 0:
                 if self.end - self.start != timedelta(minutes=(int(self.availableBookingDate.intervalTime) + int(self.availableBookingDate.breakBetweenIntervals))):

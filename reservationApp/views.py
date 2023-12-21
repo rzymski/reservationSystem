@@ -181,8 +181,8 @@ def reserveEntireBookingDate(request):
     return redirect('index')
 
 
-def allReservationsWithoutServiceProvider(request, allServiceProviders=True, selectedIds=None):
-    reservations = Reservation.objects.filter(availableBookingDate__isnull=True) if allServiceProviders else Reservation.objects.filter(availableBookingDate__isnull=True, availableBookingDate__user__id__in=selectedIds)
+def allReservationsWithoutServiceProvider(request):
+    reservations = Reservation.objects.filter(availableBookingDate__isnull=True)
     out = []
     for reservation in reservations:
         out.append({
@@ -202,6 +202,8 @@ def allReservationsWithoutServiceProvider(request, allServiceProviders=True, sel
             'intervalTimeString': None,
             'breakBetweenIntervals': 0,
             'editable': True,
+            'availableBookingDateStart': None,
+            'availableBookingDateEnd': None,
         })
     return JsonResponse(out, safe=False)
 
@@ -223,10 +225,12 @@ def allUnconfirmedReservations(request, allServiceProviders=True, selectedIds=No
             'clientId': reservation.bookingPerson.id,
             'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
             'eventType': 1,
-            'intervalTimeInt': None,
-            'intervalTimeString': None,
+            'intervalTimeInt': reservation.availableBookingDate.intervalTime,
+            'intervalTimeString': getTimeStringValue(reservation.availableBookingDate.intervalTime),
             'breakBetweenIntervals': 0,
             'editable': False,
+            'availableBookingDateStart': reservation.availableBookingDate.start,
+            'availableBookingDateEnd': reservation.availableBookingDate.end,
         })
     return JsonResponse(out, safe=False)
 
@@ -248,10 +252,12 @@ def allConfirmedReservations(request, allServiceProviders=True, selectedIds=None
             'clientId': reservation.bookingPerson.id,
             'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
             'eventType': 2,
-            'intervalTimeInt': None,
-            'intervalTimeString': None,
+            'intervalTimeInt': reservation.availableBookingDate.intervalTime,
+            'intervalTimeString': getTimeStringValue(reservation.availableBookingDate.intervalTime),
             'breakBetweenIntervals': 0,
             'editable': False,
+            'availableBookingDateStart': reservation.availableBookingDate.start,
+            'availableBookingDateEnd': reservation.availableBookingDate.end,
         })
     return JsonResponse(out, safe=False)
 
@@ -280,6 +286,8 @@ def allAvailableBookingDates(request, allServiceProviders=True, selectedIds=None
                 'intervalTimeString': getTimeStringValue(availableBookingDate.intervalTime),
                 'breakBetweenIntervals': availableBookingDate.breakBetweenIntervals,
                 'editable': possibleDragging,
+                'availableBookingDateStart': None,
+                'availableBookingDateEnd': None,
             })
     return JsonResponse(out, safe=False)
 
@@ -309,42 +317,6 @@ def filterServiceProviders(request):
     return redirect('index')
 
 
-# @login_required(login_url='login')
-# def dragEvent(request):
-#     ic("Przeciagnieto")
-#     if request.method == 'POST':
-#         ic(request.POST)
-#         newStartJson = request.POST.get('newStart')
-#         newStartString = json.loads(newStartJson)
-#         newEndJson = request.POST.get('newEnd')
-#         newEndString = json.loads(newEndJson)
-#         newStartDate = datetime.strptime(newStartString, '%d/%m/%Y %H:%M')
-#         newEndDate = datetime.strptime(newEndString, '%d/%m/%Y %H:%M')
-#         eventIdJSON = request.POST.get('selectedEvent')
-#         eventId = int(json.loads(eventIdJSON))
-#         eventTypeJSON = request.POST.get('eventType')
-#         eventType = int(json.loads(eventTypeJSON))
-#         ic(newStartDate, newEndDate, eventId, eventType)
-#         if eventType == 0:
-#             availableBookingDate = AvailableBookingDate.objects.get(id=eventId)
-#             try:
-#                 availableBookingDate.start = newStartDate
-#                 availableBookingDate.end = newEndDate
-#                 availableBookingDate.save()
-#             except ValidationError as e:
-#                 ic("JEST ERROR?", e)
-#                 messages.error(request, e.message)
-#         if eventType == 3:
-#             reservation = Reservation.objects.get(id=eventId)
-#             try:
-#                 reservation.start = newStartDate
-#                 reservation.end = newEndDate
-#                 reservation.save()
-#             except ValidationError as e:
-#                 ic("JEST ERROR?", e)
-#                 messages.error(request, e.message)
-#     return redirect('index')
-
 @login_required(login_url='login')
 def dragEvent(request):
     ic("Przeciagnieto")
@@ -368,7 +340,7 @@ def dragEvent(request):
             except ValidationError as e:
                 ic("JEST ERROR?", e)
                 messages.error(request, e.message)
-        if eventType == 3:
+        if eventType == 3 or eventType == 1:
             reservation = Reservation.objects.get(id=eventId)
             try:
                 reservation.start = newStartDate

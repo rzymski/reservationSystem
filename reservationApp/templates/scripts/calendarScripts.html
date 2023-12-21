@@ -113,7 +113,7 @@
             {#edycja/usuwanie dostepnych terminow#}
             eventClick: function (info) {
                 if ("{{ request.user }}" === 'AnonymousUser') { return; }
-                currentUserId = {{ request.user.id }}
+                currentUserId = {{ request.user.id }};
                 console.log("WYKONALO SIE klikniecie eventu");
                 let serviceProviderId = info.event.extendedProps.serviceProviderId;
                 let clientId = info.event.extendedProps.clientId;
@@ -145,6 +145,7 @@
                     openModal('reserveIntervalOfBookingDateModal', availableBookingData);
                 } else if (eventType === 1 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) { //potwierdzenie rezerwacji
                     $('#confirmOrRejectReservationId').val(info.event.id)
+                    console.log("DOBRZE")
                     openModal('confirmOrRejectReservationModal', availableBookingData)
                 } else if (eventType === 1 && (serviceProviderId === currentUserId || clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) { //usuwanie niepotwierdzonej rezerwacji
                     console.log("USUN niepotwierdzona rezerwacje")
@@ -172,6 +173,28 @@
                 }
                 console.log(currentUserRole);
             },
+            eventMouseEnter: function (info) {
+                //console.log("HOVER")
+                let hoveredEvent = info.event;
+                if ("{{ request.user }}" === 'AnonymousUser') { hoveredEvent.setProp('editable', false); return; }
+                currentUserId = {{ request.user.id }};
+                let serviceProviderId = hoveredEvent.extendedProps.serviceProviderId;
+                let clientId = hoveredEvent.extendedProps.clientId;
+                let eventType = hoveredEvent.extendedProps.eventType;
+                //console.log("SPRAWDZONO KTO TO: ",serviceProviderId, clientId, eventType, currentUserId, currentUserRole)
+                if(eventType == 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ // uslugodawca przesuwa swoj dostepny termin
+                    //console.log("Wlasciciel servieProvider")
+                    hoveredEvent.setProp('editable', true)
+                    return;
+                }
+                if((eventType == 3 || eventType == 1) && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ // klient przesuwa swoja propozycje
+                    //console.log("Wlasciciel client")
+                    hoveredEvent.setProp('editable', true)
+                    return;
+                }
+                //console.log("Nie ma uprawnien do przesuwania tego")
+                hoveredEvent.setProp('editable', false)
+            },
             eventDrop: function (info) {
                 if ("{{ request.user }}" === 'AnonymousUser') { return; }
                 currentUserId = {{ request.user.id }}
@@ -183,12 +206,45 @@
                 selectedBookingDateId = info.event.id
                 selectedEventInfo = info
                 let oldDate = new Date(info.oldEvent.start.setMinutes(info.oldEvent.start.getMinutes() + info.oldEvent.start.getTimezoneOffset()));
-                let oldString = `${oldDate.getDate()}/${oldDate.getMonth()+1}/${oldDate.getFullYear()} ${oldDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`
+                let oldString = `${oldDate.getDate()}/${oldDate.getMonth()+1}/${oldDate.getFullYear()} ${oldDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`;
                 let startDate = new Date(info.event.start.setMinutes(info.event.start.getMinutes() + info.event.start.getTimezoneOffset()));
-                let startString = `${startDate.getDate()}/${startDate.getMonth()+1}/${startDate.getFullYear()} ${startDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`
+                let startString = `${startDate.getDate()}/${startDate.getMonth()+1}/${startDate.getFullYear()} ${startDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`;
                 let endDate = new Date(info.event.end.setMinutes(info.event.end.getMinutes() + info.event.end.getTimezoneOffset()));
-                let endString = `${endDate.getDate()}/${endDate.getMonth()+1}/${endDate.getFullYear()} ${endDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`
-                if ((eventType === 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) || (eventType === 3 && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller"))){ //edycja/usuwanie dostępnego terminu
+                let endString = `${endDate.getDate()}/${endDate.getMonth()+1}/${endDate.getFullYear()} ${endDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`;
+                let minStart = new Date(info.event.extendedProps.availableBookingDateStart);
+                let maxEnd = new Date(info.event.extendedProps.availableBookingDateEnd);
+                let intervalTimeInt = info.event.extendedProps.intervalTimeInt;
+                let intervalTimeValue = 0;
+                if ( info.event.extendedProps.intervalTimeInt ) { intervalTimeValue = parseInt(info.event.extendedProps.intervalTimeInt, 10) }
+                let breakBetweenIntervalsValue = 0;
+                if ( info.event.extendedProps.breakBetweenIntervals ) { breakBetweenIntervalsValue = parseInt(info.event.extendedProps.breakBetweenIntervals, 10) }
+                const totalMinutes = (intervalTimeValue + breakBetweenIntervalsValue);
+                let validationFailed = true;
+                if (eventType === 1 && (startDate < minStart || endDate > maxEnd)){
+                    console.log("Przekroczono zakres mozliwej daty", info.event.start, minStart)
+                    console.log(info.event.end, maxEnd)
+                    info.revert()
+                    return;
+                }
+                console.log("Interval =", intervalTimeInt, typeof(intervalTimeInt))
+                if (eventType === 1 && (intervalTimeInt)){
+                    let startDateHelp = new Date(info.event.start.setMinutes(info.event.start.getMinutes() + info.event.start.getTimezoneOffset()));
+                    while (startDateHelp < maxEnd) {
+                        startDateHelp.setMinutes(startDateHelp.getMinutes() + totalMinutes);
+                        if (startDateHelp.getTime() === maxEnd.getTime()) {
+                            console.log("Petla", startDateHelp, maxEnd)
+                            validationFailed = false;
+                            break;
+                        }
+                    }
+                    if(validationFailed){
+                        console.log("Probowano przeciagnac poza przedzial", info.event.start, intervalTimeInt)
+                        info.revert()
+                        return;
+                    }
+                }
+                if ((eventType === 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller"))
+                    || ((eventType === 3 || eventType === 1) && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller"))){
                     dragEventData = {
                         'selectedDragEventId': info.event.id,
                         'newStart': startString,
@@ -516,6 +572,7 @@
     {#    Script to add/close new available booking date or used to changeOptions with data then#}
     function openModal(modalId, data) {
         let modal = document.getElementById(modalId);
+        console.log("Modalid =", modalId)
         console.log("Data = ", data)
         if(data){
             if (data.serviceProviderId !== -1){
@@ -524,7 +581,7 @@
             if (data.clientId !== -1) {
                 reserveOpenModalFillClientData(modal, data, modalId)
             }
-            if (data.intervalTimeInt && data.intervalTimeInt != 0 && modalId !== 'changeOptionsAvailableBookingDateModal') {
+            if (data.intervalTimeInt && data.intervalTimeInt != 0 && modalId !== 'changeOptionsAvailableBookingDateModal' && modalId !== 'confirmOrRejectReservationModal' && modalId !== 'confirmOrRejectDragModal') {
                 console.log("DOSTALES =", modalId, modal)
                 reserveIntervalOpenModalFillIntervalData(modal, data, modalId)
             }
@@ -594,21 +651,6 @@
             startDateTerms.setMinutes(startDateTerms.getMinutes() + intervalTime + breakBetweenIntervals);
         }
     };
-    function closeModal(modalId) {
-        let modal = document.getElementById(modalId);
-        modal.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
-    };
-    function dragEventConfirmOrReject(modalId, confirm) {
-        closeModal(modalId)
-        if(confirm) {
-            console.log("Potwierdzono")
-            passDataByAJAX('/dragEvent/', dragEventData)
-        } else {
-            selectedEventInfo.revert()
-            console.log("Tu powinno przywrocic pozycje eventu")
-        }
-    };
     function editAvailableBookingDate() {
         openCloseModalAndFillInputsWithData('editAvailableBookingDateModal', 'changeOptionsAvailableBookingDateModal', true)
     };
@@ -648,5 +690,20 @@
     function openDeleteDesiredReservationDateModal() {
         closeModal('changeOptionsDesiredReservationDateModal');
         openModal('deleteDesiredReservationDateModal');
+    };
+    function closeModal(modalId) {
+        let modal = document.getElementById(modalId);
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    };
+    function dragEventConfirmOrReject(modalId, confirm) {
+        closeModal(modalId)
+        if(confirm) {
+            console.log("Potwierdzono")
+            passDataByAJAX('/dragEvent/', dragEventData)
+        } else {
+            selectedEventInfo.revert()
+            console.log("Tu powinno przywrocic pozycje eventu")
+        }
     };
 </script>
