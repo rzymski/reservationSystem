@@ -19,7 +19,7 @@
             <img id="avatarButton" type="button" data-dropdown-toggle="userDropdown" data-dropdown-placement="bottom-start" class="w-14 h-14 rounded-full cursor-pointer mr-10 border border-slate-600 dark:border-slate-700" src="{{ profileImageUrl }}" alt="User dropdown">
             <!-- Dropdown menu -->
             <div id="userDropdown" class="absolute z-10 hidden bg-gray-50 divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600 top-16">
-                <div class="px-4 py-3 font-semibold text-gray-900 dark:text-white">
+                <div class="px-4 py-3 font-bold text-xl text-gray-900 dark:text-white">
                     <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }}</a>
                 </div>
                 {% if userRole == 'admin' %}

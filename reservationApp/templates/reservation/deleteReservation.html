@@ -11,10 +11,16 @@
                 <svg class="mx-auto mb-4 text-gray-900 w-12 h-12 dark:text-gray-50" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"/>
                 </svg>
-                <h3 class="mb-5 text-lg font-normal text-gray-900 dark:text-gray-50">Czy na pewno chcesz usunąć ten dostępny termin?</h3>
+                <h3 class="mb-5 text-lg font-normal text-gray-900 dark:text-gray-50">Czy na pewno chcesz usunąć tą zatwierdzoną rezerwację?</h3>
                 <form method="post" action="{% url 'deleteReservation' %}" id="deleteReservationForm">
                     {% csrf_token %}
                     <input type="hidden" name="selectedReservationId" id="deleteReservationId" value="">
+{#                    <select id="deleteOptionsdeleteReservationModal" name="deleteOptions" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">#}
+{#                        <option value="" selected="">Opcja co usunąć</option>#}
+{#                        {% for value, textValue in deleteOptions %}#}
+{#                            <option value="{{ value }}">{{ textValue }}</option>#}
+{#                        {% endfor %}#}
+{#                    </select>#}
                     <button id="saveDeleteReservationBtn" type="submit" class="text-gray-50 bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-bold rounded-lg text-xl inline-flex items-center px-4 py-2.5 text-center me-2">
                         Tak, usuń to
                     </button>

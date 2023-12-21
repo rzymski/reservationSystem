@@ -36,7 +36,7 @@ def geRangeTimeStrings(start, end, increase):
 
 
 def getTimeStringValue(timeIntValue):
-    if timeIntValue == None:
+    if timeIntValue is None:
         return None
     timeStringValue = ''
     if timeIntValue // 60:
@@ -45,3 +45,53 @@ def getTimeStringValue(timeIntValue):
         timeStringValue += f' {timeIntValue % 60} minut'
     return timeStringValue
 
+
+def saveReservationWhichCouldBePartOfAvailableBookingData(reservation):
+    availableBookingDate = reservation.availableBookingDate
+    try:
+        if availableBookingDate.start != reservation.start or availableBookingDate.end != reservation.end:
+            availableBookingDateBeforeReservation = None
+            availableBookingDateAfterReservation = None
+            availableBookingDateInReservationTime = AvailableBookingDate.objects.create(
+                user=availableBookingDate.user,
+                start=reservation.start,
+                end=reservation.end,
+                intervalTime=availableBookingDate.intervalTime,
+                breakBetweenIntervals=availableBookingDate.breakBetweenIntervals
+            )
+            if availableBookingDate.start != reservation.start:
+                availableBookingDateBeforeReservation = AvailableBookingDate.objects.create(
+                    user=availableBookingDate.user,
+                    start=availableBookingDate.start,
+                    end=reservation.start,
+                    intervalTime=availableBookingDate.intervalTime,
+                    breakBetweenIntervals=availableBookingDate.breakBetweenIntervals
+                )
+            if availableBookingDate.end != reservation.end:
+                availableBookingDateAfterReservation = AvailableBookingDate.objects.create(
+                    user=availableBookingDate.user,
+                    start=reservation.end,
+                    end=availableBookingDate.end,
+                    intervalTime=availableBookingDate.intervalTime,
+                    breakBetweenIntervals=availableBookingDate.breakBetweenIntervals
+                )
+            reservation.availableBookingDate = availableBookingDateInReservationTime
+            reservation.isAccepted = True
+            reservation.save()
+            otherReservations = Reservation.objects.filter(availableBookingDate=availableBookingDate).exclude(id=reservation.id)
+            for otherReservation in otherReservations:
+                if availableBookingDateBeforeReservation and availableBookingDateBeforeReservation.start <= otherReservation.start and otherReservation.end <= availableBookingDateBeforeReservation.end:
+                    otherReservation.availableBookingDate = availableBookingDateBeforeReservation
+                elif availableBookingDateAfterReservation and availableBookingDateAfterReservation.start <= otherReservation.start and otherReservation.end <= availableBookingDateAfterReservation.end:
+                    otherReservation.availableBookingDate = availableBookingDateAfterReservation
+                elif availableBookingDateInReservationTime.start <= otherReservation.start and otherReservation.end <= availableBookingDateInReservationTime.end:
+                    otherReservation.availableBookingDate = availableBookingDateInReservationTime
+                else:
+                    otherReservation.availableBookingDate = None
+                otherReservation.save()
+            availableBookingDate.delete()
+        else:
+            reservation.isAccepted = True
+            reservation.save()
+    except ValidationError as e:
+        return e.message

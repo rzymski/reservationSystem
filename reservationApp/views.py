@@ -23,7 +23,7 @@ def index(request):
 
     context = {
         'serviceProvidersWithImages': serviceProvidersWithImages,
-        'rangeFrom15to180increasesBy15': geRangeTimeStrings(15, 180, 15)
+        'rangeFrom15to180increasesBy15': geRangeTimeStrings(15, 180, 15),
     }
     return render(request, 'calendar/calendar.html', context)
 
@@ -64,11 +64,9 @@ def confirmOrRejectReservation(request):
         action = request.POST.get('action')
         ic(action)
         if action == 'confirm':
-            try:
-                reservation.isAccepted = True
-                reservation.save()
-            except ValidationError as e:
-                messages.error(request, e.message)
+            errorMessage = saveReservationWhichCouldBePartOfAvailableBookingData(reservation)
+            if errorMessage:
+                messages.error(request, errorMessage)
         if action == 'reject':
             reservation.delete()
     return redirect('index')
