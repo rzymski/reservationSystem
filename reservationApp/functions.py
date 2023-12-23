@@ -52,7 +52,7 @@ def saveReservationWhichCouldBePartOfAvailableBookingData(reservation):
         if availableBookingDate.start != reservation.start or availableBookingDate.end != reservation.end:
             availableBookingDateBeforeReservation = None
             availableBookingDateAfterReservation = None
-            availableBookingDateInReservationTime = AvailableBookingDate.objects.create(
+            availableBookingDateInReservationTime = AvailableBookingDate(
                 user=availableBookingDate.user,
                 start=reservation.start,
                 end=reservation.end,
@@ -60,7 +60,7 @@ def saveReservationWhichCouldBePartOfAvailableBookingData(reservation):
                 breakBetweenIntervals=availableBookingDate.breakBetweenIntervals
             )
             if availableBookingDate.start != reservation.start:
-                availableBookingDateBeforeReservation = AvailableBookingDate.objects.create(
+                availableBookingDateBeforeReservation = AvailableBookingDate(
                     user=availableBookingDate.user,
                     start=availableBookingDate.start,
                     end=reservation.start,
@@ -68,7 +68,7 @@ def saveReservationWhichCouldBePartOfAvailableBookingData(reservation):
                     breakBetweenIntervals=availableBookingDate.breakBetweenIntervals
                 )
             if availableBookingDate.end != reservation.end:
-                availableBookingDateAfterReservation = AvailableBookingDate.objects.create(
+                availableBookingDateAfterReservation = AvailableBookingDate(
                     user=availableBookingDate.user,
                     start=reservation.end,
                     end=availableBookingDate.end,
@@ -77,7 +77,6 @@ def saveReservationWhichCouldBePartOfAvailableBookingData(reservation):
                 )
             reservation.availableBookingDate = availableBookingDateInReservationTime
             reservation.isAccepted = True
-            reservation.save()
             otherReservations = Reservation.objects.filter(availableBookingDate=availableBookingDate).exclude(id=reservation.id)
             for otherReservation in otherReservations:
                 if availableBookingDateBeforeReservation and availableBookingDateBeforeReservation.start <= otherReservation.start and otherReservation.end <= availableBookingDateBeforeReservation.end:
@@ -88,8 +87,15 @@ def saveReservationWhichCouldBePartOfAvailableBookingData(reservation):
                     otherReservation.availableBookingDate = availableBookingDateInReservationTime
                 else:
                     otherReservation.availableBookingDate = None
-                otherReservation.save()
             availableBookingDate.delete()
+            availableBookingDateInReservationTime.save()
+            reservation.save()
+            if availableBookingDateBeforeReservation:
+                availableBookingDateBeforeReservation.save()
+            if availableBookingDateAfterReservation:
+                availableBookingDateAfterReservation.save()
+            for otherReservation in otherReservations:
+                otherReservation.save()
         else:
             reservation.isAccepted = True
             reservation.save()

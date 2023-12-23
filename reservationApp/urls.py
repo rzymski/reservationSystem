@@ -23,10 +23,10 @@ urlpatterns = [
 
     path('addEditAvailableBookingDate/', views.addEditAvailableBookingDate, name='addEditAvailableBookingDate'),
     path('deleteEvent/', views.deleteEvent, name='deleteEvent'),
-
     path('addEditReservation/', views.addEditReservation, name='addEditReservation'),
-
-    path('reserve/', views.reserve, name='reserve'),
+    path('confirmOrRejectReservation/', views.confirmOrRejectReservation, name='confirmOrRejectReservation'),
+    path('dragEvent/', views.dragEvent, name='dragEvent'),
+    # path('reserve/', views.reserve, name='reserve'),
 
     # path('deleteAvailableBookingDate/', views.deleteAvailableBookingDate, name='deleteAvailableBookingDate'),
     # path('deleteReservation/', views.deleteReservation, name='deleteReservation'),
@@ -41,10 +41,10 @@ urlpatterns = [
     path('reserveEntireBookingDate/', views.reserveEntireBookingDate, name='reserveEntireBookingDate'),
     path('reservePartSingleDayBookingDate/', views.reservePartSingleDayBookingDate, name='reservePartSingleDayBookingDate'),
     path('reservePartMultipleDaysBookingDate/', views.reservePartMultipleDaysBookingDate, name='reservePartMultipleDaysBookingDate'),
-    path('confirmOrRejectReservation/', views.confirmOrRejectReservation, name='confirmOrRejectReservation'),
+
     path('reserveIntervalOfBookingDate/', views.reserveIntervalOfBookingDate, name='reserveIntervalOfBookingDate'),
 
-    path('dragEvent/', views.dragEvent, name='dragEvent'),
+
 
     path('addDesiredReservationDate/', views.addDesiredReservationDate, name='addDesiredReservationDate'),
     path('addDesiredReservationDateByCalendar/', views.addDesiredReservationDateByCalendar, name="addDesiredReservationDateByCalendar"),

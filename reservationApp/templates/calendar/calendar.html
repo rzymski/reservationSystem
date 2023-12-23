@@ -71,20 +71,20 @@
                 {% include 'availableBookingDate/deleteAvailableBookingDate.html' %}
                 {% include 'availableBookingDate/changeOptionsAvailableBookingDate.html' %}
 
-                {% include 'reservation/reservationOptions.html' %}
 
+                {% include 'reservation/reservationOptions.html' %}
                 {% include 'reservation/reservePartSingleDayBookingDate.html' %}
                 {% include 'reservation/reservePartMultipleDaysBookingDate.html' %}
                 {% include 'reservation/confirmOrRejectReservation.html' %}
-                {% comment %}{% include 'reservation/deleteReservation.html' %}{% endcomment %}
-                {% include 'reservation/reserveIntervalOfBookingDate.html' %}
+                {% include 'reservation/deleteReservation.html' %}
+
 
                 {% include 'filter/filterServiceProviders.html' %}
 
                 {% include 'desiredReservationDate/addDesiredReservationDateByCalendar.html' %}
                 {% include 'desiredReservationDate/confirmDesiredReservationProposition.html' %}
                 {% include 'desiredReservationDate/changeOptionsDesiredReservationDate.html' %}
-                {% comment %}{% include 'desiredReservationDate/deleteDesiredReservationDate.html' %}{% endcomment %}
+                {% include 'desiredReservationDate/deleteDesiredReservationDate.html' %}
                 {% include 'desiredReservationDate/editDesiredReservationDate.html' %}
                 {% include 'desiredReservationDate/addDesiredReservationDate.html' %}
 
@@ -93,6 +93,9 @@
                 {% include 'ajax/addEdit.html' %}
                 {% include 'ajax/changeOptions.html' %}
                 {% include 'ajax/delete.html' %}
+                {% include 'ajax/reserveIntervalOfBookingDate.html' %}
+                {% include 'ajax/confirmReservation.html' %}
+
             </div>
             <div style="height: calc(100vh - 10rem)">
                 <div id='calendar' class="dark:text-white bg-gray-100 dark:bg-gray-600"></div>

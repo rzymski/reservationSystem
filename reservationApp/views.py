@@ -74,7 +74,7 @@ def allUnconfirmedReservations(request, allServiceProviders=True, selectedIds=No
             'eventType': 1,
             'intervalTimeInt': reservation.availableBookingDate.intervalTime,
             'intervalTimeString': getTimeStringValue(reservation.availableBookingDate.intervalTime),
-            'breakBetweenIntervals': 0,
+            'breakBetweenIntervals': reservation.availableBookingDate.breakBetweenIntervals,
             'editable': False,
             'availableBookingDateStart': reservation.availableBookingDate.start,
             'availableBookingDateEnd': reservation.availableBookingDate.end,
@@ -101,7 +101,7 @@ def allConfirmedReservations(request, allServiceProviders=True, selectedIds=None
             'eventType': 2,
             'intervalTimeInt': reservation.availableBookingDate.intervalTime,
             'intervalTimeString': getTimeStringValue(reservation.availableBookingDate.intervalTime),
-            'breakBetweenIntervals': 0,
+            'breakBetweenIntervals': reservation.availableBookingDate.breakBetweenIntervals,
             'editable': False,
             'availableBookingDateStart': reservation.availableBookingDate.start,
             'availableBookingDateEnd': reservation.availableBookingDate.end,
@@ -213,11 +213,10 @@ def addEditAvailableBookingDate(request):
 
 @login_required(login_url='login')
 def addEditReservation(request):
-    ic("Dodaj Edytuj dostepny termin")
+    ic("Dodaj/Edytuj rezerwacje")
     if request.method == 'POST':
         ic(request.POST)
         responseData = {'status': 'success', 'message': 'Rezerwacja została dodana/edytowana.'}
-        # title = request.POST.get('title')
         startTimeSTR = request.POST.get('startTime')
         endTimeSTR = request.POST.get('endTime')
         startDateSTR = request.POST.get('startDate')
@@ -228,14 +227,44 @@ def addEditReservation(request):
         endDate = datetime.strptime(endDateSTR, '%Y-%m-%d').date()
         start = datetime.combine(startDate, startTime)
         end = datetime.combine(endDate, endTime)
-        reservationId = request.POST.get('id')
-        reservation = Reservation.objects.get(id=int(reservationId))
-        # currentUser = request.user
-        # reservation.user = currentUser
-        reservation.start = start
-        reservation.end = end
+        eventIdSTR = request.POST.get('id')
+        eventId = int(eventIdSTR)
+        eventTypeSTR = request.POST.get('eventType')
+        eventType = int(eventTypeSTR)
+        currentUser = request.user
         try:
-            reservation.save()
+            if eventType == 0:  # tworzenie nowej rezerwacji
+                ic("tworzenie nowej rezerwacji")
+                reservation = Reservation.objects.create(
+                    bookingPerson=currentUser,
+                    availableBookingDate=AvailableBookingDate.objects.get(pk=eventId),
+                    start=start,
+                    end=end,
+                    isAccepted=False
+                )
+            if eventType == 1:  # edytowanie istniejacej rezerwacji
+                ic("edytowanie istniejacej rezerwacji")
+                reservation = Reservation.objects.get(pk=eventId)
+                reservation.start = start
+                reservation.end = end
+                reservation.save()
+            if eventType == 3:
+                if eventId == -1:  # tworzenie nowej propozycji rezerwacji
+                    ic("tworzenie nowej propozycji rezerwacji")
+                    reservation = Reservation.objects.create(
+                        bookingPerson=currentUser,
+                        availableBookingDate= None,
+                        start=start,
+                        end=end,
+                        isAccepted=False
+                    )
+                else:  # edytowanie propozycji rezerwacji
+                    ic("edytowanie propozycji rezerwacji")
+                    reservation = Reservation.objects.get(id=int(eventId))
+                    # reservation.bookingPerson = currentUser
+                    reservation.start = start
+                    reservation.end = end
+                    reservation.save()
         except ValidationError as e:
             responseData = {'status': 'error', 'message': e.message}
         return JsonResponse(responseData)
@@ -258,35 +287,99 @@ def deleteEvent(request):
     return JsonResponse({'status': 'success', 'message': 'Usunieto.'})
 
 
-@login_required(login_url='login')
-def reserve(request):
-    ic("Zarezerwowano")
-    if request.method == "POST":
+@allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
+def confirmOrRejectReservation(request):
+    ic("Potwierdzono lub usunieto rezerwacje")
+    if request.method == 'POST':
         ic(request.POST)
-        responseData = {'status': 'success', 'message': 'Rezerwacja została dodana/edytowana.'}
-        availableBookingDateId = request.POST.get('id')
-        ic(availableBookingDateId)
-        selectedAvailableBookingDate = AvailableBookingDate.objects.get(id=int(availableBookingDateId))
-        startTimeSTR = request.POST.get('startTime')
-        endTimeSTR = request.POST.get('endTime')
-        startDateSTR = request.POST.get('startDate')
-        endDateSTR = request.POST.get('endDate')
-        startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
-        endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
-        startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
-        endDate = datetime.strptime(endDateSTR, '%Y-%m-%d').date()
-        start = datetime.combine(startDate, startTime)
-        end = datetime.combine(endDate, endTime)
+        responseData = {'status': 'success', 'message': 'Potwierdzono wydarzenie.'}
+        reservationId = request.POST.get('id')
+        reservation = Reservation.objects.get(pk=int(reservationId))
+        action = request.POST.get('action')
         try:
-            reservation = Reservation.objects.create(
-                bookingPerson=request.user,
-                availableBookingDate=selectedAvailableBookingDate,
-                start=start,
-                end=end,
-                isAccepted=False)
+            if action == 'confirmNew':
+                newAvailableBookingDate = AvailableBookingDate.objects.create(
+                    user=request.user,
+                    start=reservation.start,
+                    end=reservation.end,
+                    intervalTime=None,
+                    breakBetweenIntervals=0)
+                reservation.availableBookingDate = newAvailableBookingDate
+                reservation.isAccepted = True
+                reservation.save()
+            elif action == 'confirmExist':
+                errorMessage = saveReservationWhichCouldBePartOfAvailableBookingData(reservation)
+                if errorMessage:
+                    messages.error(request, errorMessage)
+            elif action == 'reject':
+                reservation.delete()
         except ValidationError as e:
+            ic("JEST ERROR?", e)
             responseData = {'status': 'error', 'message': e.message}
         return JsonResponse(responseData)
+
+
+@login_required(login_url='login')
+def dragEvent(request):
+    ic("Przeciagnieto")
+    if request.method == 'POST':
+        ic(request.POST)
+        responseData = {'status': 'success', 'message': 'Przeciagnieto wydarzenie.'}
+        newStartString = request.POST.get('newStart')
+        newEndString = request.POST.get('newEnd')
+        newStartDate = datetime.strptime(newStartString, '%d/%m/%Y %H:%M')
+        newEndDate = datetime.strptime(newEndString, '%d/%m/%Y %H:%M')
+        eventIdString = request.POST.get('selectedDragEventId')
+        eventId = int(eventIdString)
+        eventTypeString = request.POST.get('eventType')
+        eventType = int(eventTypeString)
+        ic(newStartDate, newEndDate, eventId, eventType)
+        try:
+            if eventType == 0:
+                availableBookingDate = AvailableBookingDate.objects.get(id=eventId)
+                availableBookingDate.start = newStartDate
+                availableBookingDate.end = newEndDate
+                availableBookingDate.save()
+            if eventType == 3 or eventType == 1:
+                reservation = Reservation.objects.get(id=eventId)
+                reservation.start = newStartDate
+                reservation.end = newEndDate
+                reservation.save()
+        except ValidationError as e:
+            ic("JEST ERROR?", e)
+            responseData = {'status': 'error', 'message': e.message}
+        return JsonResponse(responseData)
+
+
+# @login_required(login_url='login')
+# def reserve(request):
+#     ic("Zarezerwowano")
+#     if request.method == "POST":
+#         ic(request.POST)
+#         responseData = {'status': 'success', 'message': 'Rezerwacja została dodana/edytowana.'}
+#         availableBookingDateId = request.POST.get('id')
+#         ic(availableBookingDateId)
+#         selectedAvailableBookingDate = AvailableBookingDate.objects.get(id=int(availableBookingDateId))
+#         startTimeSTR = request.POST.get('startTime')
+#         endTimeSTR = request.POST.get('endTime')
+#         startDateSTR = request.POST.get('startDate')
+#         endDateSTR = request.POST.get('endDate')
+#         startTime = datetime.strptime(startTimeSTR, '%H:%M').time()
+#         endTime = datetime.strptime(endTimeSTR, '%H:%M').time()
+#         startDate = datetime.strptime(startDateSTR, '%Y-%m-%d').date()
+#         endDate = datetime.strptime(endDateSTR, '%Y-%m-%d').date()
+#         start = datetime.combine(startDate, startTime)
+#         end = datetime.combine(endDate, endTime)
+#         try:
+#             reservation = Reservation.objects.create(
+#                 bookingPerson=request.user,
+#                 availableBookingDate=selectedAvailableBookingDate,
+#                 start=start,
+#                 end=end,
+#                 isAccepted=False)
+#         except ValidationError as e:
+#             responseData = {'status': 'error', 'message': e.message}
+#         return JsonResponse(responseData)
 
 
 # @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
@@ -338,37 +431,6 @@ def addDesiredReservationDate(request):
             responseData = {'status': 'error', 'message': e.message}
         return JsonResponse(responseData)
 
-@login_required(login_url='login')
-def dragEvent(request):
-    ic("Przeciagnieto")
-    if request.method == 'POST':
-        ic(request.POST)
-        responseData = {'status': 'success', 'message': 'Przeciagnieto wydarzenie.'}
-        newStartString = request.POST.get('newStart')
-        newEndString = request.POST.get('newEnd')
-        newStartDate = datetime.strptime(newStartString, '%d/%m/%Y %H:%M')
-        newEndDate = datetime.strptime(newEndString, '%d/%m/%Y %H:%M')
-        eventIdString = request.POST.get('selectedDragEventId')
-        eventId = int(eventIdString)
-        eventTypeString = request.POST.get('eventType')
-        eventType = int(eventTypeString)
-        ic(newStartDate, newEndDate, eventId, eventType)
-        try:
-            if eventType == 0:
-                availableBookingDate = AvailableBookingDate.objects.get(id=eventId)
-                availableBookingDate.start = newStartDate
-                availableBookingDate.end = newEndDate
-                availableBookingDate.save()
-            if eventType == 3 or eventType == 1:
-                reservation = Reservation.objects.get(id=eventId)
-                reservation.start = newStartDate
-                reservation.end = newEndDate
-                reservation.save()
-        except ValidationError as e:
-            ic("JEST ERROR?", e)
-            responseData = {'status': 'error', 'message': e.message}
-        return JsonResponse(responseData)
-
 
 @allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
 def confirmDesiredReservationProposition(request):
@@ -389,24 +451,6 @@ def confirmDesiredReservationProposition(request):
             reservation.save()
         except ValidationError as e:
             messages.error(request, e.message)
-    return redirect('index')
-
-
-@allowedUsers(allowedGroups=['admin', 'controller', 'serviceProvider'])
-def confirmOrRejectReservation(request):
-    ic("Potwierdzono lub usunieto rezerwacje")
-    if request.method == 'POST':
-        reservationId = request.POST.get('selectedReservationId')
-        ic(reservationId)
-        reservation = Reservation.objects.get(pk=reservationId)
-        action = request.POST.get('action')
-        ic(action)
-        if action == 'confirm':
-            errorMessage = saveReservationWhichCouldBePartOfAvailableBookingData(reservation)
-            if errorMessage:
-                messages.error(request, errorMessage)
-        if action == 'reject':
-            reservation.delete()
     return redirect('index')
 
 
