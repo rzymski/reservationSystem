@@ -17,28 +17,10 @@
         </head>
         <body>
             <div class="h-20">
-                {% comment %}<div class="flex justify-between items-center text-center align-middle">
-                    <div class="text-left flex items-center">
-                        <button id="filterButton" onclick="filter()" class="ml-2 mr-1 py-1 px-1 text-2xl font-semibold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Filtruj</button>
-                    </div>
-                    <select id="filterServiceProviders" multiple data-te-select-init data-te-select-placeholder="Filtruj usługodawców" data-te-select-filter="true" data-te-select-clear-button="true">
-                        {% for user in serviceProviders %}
-                            <option value="{{ user.id }}">{{ user.first_name }} {{ user.last_name }}</option>
-                        {% endfor %}
-                    </select>
-                    <div style="text-align: left; vertical-align: center; display: flex; align-items: center;">
-                        <button id="filterOpenModalButton" onclick="openModal('filterModal')" class="my-2 ml-2 mr-1 py-1 px-1 text-2xl font-semibold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Filtruj</button>
-                    </div>
-                    {% if userRole != 'client' %}
-                        <div class="text-right flex items-center">
-                            <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="m-2 py-1 px-1 text-2xl font-semibold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Dodaj dostepny termin</button>
-                        </div>
-                    {% endif %}
-                </div>{% endcomment %}
                 <div class="grid grid-flow-row-dense grid-cols-12">
                       <div class="col-span-2 flex items-center">
                           <div>
-                              <button id="filterOpenModalButton" onclick="openModal('filterModal')" class="my-2 ml-2 mr-1 py-2 px-5 text-3xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Filtruj</button>
+                              <button id="filterOpenModalButton" onclick="openModalNewVersion('filterModal', false, false, false, false)" class="my-2 ml-2 mr-1 py-2 px-5 text-3xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Filtruj</button>
                           </div>
                       </div>
                       <div class="col-span-4">
@@ -46,22 +28,13 @@
                       <div class="col-span-6">
                           {% if userRole != 'client' %}
                               <div class="text-right items-center">
-                                  <button id="btnAddAvailableBookingDate" onclick="addByButton('AddEditModal', 0, 'Dodaj dostępny termin świadczenie usług', 'AJAX Button Dodaj dostępny termin świadczenie usług')" type="button" class="m-2 py-3 px-5 text-2xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Dodaj dostepny termin</button>
+                                  <button id="btnAddAvailableBookingDate" onclick="addByButton('AddEditModal', 0, 'Dodaj nowy dostępny termin świadczenie usług', 'Dodaj termin')" type="button" class="m-2 py-3 px-5 text-2xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Dodaj dostepny termin</button>
                               </div>
                           {% else %}
                               <div class="text-right items-center">
-                                  <button id="btnAddAvailableBookingDate" onclick="addByButton('AddEditModal', 3, 'Dodaj propozycje nowego terminu', 'AJAX Button Dodaj propozycje nowego terminu')" type="button" class="m-2 py-3 px-5 text-2xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Zaproponuj termin</button>
+                                  <button id="btnAddAvailableBookingDate" onclick="addByButton('AddEditModal', 3, 'Dodaj propozycje nowego terminu', 'Dodaj propozycje')" type="button" class="m-2 py-3 px-5 text-2xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Zaproponuj termin</button>
                               </div>
                           {% endif %}
-                          {% comment %}{% if userRole != 'client' %}
-                              <div class="text-right items-center">
-                                  <button id="btnAddAvailableBookingDate" onclick="openModal('addAvailableBookingDateModal')" type="button" class="m-2 py-3 px-5 text-2xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Dodaj dostepny termin</button>
-                              </div>
-                          {% else %}
-                              <div class="text-right items-center">
-                                  <button id="btnAddAvailableBookingDate" onclick="openModal('addDesiredReservationDateModal')" type="button" class="m-2 py-3 px-5 text-2xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Zaproponuj termin</button>
-                              </div>
-                          {% endif %}{% endcomment %}
                       </div>
                 </div>
 

@@ -141,3 +141,14 @@ function validationModalForm(modalId, e, reservationValidation, submit=true) {
     }
     return true;
 };
+
+function validateSelectIfThereIsValue(modalId, selectPrefix) {
+    console.error("DZIALA START")
+    const select = document.getElementById(selectPrefix+modalId)
+    if (select.value === null) {
+        setError(modalId, 'Musisz wybrać opcje')
+        return false;
+    }
+    setSuccess(modalId)
+    return true;
+}

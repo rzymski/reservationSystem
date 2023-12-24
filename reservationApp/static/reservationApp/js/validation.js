@@ -18,7 +18,7 @@ const setError = (modalId, message) => {
         errorDisplay.innerText = message;
         inputControl.classList.add('error');
         inputControl.classList.remove('success');
-        setTimeout(function () {setSuccess(modalId) ;console.log("Koniec komunikatu."); }, 2000);
+        setTimeout(function () {setSuccess(modalId) ;console.log("Koniec komunikatu o bledzie."); }, 2000);
     }
 };
 const setSuccess = (modalId) => {
@@ -141,3 +141,13 @@ function validationModalForm(modalId, e, reservationValidation, submit=true) {
     }
     return true;
 };
+
+function validateSelectIfThereIsValue(modalId, selectPrefix) {
+    const select = document.getElementById(selectPrefix+modalId)
+    if (select.value === null || select.value === "" || typeof select.value === 'undefined' ) {
+        setError(modalId, 'Musisz wybrać opcje')
+        return false;
+    }
+    setSuccess(modalId)
+    return true;
+}

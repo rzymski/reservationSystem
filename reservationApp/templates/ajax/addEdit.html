@@ -2,7 +2,7 @@
     <div class="relative p-4 w-full max-w-max max-h-full">
         <div class="relative bg-gray-50 rounded-lg shadow dark:bg-gray-700">
             <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 id="titleAddEditModal" class="text-lg font-semibold text-gray-900 dark:text-white"></h3>
+                <h3 class="text-2xl font-semibold text-gray-900 dark:text-white me-2"><span id="titleAddEditModal"></span></h3>
                 <button onclick="closeModal('AddEditModal')" type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-toggle="crud-modal">
                     <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
@@ -10,7 +10,7 @@
                     <span class="sr-only">Close modal</span>
                 </button>
             </div>
-            <div id="AddEditForm" class="p-4 md:p-5">
+            <div class="p-4 md:p-5">
                 <div id="inputControlAddEditModal" class="grid gap-4 mb-4 grid-cols-2 input-control">
                     <div id="startDateContainerAddEditModal">
                         <label for="startDate" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Data początkowa</label>
@@ -66,10 +66,15 @@
                     </div>
                     <div id="errorDisplayAddEditModal" name="errorDisplay" class="error col-span-2"></div>
                     <input type="hidden" name="id" id="selectedEventIdAddEditModal" value="-1">
-                    <div class="col-span-2">
+                    <div class="col-span-1">
                         <button onclick="addEditEvent()" id="saveBtnAddEditModal" type="submit" class="text-gray-50 flex items-center w-full justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-lg px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
                             <i class="fa-solid fa-plus"></i>
                             <span id="btnTextAddEditModal" class="ms-3 whitespace-nowrap"></span>
+                        </button>
+                    </div>
+                    <div class="col-span-1">
+                        <button id="btnCancelAddEditModal" onclick="closeModal('AddEditModal')"  class="w-full text-gray-500 bg-gray-50 hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-lg font-bold px-1 py-2 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
+                            Anuluj
                         </button>
                     </div>
                 </div>

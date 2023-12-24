@@ -1,5 +1,5 @@
 <div id="ConfirmReservationModal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div class="relative p-4 w-full max-w-max max-h-full">
+    <div class="relative p-4 w-full max-w-lg max-h-full">
         <div class="relative bg-gray-50 rounded-lg shadow dark:bg-gray-700">
             <button onclick="closeModal('ConfirmReservationModal')" type="button" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="popup-modal">
                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
@@ -11,27 +11,27 @@
                 <i class="fa-solid fa-book-open fa-3x mx-auto mb-4 text-gray-900 w-12 h-12 dark:text-gray-50"></i>
                 <div class="text-left">
                     <h3 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-50">
-                        <a id="clientProfileLinkConfirmReservationModal" href="" class="hover:text-orange-400"><span id="clientNameAndSurname"></span></a>
+                        <a id="clientProfileLinkConfirmReservationModal" href="" class="hover:text-orange-400"><span id="clientNameAndSurnameConfirmReservationModal"></span></a>
                     </h3>
                     <h3 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-50">
-                        <a id="serviceProviderProfileLinkConfirmReservationModal" href="" class="hover:text-green-500"><span id="serviceProviderNameAndSurname"></span></a>
+                        <a id="serviceProviderProfileLinkConfirmReservationModal" href="" class="hover:text-green-500"><span id="serviceProviderNameAndSurnameConfirmReservationModal"></span></a>
                     </h3>
-                    <h3 class="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-50">
+                    <h3 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-50">
                         Termin: <span id="dateRangeConfirmReservationModal"></span>
                     </h3>
-                    <h3 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-50">
+                    <h3 class="mb-6 text-lg font-semibold text-gray-900 dark:text-gray-50">
                         <span id="visitTimeConfirmReservationModal"></span>
                     </h3>
                 </div>
                 <h3 id="optionQuestionConfirmReservationModal" class="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-50"></h3>
 {#                <input type="hidden" name="selectedReservationId" id="idConfirmReservationModal" value="">#}
-                <button id="btnOption1TextConfirmReservationModal" onclick="optionSelectedModal(2, 'ConfirmReservationModal')" class="w-full flex items-center text-gray-50 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-bold rounded-lg text-2xl px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                <button  onclick="optionSelectedModal(2, 'ConfirmReservationModal')" class="w-full flex items-center text-gray-50 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-bold rounded-lg text-2xl px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
                     <i class="fa-solid fa-check"></i>
-                    <span class="ms-3 whitespace-nowrap"></span>
+                    <span id="btnOption1TextConfirmReservationModal" class="ms-3 whitespace-nowrap"></span>
                 </button>
-                <button id="btnOption2TextConfirmReservationModal" onclick="optionSelectedModal(3, 'ConfirmReservationModal')"  class="w-full flex items-center text-gray-50 bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-bold rounded-lg text-2xl inline-flex items-center px-5 py-2.5 text-center me-2">
+                <button  onclick="optionSelectedModal(3, 'ConfirmReservationModal')"  class="w-full flex items-center text-gray-50 bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-bold rounded-lg text-2xl inline-flex items-center px-5 py-2.5 text-center me-2">
                     <i class="fa-solid fa-x"></i>
-                    <span class="ms-3 whitespace-nowrap"></span>
+                    <span id="btnOption2TextConfirmReservationModal" class="ms-3 whitespace-nowrap"></span>
                 </button>
             </div>
         </div>
