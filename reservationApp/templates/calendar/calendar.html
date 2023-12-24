@@ -38,36 +38,14 @@
                       </div>
                 </div>
 
-                {% include 'availableBookingDate/addAvailableBookingDateByCalendar.html' %}
-                {% include 'availableBookingDate/addAvailableBookingDate.html' %}
-                {% include 'availableBookingDate/editAvailableBookingDate.html' %}
-                {% include 'availableBookingDate/deleteAvailableBookingDate.html' %}
-                {% include 'availableBookingDate/changeOptionsAvailableBookingDate.html' %}
-
-
-                {% include 'reservation/reservationOptions.html' %}
-                {% include 'reservation/reservePartSingleDayBookingDate.html' %}
-                {% include 'reservation/reservePartMultipleDaysBookingDate.html' %}
-                {% include 'reservation/confirmOrRejectReservation.html' %}
-                {% include 'reservation/deleteReservation.html' %}
-
-
                 {% include 'filter/filterServiceProviders.html' %}
 
-                {% include 'desiredReservationDate/addDesiredReservationDateByCalendar.html' %}
-                {% include 'desiredReservationDate/confirmDesiredReservationProposition.html' %}
-                {% include 'desiredReservationDate/changeOptionsDesiredReservationDate.html' %}
-                {% include 'desiredReservationDate/deleteDesiredReservationDate.html' %}
-                {% include 'desiredReservationDate/editDesiredReservationDate.html' %}
-                {% include 'desiredReservationDate/addDesiredReservationDate.html' %}
-
-                {% include 'dragEvent/confirmOrRejectDrag.html' %}
-
-                {% include 'ajax/addEdit.html' %}
-                {% include 'ajax/changeOptions.html' %}
-                {% include 'ajax/delete.html' %}
-                {% include 'ajax/reserveIntervalOfBookingDate.html' %}
-                {% include 'ajax/confirmReservation.html' %}
+                {% include 'calendar/addEdit.html' %}
+                {% include 'calendar/changeOptions.html' %}
+                {% include 'calendar/delete.html' %}
+                {% include 'calendar/reserveIntervalOfBookingDate.html' %}
+                {% include 'calendar/confirmReservation.html' %}
+                {% include 'calendar/confirmOrRejectDrag.html' %}
 
             </div>
             <div style="height: calc(100vh - 10rem)">

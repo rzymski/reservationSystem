@@ -83,41 +83,6 @@
                     dayHeaderContent: myDaydayHeaderContent,
                 },
             },
-
-            {#dodawanie dostepnych terminow#}
-            {% comment %}select: function (data){
-                if ("{{ request.user }}" === 'AnonymousUser') { return; }
-                let modalName = ""
-                if (currentUserRole !== "client")
-                {
-                    console.log("Wykonalo sie dodanie dostepnego terminu")
-                    modalName = "addAvailableBookingDateByCalendarModal"
-                } else {
-                    console.log("Dodaj propozycje rezerwacji")
-                    modalName = "addDesiredReservationDateByCalendarModal"
-                }
-                let selectedView = calendar.view.type;
-                const startDateTime = new Date(data.startStr)
-                let startDateOnly = startDateTime.toISOString().split('T')[0];
-                let startTimeOnly = startDateTime.toLocaleTimeString().slice(0, 5);
-                const endDateTime = new Date(data.endStr)
-                if (selectedView === 'dayGridMonth') { endDateTime.setDate(endDateTime.getDate() - 1) }
-                let endDateOnly = endDateTime.toISOString().split('T')[0];
-                let endTimeOnly = endDateTime.toLocaleTimeString().slice(0, 5);
-                if (selectedView !== 'dayGridMonth'){
-                    console.log("OK")
-                    {#dotyczy widoku kalendarza widoku tygodniowego/dniowego gdzie uzupelnia od razu godzine startu i konca#}
-                    $('#'+modalName+' [name="startTime"]').val(startTimeOnly);
-                    $('#'+modalName+' [name="endTime"]').val(endTimeOnly);
-                } else {
-                    {#$('#addAvailableBookingDateByCalendarModal [name="startTime"]').val('12:00');#}
-                    {#$('#addAvailableBookingDateByCalendarModal [name="endTime"]').val('23:00');#}
-                }
-                $('#startDate'+modalName).val(startDateOnly);
-                $('#endDate'+modalName).val(endDateOnly);
-                openModal(modalName)
-            },{% endcomment %}
-
             {#dodawanie dostepnych terminow#}
             select: function (data){
                 if ("{{ request.user }}" === 'AnonymousUser') { return; }
@@ -155,71 +120,6 @@
                     openModalNewVersion(modalId, false, false, true, true)
                 }
             },
-
-            {#edycja/usuwanie dostepnych terminow#}
-            {% comment %}eventClick: function (info) {
-                if ("{{ request.user }}" === 'AnonymousUser') { return; }
-                currentUserId = {{ request.user.id }};
-                console.log("WYKONALO SIE klikniecie eventu");
-                let serviceProviderId = info.event.extendedProps.serviceProviderId;
-                let clientId = info.event.extendedProps.clientId;
-                let eventType = info.event.extendedProps.eventType;
-                let intervalTimeInt = info.event.extendedProps.intervalTimeInt;
-
-                availableBookingData = fillAvailableBookingData(info)
-                selectedEventId = info.event.id
-                selectedEventInfo = info
-
-                if (eventType === 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ //edycja/usuwanie dostępnego terminu
-                    $('#deleteSelectedEvent').val(selectedEventId)
-                    $('#editSelectedEvent').val(selectedEventId)
-                    openModal('changeOptionsAvailableBookingDateModal', availableBookingData);
-                }else if (eventType === 0 && currentUserRole === "client" && !intervalTimeInt) { //proba rezerwacji prze klienta jesli nie ma interwalow w spotkaniu
-                    console.log("Wybrano opcje nie ok", intervalTimeInt)
-                    // calosc
-                    $('#reserveEntireSelectedBookingDateId').val(selectedEventId)
-                    $('#reserveEntireSelectedBookingDateStart').val(info.event.start.toISOString())
-                    $('#reserveEntireSelectedBookingDateEnd').val(info.event.end.toISOString())
-                    // czesc
-                    $('#reservePartSingleDaySelectedBookingDateId').val(selectedEventId)
-                    $('#reservePartMultipleDaysSelectedBookingDateId').val(selectedEventId)
-                    openModal('reservationOptionsModal', availableBookingData);
-                } else if (eventType === 0 && currentUserRole === "client" && intervalTimeInt){ //proba rezerwacji prze klienta jesli sa interwaly w spotkaniu
-                    // dotepny termin z przedzialami
-                    console.log("Wybrano opcje OKKKKKKK")
-                    $('#reserveIntervalOfBookingDateId').val(selectedEventId)
-                    openModal('reserveIntervalOfBookingDateModal', availableBookingData);
-                } else if (eventType === 1 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) { //potwierdzenie rezerwacji
-                    $('#confirmOrRejectReservationId').val(info.event.id)
-                    console.log("DOBRZE")
-                    openModal('confirmOrRejectReservationModal', availableBookingData)
-                } else if (eventType === 1 && (serviceProviderId === currentUserId || clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) { //usuwanie niepotwierdzonej rezerwacji
-                    console.log("USUN niepotwierdzona rezerwacje")
-                    let reservationTextQuestion = document.getElementById('questiondeleteReservationModal')
-                    reservationTextQuestion.textContent = 'Czy na pewno chcesz usunąć tą propozycje rezerwacji?'
-                    $('#deleteReservationId').val(selectedEventId)
-                    openModal('deleteReservationModal')
-                } else if (eventType === 2 && (serviceProviderId === currentUserId || clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) { //usuwanie potwierdzonej rezerwacji
-                    console.log("USUN potwierdzona rezerwacje")
-                    let reservationTextQuestion = document.getElementById('questiondeleteReservationModal')
-                    reservationTextQuestion.textContent = 'Czy na pewno chcesz usunąć tą zatwierdzoną rezerwację?'
-                    $('#deleteReservationId').val(selectedEventId)
-                    openModal('deleteReservationModal')
-                } else if (eventType === 3 && (currentUserRole !== "client")) { // potwierdzenie propozycji terminu klienta przez nowego uslugodawce
-                    console.log("Można zaakceptować propozycje rezerwacji terminu klienta")
-                    $('#confirmDesiredReservationPropositionId').val(selectedEventId)
-                    openModal('confirmDesiredReservationPropositionModal', availableBookingData)
-                } else if (eventType == 3 && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) { // edycja/usuwanie propozycji terminu klienta
-                    console.log("EDYTUJ LUB USUN SWOJA PROPOZYCJE")
-                    $('#deleteSelectedDesiredReservationDate').val(selectedEventId)
-                    $('#editSelectedDesiredReservationDate').val(selectedEventId)
-                    openModal('changeOptionsDesiredReservationDateModal', availableBookingData);
-                } else{
-                    console.log("Nie masz uprawnien, zeby to zrobic")
-                }
-                console.log(currentUserRole);
-            },{% endcomment %}
-
             {#edycja/usuwanie dostepnych terminow#}
             eventClick: function (info) {
                 if ("{{ request.user }}" === 'AnonymousUser') { return; }
@@ -476,6 +376,7 @@
                 displayBackendError(error.responseText)
             }
         });
+        closeModal('filterModal')
     };
     function getDateDetails(date, dateSeparator = '-' , dateOrder = 'YMD'){
         //console.log("Data =", date)
@@ -953,140 +854,4 @@
         const currentTime =  hours + ':' + minutes;
         $('#' + containerValue + ' .' + inputValue).val(currentTime);
     };
-
-
-    {% comment %}function openCloseModalAndFillInputsWithDataNewVersion(openModalId, closeModalId, intervalsToo) {
-        closeModal(closeModalId);
-        $('#'+openModalId+' [name="title"]').val(selectedEventInfo.event.title);
-        let startDate = selectedEventInfo.event.start.toISOString().split('T')[0];
-        let startTime = selectedEventInfo.event.start.toISOString().split('T')[1].slice(0, 5);
-        let endDate = selectedEventInfo.event.end.toISOString().split('T')[0];
-        let endTime = selectedEventInfo.event.end.toISOString().split('T')[1].slice(0, 5);
-        console.log(startDate, startTime, endDate, endTime)
-        $('#startDate'+openModalId).val(startDate);
-        $('#'+openModalId+' [name="startTime"]').val(startTime);
-        $('#'+openModalId+' [name="endDate"]').val(endDate);
-        $('#'+openModalId+' [name="endTime"]').val(endTime);
-        if (intervalsToo) {
-            $('#'+openModalId+' [name="intervalTime"]').val(selectedEventInfo.event.extendedProps.intervalTimeInt);
-            $('#'+openModalId+' [name="breakBetweenIntervals"]').val(selectedEventInfo.event.extendedProps.breakBetweenIntervals);
-            console.log("ISTNIEJE =", selectedEventInfo.event.extendedProps.intervalTimeInt, selectedEventInfo.event.extendedProps.breakBetweenIntervals)
-        }
-
-        openModalNewVersion(openModalId, '/addAvailableBookingDate/', null, 'Abra kadabra', 'Czary', false)
-        {#openModal(openModalId)#}
-    }{% endcomment %}
-
-
-
-    {#    Script to add/close new available booking date or used to changeOptions with data then#}
-    {% comment %}function openModal(modalId, data) {
-        let modal = document.getElementById(modalId);
-        console.log("Modalid =", modalId)
-        console.log("Data = ", data)
-        if(data){
-            fillServiceProviderInformation(modal, data, modalId)
-            reserveOpenModalFillClientData(modal, data, modalId)
-            if (data.intervalTimeInt && data.intervalTimeInt != 0 && modalId !== 'changeOptionsAvailableBookingDateModal' && modalId !== 'confirmOrRejectReservationModal' && modalId !== 'confirmOrRejectDragModal') {
-                console.log("DOSTALES =", modalId, modal)
-                fillIntervalSelectsInTemplate(modal, data, modalId)
-            }
-            fillDateRange(modalId, data, 'dateRange'+modalId)
-        }
-        modal.classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
-    };{% endcomment %}
-
-    {% comment %}function editAvailableBookingDate() {
-        openCloseModalAndFillInputsWithData('editAvailableBookingDateModal', 'changeOptionsAvailableBookingDateModal', true)
-    };
-    function editDesiredReservationDate() {
-        openCloseModalAndFillInputsWithData('editDesiredReservationDateModal', 'changeOptionsDesiredReservationDateModal', false)
-    };{% endcomment %}
-    {% comment %}function openReservePartBookingDateModal() {
-        if (availableBookingData.startAvailableBookingDate.getDate() === availableBookingData.endAvailableBookingDate.getDate()) {
-            openCloseModalAndFillInputsWithData('reservePartSingleDayBookingDateModal', 'reservationOptionsModal', false)
-        } else {
-            openCloseModalAndFillInputsWithData('reservePartMultipleDaysBookingDateModal', 'reservationOptionsModal', false)
-        }
-    };{% endcomment %}
-    {% comment %}function openCloseModalAndFillInputsWithData(openModalId, closeModalId, intervalsToo) {
-        closeModal(closeModalId);
-        $('#'+openModalId+' [name="title"]').val(selectedEventInfo.event.title);
-        let startDate = selectedEventInfo.event.start.toISOString().split('T')[0];
-        let startTime = selectedEventInfo.event.start.toISOString().split('T')[1].slice(0, 5);
-        let endDate = selectedEventInfo.event.end.toISOString().split('T')[0];
-        let endTime = selectedEventInfo.event.end.toISOString().split('T')[1].slice(0, 5);
-        console.log(startDate, startTime, endDate, endTime)
-        $('#startDate'+openModalId).val(startDate);
-        $('#'+openModalId+' [name="startTime"]').val(startTime);
-        $('#'+openModalId+' [name="endDate"]').val(endDate);
-        $('#'+openModalId+' [name="endTime"]').val(endTime);
-        if (intervalsToo) {
-            $('#'+openModalId+' [name="intervalTime"]').val(selectedEventInfo.event.extendedProps.intervalTimeInt);
-            $('#'+openModalId+' [name="breakBetweenIntervals"]').val(selectedEventInfo.event.extendedProps.breakBetweenIntervals);
-            console.log("ISTNIEJE =", selectedEventInfo.event.extendedProps.intervalTimeInt, selectedEventInfo.event.extendedProps.breakBetweenIntervals)
-        }
-
-        {#openModalNewVersion(openModalId, '/addAvailableBookingDate/', null, 'Abra kadabra', 'Czary', false)#}
-        openModal(openModalId)
-    }
-    function openDeleteAvailableBookingDateModal() {
-        closeModal('changeOptionsAvailableBookingDateModal');
-        openModal('deleteAvailableBookingDateModal');
-    };
-    function openDeleteDesiredReservationDateModal() {
-        closeModal('changeOptionsDesiredReservationDateModal');
-        openModal('deleteDesiredReservationDateModal');
-    };{% endcomment %}
-
-
-    {% comment %}//Skrypt odpowiadajacy za walidacje czasow w dodawaniu wolnego terminu przez kalendarz
-    const formaddAvailableBookingDateByCalendar = document.getElementById('addAvailableBookingDateByCalendarForm')
-    formaddAvailableBookingDateByCalendar.addEventListener('submit', (e) => {
-        console.log("Wykonala sie walidacja add calendar")
-        validationModalForm('addAvailableBookingDateByCalendarModal', e, false)
-    });
-    //Skrypt odpowiadajacy za walidacje dat i czasow w w dodawaniu wolnego terminu przez przycisk
-    const formaddAvailableBookingDateModal = document.getElementById('addAvailableBookingDateForm')
-    formaddAvailableBookingDateModal.addEventListener('submit', (e) => {
-        console.log("Wykonala sie walidacja addBtn")
-        validationModalForm('addAvailableBookingDateModal', e, false)
-    });
-    //Skrypt odpowiadajacy za walidacje dat i czasow w w edytowaniu wolnego terminu
-    const formeditAvailableBookingDateModal = document.getElementById('editAvailableBookingDateForm')
-    formeditAvailableBookingDateModal.addEventListener('submit', (e) => {
-        console.log("Wykonala sie walidacja edit")
-        validationModalForm('editAvailableBookingDateModal', e, false)
-    });
-    //Skrypt odpowiadajacy za walidacje czasow i dat przy rezerwacji terminu skladajacego sie z kilku dni
-    const formreservePartMultipleDaysBookingDateModal = document.getElementById('reservePartMultipleDaysBookingDateForm')
-    formreservePartMultipleDaysBookingDateModal.addEventListener('submit', (e) => {
-        console.log("Wykonala sie walidacja wiely dni reservePartMultipleDaysBookingDateModal")
-        validationModalForm('reservePartMultipleDaysBookingDateModal', e, true)
-    });
-    //Skrypt odpowiadajacy za walidacje czasow przy rezerwacji terminu skladajacego sie z pojedynczego dnia
-    const formreservePartSingleDayBookingDateModal = document.getElementById('reservePartSingleDayBookingDateForm')
-    formreservePartSingleDayBookingDateModal.addEventListener('submit', (e) => {
-        console.log("Wykonala sie walidacja reservePartSingleDayBookingDateModal")
-        validationModalForm('reservePartSingleDayBookingDateModal', e, true)
-    });
-    //Skrypt odpowiadajacy za walidacje czasow przy proponowaniu terminu przez kalendarz
-    const formaddDesiredReservationDateByCalendarModal = document.getElementById('addDesiredReservationDateByCalendarForm')
-    formaddDesiredReservationDateByCalendarModal.addEventListener('submit', (e) => {
-        console.log("Wykonala sie walidacja addDesiredReservationDateByCalendarModal")
-        validationModalForm('addDesiredReservationDateByCalendarModal', e, false)
-    });
-    //Skrypt odpowiadajacy za walidacje czasow przy proponowaniu terminu przez kalendarz
-    const formaddDesiredReservationDateModal = document.getElementById('addDesiredReservationDateForm')
-    formaddDesiredReservationDateModal.addEventListener('submit', (e) => {
-        console.log("Wykonala sie walidacja addDesiredReservationDateModal")
-        validationModalForm('addDesiredReservationDateModal', e, false)
-    });
-    // Skrypt odpowiadajacy za walidacje czasow przy proponowaniu terminu przez kalendarz
-    const formeditDesiredReservationDateModal = document.getElementById('editDesiredReservationDateForm')
-    formeditDesiredReservationDateModal.addEventListener('submit', (e) => {
-        console.log("Wykonala sie walidacja editDesiredReservationDate")
-        validationModalForm('editDesiredReservationDateModal', e, false)
-    });{% endcomment %}
 </script>
