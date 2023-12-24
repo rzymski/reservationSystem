@@ -533,7 +533,8 @@
         setTextsInTextVariables({reserveOptionConfirmation: false, eventType: eventType, title: titleText, mainButton: buttonText})
         selectedEventId = -1
         selectedEventInfo = null
-        openModalNewVersion(modalId, null, true, false)
+        if (eventType === 0) { openModalNewVersion(modalId, null, true, true) }
+        if (eventType === 3) { openModalNewVersion(modalId, null, true, false) }
     }
     // najpierw ustawiamy wartosci zmiennych textowych potrzebnych do wyswietlania w modal-u
     function setTextsInTextVariables ( {reserveOptionConfirmation, eventType, title, mainButton, question, buttonOption1, buttonOption2} ) {
@@ -650,7 +651,7 @@
         }
         else if (eventTypeInt === 0 && option === 1 && !reserveOption)
         {
-            setTextsInTextVariables({question: 'Czy na pewno chcesz usunąć ten dostępny termin? XD', buttonOption1: 'Ajax Tak, usuń go', buttonOption2: 'Ajax Nie, nie usuwaj'})
+            setTextsInTextVariables({question: 'Czy na pewno chcesz usunąć ten dostępny termin? XD', buttonOption1: 'Tak, usuń ten termin', buttonOption2: 'Nie, nie usuwaj tego terminu'})
             openModalNewVersion('DeleteModal', null, false, false)
         }
         else if (eventTypeInt === 0 && option === 0 && reserveOption) {
