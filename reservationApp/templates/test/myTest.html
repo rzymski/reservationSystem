@@ -1,10 +1,234 @@
-{% extends 'test/posts/main.html' %}
+{% extends 'base.html' %}
 
 {% block content %}
-    Moja strona
+
+    <div class="bg-yellow-600">
+
+
+    <div class="text-center">
+        Moja strona
+    </div>
+    <div class="text-right">
+        <button onclick="openModal()" class="border-2 border-purple-500 border-solid m-10 rounded-lg hover:bg-slate-600 hover:text-purple-500 px-6 py-3">
+            <span class="text-center text-3xl font-bold">
+                Open Window
+            </span>
+        </button>
+    </div>
+
+    {% comment %}    <div id="modal" class="w-1/2 h-[500px] max-h-full absolute left-0 right-0 top-0 bottom-0 m-auto rounded-t-lg">{% endcomment %}
+    <div id="modal" class="w-1/2 h-[450px] max-h-full absolute left-0 right-0 top-0 bottom-0 m-auto rounded-t-lg" style="container-type: inline-size">
+        <div id="header" class="bg-slate-600 p-6 border-2 border-solid border-white flex justify-between cursor-move rounded-t-lg" style="font-size: 3.8cqw">
+            <h3 class="font-semibold text-gray-900 dark:text-purple-600">Edytuj dostepny termin świadczenia usługi</h3>
+            <div id="myActions" class="cursor-pointer">
+                <div onclick="minimalize()" class="text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center border border-gray-200 hover:bg-gray-200 dark:border-slate-500 dark:text-gray-50 dark:hover:bg-slate-500">
+                    <i class="fa-solid fa-window-minimize fa-xl"></i>
+                </div>
+                <div onclick="maximize()" class="text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center border border-gray-200 hover:bg-gray-200 dark:border-slate-500 dark:text-gray-50 dark:hover:bg-slate-500">
+                    <i class="fa-solid fa-expand fa-xl"></i>
+                </div>
+                <div onclick="closeModal()" class="text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center border border-gray-200 hover:bg-gray-200 hover:text-red-500 dark:border-slate-500 dark:text-gray-50 dark:hover:bg-red-500">
+                    <i class="fa-solid fa-xmark fa-xl"></i>
+                </div>
+            </div>
+        </div>
+        <div id="content" class="bg-slate-500 h-full rounded-b-lg">
+            <div class="h-full text-center" >
+                <span class="flex align-center justify-center" style="font-size: 5cqw">ZAWARTOSC</span>
+                <div class="p-5">
+                    <div id="inputControlmodal" class="grid gap-4 mb-4 grid-cols-2 input-control">
+                        <div id="startDateContainermodal">
+                            <label for="startDate" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" style="font-size: 3cqw">Data początkowa</label>
+                            <div>
+                                <input id="startDatemodal" type="date" name="startDate" class="startDate bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Data początkowa" required>
+                            </div>
+                        </div>
+                        <div id="startTimeContainermodal">
+                            <label for="startTime" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Czas początkowy</label>
+                            <div class="relative inputTime">
+                                <input id="startTimemodal" type="time" name="startTime" class="startTime bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Czas początkowy" required>
+                                <div class="inputCurrentTime">
+                                    <a href="" class="text-blue-500 text-sm mr-6">teraz</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="endDateContainermodal">
+                            <label for="endDate" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Data końcowa</label>
+                            <div>
+                                <input id="endDatemodal" type="date" name="endDate" style="line-height: 5cqw; font-size: 3cqw" class="endDate bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Data końcowa" required>
+                            </div>
+                        </div>
+                        <div id="endTimeContainermodal">
+                            <label for="endTime" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Czas końcowy</label>
+                            <div class="relative inputTime">
+                                <input id="endTimemodal" type="time" name="endTime" class="endTime bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Czas końcowy" required>
+                                <div class="inputCurrentTime">
+                                    <a href="" class="text-blue-500 text-sm mr-6">teraz</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="intervalTimeContainermodal" class="col-span-2 sm:col-span-1">
+                            <label for="intervalTime" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Przedziały czasowe</label>
+                            <select id="intervalTimemodal" name="intervalTime" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                                <option value="" selected="">Długość przedziału</option>
+                            </select>
+                        </div>
+                        <div id="breakBetweenIntervalsContainermodal" class="col-span-2 sm:col-span-1">
+                            <label for="breakBetweenIntervals" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Przerwa pomiędzy</label>
+                            <select id="breakBetweenIntervalsmodal" name="breakBetweenIntervals" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                                <option value="0" selected="">Długość przerwy</option>
+                                <option value="0">0 minut</option>
+                                <option value="5">5 minut</option>
+                                <option value="10">10 minut</option>
+                                <option value="15">15 minut</option>
+                                <option value="20">20 minut</option>
+                                <option value="25">25 minut</option>
+                                <option value="30">30 minut</option>
+                            </select>
+                        </div>
+                        <div id="errorDisplaymodal" name="errorDisplay" class="error col-span-2"></div>
+                        <input type="hidden" name="id" id="selectedEventIdmodal" value="-1">
+                        <div class="col-span-1">
+                            <button onclick="" id="saveBtnmodal" type="submit" class="text-gray-50 flex items-center w-full justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-lg px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                <i class="fa-solid fa-plus"></i>
+                                <span id="btnTextmodal" class="ms-3 whitespace-nowrap">Edytuj dostepny termin</span>
+                            </button>
+                        </div>
+                        <div class="col-span-1">
+                            <button id="btnCancelmodal" onclick=""  class="w-full text-gray-500 bg-gray-50 hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-lg font-bold px-1 py-2 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
+                                Anuluj
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    </div>
+
+    <script>
+        let modal = document.querySelector('#modal');
+        let header = modal.querySelector('#header');
+        let content = modal.querySelector('#content');
+        let isMouseDownHeader = false;
+        let isMouseOverActions = false;
+        let isMaximized = false;
+
+        let offsetX = 0;
+        let offsetY = 0;
+
+        let leftStyle = '0px';
+        let topStyle = '0px';
+
+        console.error("INitial =", leftStyle, " i ", topStyle)
+
+        function maximize(){
+            console.log('MAXMIZE')
+            if (isMaximized) {
+                modal.style.left = leftStyle;
+                modal.style.top = topStyle;
+                console.error("Initial po pomniejszeniu =", leftStyle, " i ", topStyle)
+            } else {
+                content.classList.remove('hidden')
+                //initialLeft = modal.offsetLeft;
+                //initialTop = modal.offsetTop;
+                modal.style.left = '0px';
+                modal.style.top = '0px';
+                console.error("Initial po powiekszeniu =", leftStyle, " i ", topStyle)
+            }
+
+            modal.classList.toggle('w-full');
+            modal.classList.toggle('h-full');
+            isMaximized = !isMaximized;
+            header.classList.toggle('cursor-move');
+
+            {% comment %}if(modal.classList.contains("w-full")){
+                modal.classList.remove('w-full');
+                modal.classList.remove('h-full');
+                modal.style.left = leftStyle
+                modal.style.top = rightStyle
+                modal.classList.remove('left-0');
+                modal.classList.remove('right-0');
+                modal.classList.remove('top-0');
+                modal.classList.remove('bottom-0');
+                isMaximized = false;
+                header.classList.add('cursor-move')
+                console.error("NOT MAXIMIZED")
+            } else {
+                modal.classList.add('w-full');
+                modal.classList.add('h-full');
+                modal.style.left = ''
+                modal.style.top = ''
+                modal.classList.add('left-0');
+                modal.classList.add('right-0');
+                modal.classList.add('top-0');
+                modal.classList.add('bottom-0');
+                isMaximized = true;
+                header.classList.remove('cursor-move')
+                console.error("MAXIMIZED")
+            }{% endcomment %}
+        };
+        function minimalize(){
+            console.log('MINIMIZE')
+            content.classList.toggle('hidden');
+            {% comment %}if (!content.classList.contains('hidden')) {
+                content.classList.add('hidden')
+            } else {
+                content.classList.remove('hidden')
+            }{% endcomment %}
+        };
+        function closeModal(){
+            console.log('CLOSE')
+            modal.classList.add('hidden')
+        };
+        function openModal(){
+            console.log('OPEN')
+            modal.classList.remove('hidden')
+        };
+
+        header.addEventListener('mousedown', e=> {
+            if (isMouseOverActions || isMaximized) return;
+            console.log("JEST NA HEADER = ", leftStyle, " i ", topStyle)
+
+            isMouseDownHeader = true;
+            offsetX = modal.offsetLeft - e.clientX;
+            offsetY = modal.offsetTop - e.clientY;
+        });
+
+        document.addEventListener('mousemove', e => {
+            if (isMouseOverActions || isMaximized) return;
+            if (!isMouseDownHeader) return;
+            e.preventDefault()
+
+            modal.classList.remove('left-0');
+            modal.classList.remove('right-0');
+            modal.classList.remove('top-0');
+            modal.classList.remove('bottom-0');
+
+            leftStyle = modal.style.left = e.clientX + offsetX + "px";
+            topStyle = modal.style.top = e.clientY + offsetY + "px";
+        });
+
+        document.addEventListener('mouseup', e => {
+            if (isMouseOverActions || isMaximized) return;
+            isMouseDownHeader = false;
+        });
+
+        let myActions = document.getElementById('myActions');
+        myActions.addEventListener('mouseover', () => {
+            //console.log('Mouse over the actions');
+            isMouseOverActions = true;
+        })
+
+        myActions.addEventListener('mouseout', () => {
+            //console.log('Mouse out of the actions');
+            isMouseOverActions = false;
+        })
+
+    </script>
 
 {% endblock %}
-
 
 
 
@@ -25,3 +249,134 @@
 {#    <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/tw-elements.umd.min.js"></script>#}
 {#</body>#}
 
+
+
+
+{% comment %}
+{% extends 'base.html' %}
+
+{% block content %}
+
+    <div class="text-center">
+        Moja strona
+    </div>
+    <div class="text-right">
+        <button onclick="openModal()" class="border-2 border-purple-500 border-solid m-10 rounded-lg hover:bg-slate-600 hover:text-purple-500 px-6 py-3">
+            <span class="text-center text-3xl font-bold">
+                Open Window
+            </span>
+        </button>
+    </div>
+
+        <div id="modal" class="overflow-y-auto overflow-x-hidden justify-center items-center p-4 relative w-full max-w-max h-full">
+    <div id="modal" class=" p-4 absolute left-0 top-0 bg-yellow-500 w-full">
+        <div class="justify-center items-center">
+            <div class="bg-gray-50 rounded-lg shadow w-full h-full dark:bg-green-700">
+                <div class="flex items-center justify-between p-4 p-5 border-b rounded-t dark:border-gray-600 bg-gray-100 dark:bg-slate-600 cursor-move">
+                    <h3 class="text-2xl font-semibold text-gray-900 dark:text-white me-2">Edytuj dostepny termin świadczenia usługi<span id="titlemodal"></span></h3>
+                    <div id="actions" class="ml-10 cursor-pointer ">
+                        <div onclick="minimalize()" class="text-2xl text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center border border-gray-200 hover:bg-gray-200 dark:border-slate-500 dark:text-gray-50 dark:hover:bg-slate-500">
+                            <i class="fa-solid fa-window-minimize fa-xl"></i>
+                        </div>
+                        <div onclick="maximize()" class="text-2xl text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center border border-gray-200 hover:bg-gray-200 dark:border-slate-500 dark:text-gray-50 dark:hover:bg-slate-500">
+                            <i class="fa-solid fa-expand fa-xl"></i>
+                        </div>
+                        <div onclick="closeModal()" class="text-2xl text-gray-900 bg-transparent rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center border border-gray-200 hover:bg-gray-200 hover:text-red-500 dark:border-slate-500 dark:text-gray-50 dark:hover:bg-red-500">
+                            <i class="fa-solid fa-xmark fa-xl"></i>
+                        </div>
+
+                    </div>
+
+                </div>
+                <div class="p-5">
+                    <div id="inputControlmodal" class="grid gap-4 mb-4 grid-cols-2 input-control">
+                        <div id="startDateContainermodal">
+                            <label for="startDate" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Data początkowa</label>
+                            <div>
+                                <input id="startDatemodal" type="date" name="startDate" class="startDate bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Data początkowa" required>
+                            </div>
+                        </div>
+                        <div id="startTimeContainermodal">
+                            <label for="startTime" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Czas początkowy</label>
+                            <div class="relative inputTime">
+                                <input id="startTimemodal" type="time" name="startTime" class="startTime bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Czas początkowy" required>
+                                <div class="inputCurrentTime">
+                                    <a href="" class="text-blue-500 text-sm mr-6">teraz</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="endDateContainermodal">
+                            <label for="endDate" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Data końcowa</label>
+                            <div>
+                                <input id="endDatemodal" type="date" name="endDate"class="endDate bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Data końcowa" required>
+                            </div>
+                        </div>
+                        <div id="endTimeContainermodal">
+                            <label for="endTime" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Czas końcowy</label>
+                            <div class="relative inputTime">
+                                <input id="endTimemodal" type="time" name="endTime" class="endTime bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500" placeholder="Czas końcowy" required>
+                                <div class="inputCurrentTime">
+                                    <a href="" class="text-blue-500 text-sm mr-6">teraz</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="intervalTimeContainermodal" class="col-span-2 sm:col-span-1">
+                            <label for="intervalTime" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Przedziały czasowe</label>
+                            <select id="intervalTimemodal" name="intervalTime" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                                <option value="" selected="">Długość przedziału</option>
+                            </select>
+                        </div>
+                        <div id="breakBetweenIntervalsContainermodal" class="col-span-2 sm:col-span-1">
+                            <label for="breakBetweenIntervals" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Przerwa pomiędzy</label>
+                            <select id="breakBetweenIntervalsmodal" name="breakBetweenIntervals" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
+                                <option value="0" selected="">Długość przerwy</option>
+                                <option value="0">0 minut</option>
+                                <option value="5">5 minut</option>
+                                <option value="10">10 minut</option>
+                                <option value="15">15 minut</option>
+                                <option value="20">20 minut</option>
+                                <option value="25">25 minut</option>
+                                <option value="30">30 minut</option>
+                            </select>
+                        </div>
+                        <div id="errorDisplaymodal" name="errorDisplay" class="error col-span-2"></div>
+                        <input type="hidden" name="id" id="selectedEventIdmodal" value="-1">
+                        <div class="col-span-1">
+                            <button onclick="" id="saveBtnmodal" type="submit" class="text-gray-50 flex items-center w-full justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-lg px-4 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                <i class="fa-solid fa-plus"></i>
+                                <span id="btnTextmodal" class="ms-3 whitespace-nowrap">Edytuj dostepny termin</span>
+                            </button>
+                        </div>
+                        <div class="col-span-1">
+                            <button id="btnCancelmodal" onclick=""  class="w-full text-gray-500 bg-gray-50 hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-gray-200 rounded-lg border border-gray-200 text-lg font-bold px-1 py-2 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
+                                Anuluj
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let modal = document.querySelector('#modal');
+        function maximize(){
+            console.log('MAXMIZE')
+            modal.classList.remove('max-w-max');
+            modal.classList.add('h-full');
+
+        };
+        function minimalize(){
+            console.log('MINIMIZE')
+            modal.classList.add('max-w-max');
+            modal.classList.remove('h-full');
+        };
+        function closeModal(){
+            console.log('CLOSE')
+        };
+        function openModal(){
+            console.log('OPEN')
+        };
+    </script>
+
+{% endblock %}
+{% endcomment %}

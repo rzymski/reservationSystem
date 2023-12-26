@@ -346,7 +346,7 @@
     };
     function filter() {
         console.log("DZIALA")
-        var selectedOptions = $('#selectServiceProviders').val();
+        let selectedOptions = $('#selectServiceProviders').val();
         console.log("Selected Options:", selectedOptions);
         $.ajax({
             type: 'POST',
@@ -729,16 +729,18 @@
                     setTimeout(function () { calendar.refetchEvents(); }, 50);
                     setTimeout(function () { calendar.refetchEvents(); }, 250);
                     setTimeout(function () { calendar.refetchEvents(); }, 2500);
-                } else {
-                    console.error("Error na backendzie", response.message)
-                    displayBackendError(response.message)
-                    if (possibleNeedRevert) {
-                        selectedEventInfo.revert()
-                    }
+                    return response
                 }
+                console.error("Error na backendzie", response.message)
+                displayBackendError(response.message)
+                if (possibleNeedRevert) {
+                    selectedEventInfo.revert()
+                }
+                return response
             },
             error: function (response) {
                 console.error("Cos poszło nie tak:", response.message)
+                return response
             }
         });
     };
