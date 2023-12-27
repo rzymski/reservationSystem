@@ -56,6 +56,14 @@ class AvailableBookingDate(models.Model):
     def save(self, *args, **kwargs):
         self.clean()
         super().save(*args, **kwargs)
+        for reservation in self.reservation_set.filter(isAccepted=False):
+            if self.intervalTime and int(self.intervalTime) > 0:
+                if (reservation.end - reservation.start) != timedelta(minutes=(int(self.intervalTime)) + int(self.breakBetweenIntervals)):
+                    reservation.availableBookingDate = None
+                    reservation.save()
+            if reservation.end > self.end or reservation.start < self.start:
+                reservation.availableBookingDate = None
+                reservation.save()
 
 
 class Reservation(models.Model):

@@ -198,11 +198,6 @@ def addEditAvailableBookingDate(request):
                 availableBookingDate.intervalTime = intervalTime
                 availableBookingDate.breakBetweenIntervals = breakBetweenIntervals
                 availableBookingDate.save()
-                if availableBookingDate.intervalTime and int(availableBookingDate.intervalTime) > 0:
-                    for reservation in availableBookingDate.reservation_set.filter(isAccepted=False):
-                        if (reservation.end - reservation.start) != timedelta(minutes=(int(availableBookingDate.intervalTime)) + int(availableBookingDate.breakBetweenIntervals)):
-                            reservation.availableBookingDate = None
-                            reservation.save()
         except ValidationError as e:
             # messages.error(request, e.message)
             responseData = {'status': 'error', 'message': e.message}
