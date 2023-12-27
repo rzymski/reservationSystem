@@ -775,6 +775,7 @@
     }
     function closeModal(modalId) {
         setSuccess(modalId)
+        console.error("MODAL ID = ", modalId)
         let modal = document.getElementById(modalId);
         modal.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');

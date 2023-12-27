@@ -28,3 +28,65 @@
 .fc-title a:hover {
     color: blue;
 }
+
+
+.headerContainer {
+    padding: 2cqw;
+    font-size: 3cqw;
+}
+
+.headerContainer .iconContainer {
+    width: 6cqw;
+    height: 6cqw
+}
+
+.contentContainer {
+    padding: 1cqw 2cqw 1cqw 2cqw;
+}
+
+.contentContainer :is(input, select) {
+    line-height: 3.5cqw;
+    font-size: 2.5cqw;
+}
+
+.contentContainer :is(label, span) {
+    font-size: 2.5cqw;
+}
+
+.contentContainer button {
+    line-height: 5cqw;
+    font-size: 3.5cqw;
+    padding: 1.5cqw 0cqw 1.5cqw 0cqw;
+}
+
+.contentContainer label {
+    margin-bottom: 0.5rem;
+}
+
+
+/*.contentContainer :is(input, select) {*/
+/*    line-height: 5cqw;*/
+/*    font-size: 3cqw;*/
+/*}*/
+
+/*.contentContainer :is(label, span) {*/
+/*    font-size: 3cqw;*/
+/*}*/
+
+/*.contentContainer button {*/
+/*    line-height: 7cqw;*/
+/*    font-size: 3.9cqw;*/
+/*}*/
+
+/*.headerContainer {*/
+/*    font-size: 3.5cqw;*/
+/*}*/
+
+/*.headerContainer .iconContainer {*/
+/*    width: 7cqw;*/
+/*    height: 7cqw*/
+/*}*/
+
+/*.contentContainer label {*/
+/*    margin-bottom: 0.5rem;*/
+/*}*/
