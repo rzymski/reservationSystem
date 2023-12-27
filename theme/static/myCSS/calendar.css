@@ -49,7 +49,7 @@
     font-size: 2.5cqw;
 }
 
-.contentContainer :is(label, span) {
+.contentContainer :is(label, span, p) {
     font-size: 2.5cqw;
 }
 

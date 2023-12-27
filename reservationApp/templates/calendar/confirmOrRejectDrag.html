@@ -1,7 +1,7 @@
-<div id="confirmOrRejectDragModal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div class="relative p-4 w-full max-w-lg max-h-full">
-        <div class="relative bg-gray-50 rounded-lg shadow dark:bg-gray-700">
-            <button onclick="dragEventConfirmOrReject('confirmOrRejectDragModal', false)" type="button" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="popup-modal">
+<div id="ConfirmOrRejectDragModal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden absolute top-0 right-0 bottom-0 left-0 m-auto z-50" style="container-type: inline-size; width: 500px;">
+    <div>
+        <div name="header" class="relative bg-gray-50 rounded-lg shadow dark:bg-gray-700 cursor-move">
+            <button onclick="dragEventConfirmOrReject('ConfirmOrRejectDragModal', false)" type="button" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="popup-modal">
                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                 </svg>
@@ -11,24 +11,24 @@
                 <i class="fa-solid fa-book-open fa-3x mx-auto mb-4 text-gray-900 w-12 h-12 dark:text-gray-50"></i>
                 <div class="text-left">
                     <h3 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-50">
-                        <a id="clientProfileLinkconfirmOrRejectDragModal" href="" class="hover:text-orange-400"><span id="clientNameAndSurname"></span></a>
+                        <a id="clientProfileLinkConfirmOrRejectDragModal" href="" class="hover:text-orange-400"><span id="clientNameAndSurname"></span></a>
                     </h3>
                     <h3 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-50">
-                        <a id="serviceProviderProfileLinkconfirmOrRejectDragModal" href="" class="hover:text-green-500"><span id="serviceProviderNameAndSurname"></span></a>
+                        <a id="serviceProviderProfileLinkConfirmOrRejectDragModal" href="" class="hover:text-green-500"><span id="serviceProviderNameAndSurname"></span></a>
                     </h3>
-                    <h3 class="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-50">
-                        Stary termin: <span id="oldDateRangeconfirmOrRejectDragModal"></span>
+                    <h3 class="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-50 whitespace-nowrap">
+                        Stary termin: <span id="oldDateRangeConfirmOrRejectDragModal"></span>
                     </h3>
-                    <h3 class="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-50">
-                        Nowy termin: <span id="dateRangeconfirmOrRejectDragModal"></span>
+                    <h3 class="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-50 whitespace-nowrap">
+                        Nowy termin: <span id="dateRangeConfirmOrRejectDragModal"></span>
                     </h3>
                 </div>
                 <h3 class="mb-3 text-lg font-semibold text-gray-900 dark:text-gray-50">Czy chcesz zatwierdzić termin?</h3>
-                <button id="confirmEventDragBtn" onclick="dragEventConfirmOrReject('confirmOrRejectDragModal', true)" class="w-full flex items-center text-gray-50 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-bold rounded-lg text-2xl px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                <button id="confirmEventDragBtn" onclick="dragEventConfirmOrReject('ConfirmOrRejectDragModal', true)" class="w-full flex items-center text-gray-50 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-bold rounded-lg text-2xl px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
                     <i class="fa-solid fa-check"></i>
                     <span class="ms-3 whitespace-nowrap">Tak, zmień termin</span>
                 </button>
-                <button id="rejectEventDragBtn" onclick="dragEventConfirmOrReject('confirmOrRejectDragModal', false)" class="w-full flex items-center text-gray-50 bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-bold rounded-lg text-2xl inline-flex items-center px-5 py-2.5 text-center me-2">
+                <button id="rejectEventDragBtn" onclick="dragEventConfirmOrReject('ConfirmOrRejectDragModal', false)" class="w-full flex items-center text-gray-50 bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-bold rounded-lg text-2xl inline-flex items-center px-5 py-2.5 text-center me-2">
                     <i class="fa-solid fa-x"></i>
                     <span class="ms-3 whitespace-nowrap">Nie, nie zmieniaj terminu.</span>
                 </button>
@@ -36,4 +36,41 @@
         </div>
     </div>
 </div>
+<script>
+    let confirmOrRejectDragModal = document.querySelector('#ConfirmOrRejectDragModal');
+    let headerConfirmOrRejectDragModal = document.querySelector('#ConfirmOrRejectDragModal [name="header"]');
+    let isMouseDownHeaderConfirmOrRejectDragModal = false;
+    let isMouseOverActionsConfirmOrRejectDragModal = false;
 
+    let offsetXConfirmOrRejectDragModal = 0;
+    let offsetYConfirmOrRejectDragModal = 0;
+
+
+    headerConfirmOrRejectDragModal.addEventListener('mousedown', e=> {
+        if (isMouseOverActionsConfirmOrRejectDragModal) return;
+        console.log("JEST NA HEADER CHANGEOPTIONS = ")
+
+        isMouseDownHeaderConfirmOrRejectDragModal = true;
+        offsetXConfirmOrRejectDragModal = confirmOrRejectDragModal.offsetLeft - e.clientX;
+        offsetYConfirmOrRejectDragModal = confirmOrRejectDragModal.offsetTop - e.clientY;
+    });
+
+    document.addEventListener('mousemove', e => {
+        if (isMouseOverActionsConfirmOrRejectDragModal) return;
+        if (!isMouseDownHeaderConfirmOrRejectDragModal) return;
+        e.preventDefault()
+
+        confirmOrRejectDragModal.classList.remove('top-20');
+        confirmOrRejectDragModal.classList.remove('right-0');
+        confirmOrRejectDragModal.classList.remove('bottom-0');
+        confirmOrRejectDragModal.classList.remove('left-0');
+
+        confirmOrRejectDragModal.style.left = e.clientX + offsetXConfirmOrRejectDragModal + "px";
+        confirmOrRejectDragModal.style.top = e.clientY + offsetYConfirmOrRejectDragModal + "px";
+    });
+
+    document.addEventListener('mouseup', e => {
+        if (isMouseOverActionsConfirmOrRejectDragModal) return;
+        isMouseDownHeaderConfirmOrRejectDragModal = false;
+    });
+</script>

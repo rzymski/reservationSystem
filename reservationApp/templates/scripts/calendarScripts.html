@@ -265,7 +265,7 @@
                 const totalMinutes = (intervalTimeValue + breakBetweenIntervalsValue);
                 let validationFailed = true;
                 if (eventType === 1 && (startDate < minStart || endDate > maxEnd)){
-                    console.log("Przekroczono zakres mozliwej daty", info.event.start, minStart)
+                    console.error("Revert Przekroczono zakres mozliwej daty", info.event.start, minStart)
                     console.log(info.event.end, maxEnd)
                     info.revert()
                     return;
@@ -282,7 +282,7 @@
                         }
                     }
                     if(validationFailed){
-                        console.log("Probowano przeciagnac poza przedzial", info.event.start, intervalTimeInt)
+                        console.error("REVERT Probowano przeciagnac poza przedzial", info.event.start, intervalTimeInt)
                         info.revert()
                         return;
                     }
@@ -295,13 +295,13 @@
                         'newEnd': endString,
                         'eventType': eventType,
                     }
-                    fillDateRange('confirmOrRejectDragModal', data = {startAvailableBookingDate: info.oldEvent.start, endAvailableBookingDate: info.oldEvent.end}, 'oldDateRangeconfirmOrRejectDragModal')
-                    openModalNewVersion('confirmOrRejectDragModal', false, false, true, false)
+                    fillDateRange('ConfirmOrRejectDragModal', data = {startAvailableBookingDate: info.oldEvent.start, endAvailableBookingDate: info.oldEvent.end}, 'oldDateRangeConfirmOrRejectDragModal')
+                    openModalNewVersion('ConfirmOrRejectDragModal', false, false, true, false)
                 }
             },
         });
         calendar.render();
-        let refetchInterval = setInterval(function() { calendar.refetchEvents(); console.log("regular refetch events of every 60 seconds");}, 60000);
+        //let refetchInterval = setInterval(function() { calendar.refetchEvents(); console.log("regular refetch events of every 60 seconds");}, 60000);
     });
     function getMainEventData() {
         let info = selectedEventInfo;
@@ -725,7 +725,7 @@
             data: data,
             success: function(response) {
                 if (response.status === 'success') {
-                    console.log("Pelny skuces: ", response.message)
+                    console.log("Refetch Pelny skuces: ", response.message)
                     setTimeout(function () { calendar.refetchEvents(); }, 50);
                     setTimeout(function () { calendar.refetchEvents(); }, 250);
                     setTimeout(function () { calendar.refetchEvents(); }, 2500);
@@ -735,6 +735,7 @@
                 displayBackendError(response.message)
                 if (possibleNeedRevert) {
                     selectedEventInfo.revert()
+                    console.error("REVERT ERROR NA BACKENDZIE")
                 }
                 return response
             },
@@ -775,7 +776,7 @@
     }
     function closeModal(modalId) {
         setSuccess(modalId)
-        console.error("MODAL ID = ", modalId)
+        //console.error("MODAL ID = ", modalId)
         let modal = document.getElementById(modalId);
         modal.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
@@ -787,7 +788,7 @@
             passDataByAJAX('/dragEvent/', dragEventData, true)
         } else {
             selectedEventInfo.revert()
-            console.log("Tu powinno przywrocic pozycje eventu")
+            console.error("REVERT Tu powinno przywrocic pozycje eventu")
         }
     };
     function fillClientData(modal, data, modalId) {

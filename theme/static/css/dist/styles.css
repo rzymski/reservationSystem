@@ -779,10 +779,6 @@ select {
   position: sticky;
 }
 
-.inset-0 {
-  inset: 0px;
-}
-
 .bottom-0 {
   bottom: 0px;
 }
@@ -827,8 +823,8 @@ select {
   z-index: 50;
 }
 
-.z-40 {
-  z-index: 40;
+.z-20 {
+  z-index: 20;
 }
 
 .col-span-1 {
@@ -985,6 +981,10 @@ select {
   display: block;
 }
 
+.inline-block {
+  display: inline-block;
+}
+
 .flex {
   display: flex;
 }
@@ -1057,6 +1057,14 @@ select {
   width: 50%;
 }
 
+.w-1\/4 {
+  width: 25%;
+}
+
+.w-1\/5 {
+  width: 20%;
+}
+
 .w-12 {
   width: 3rem;
 }
@@ -1067,10 +1075,6 @@ select {
 
 .w-2\/5 {
   width: 40%;
-}
-
-.w-2\/6 {
-  width: 33.333333%;
 }
 
 .w-3 {
@@ -1097,26 +1101,18 @@ select {
   width: 100%;
 }
 
-.w-1\/4 {
-  width: 25%;
+.w-1\/6 {
+  width: 16.666667%;
 }
 
-.min-w-fit {
-  min-width: -moz-fit-content;
-  min-width: fit-content;
+.w-fit {
+  width: -moz-fit-content;
+  width: fit-content;
 }
 
-.min-w-\[500\] {
-  min-width: 500;
-}
-
-.min-w-\[1500\] {
-  min-width: 1500;
-}
-
-.min-w-max {
-  min-width: -moz-max-content;
-  min-width: max-content;
+.w-max {
+  width: -moz-max-content;
+  width: max-content;
 }
 
 .max-w-lg {
@@ -1126,10 +1122,6 @@ select {
 .max-w-max {
   max-width: -moz-max-content;
   max-width: max-content;
-}
-
-.max-w-md {
-  max-width: 28rem;
 }
 
 .flex-1 {
@@ -1411,16 +1403,6 @@ select {
   background-color: rgb(202 138 4 / var(--tw-bg-opacity));
 }
 
-.bg-yellow-400 {
-  --tw-bg-opacity: 1;
-  background-color: rgb(250 204 21 / var(--tw-bg-opacity));
-}
-
-.bg-black {
-  --tw-bg-opacity: 1;
-  background-color: rgb(0 0 0 / var(--tw-bg-opacity));
-}
-
 .object-cover {
   -o-object-fit: cover;
      object-fit: cover;
@@ -1448,10 +1430,6 @@ select {
 
 .p-4 {
   padding: 1rem;
-}
-
-.p-5 {
-  padding: 1.25rem;
 }
 
 .p-6 {
@@ -1516,11 +1494,6 @@ select {
 .py-8 {
   padding-top: 2rem;
   padding-bottom: 2rem;
-}
-
-.py-9 {
-  padding-top: 2.25rem;
-  padding-bottom: 2.25rem;
 }
 
 .pl-4 {
@@ -1685,18 +1658,6 @@ select {
 
 .no-underline {
   text-decoration-line: none;
-}
-
-.opacity-50 {
-  opacity: 0.5;
-}
-
-.opacity-0 {
-  opacity: 0;
-}
-
-.opacity-100 {
-  opacity: 1;
 }
 
 .shadow {

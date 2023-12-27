@@ -1,6 +1,6 @@
-<div id="ConfirmReservationModal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div class="relative p-4 w-full max-w-lg max-h-full">
-        <div class="relative bg-gray-50 rounded-lg shadow dark:bg-gray-700">
+<div id="ConfirmReservationModal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden absolute top-0 right-0 bottom-0 left-0 m-auto z-50" style="container-type: inline-size; width: 450px;">
+    <div>
+        <div name="header" class="relative bg-gray-50 rounded-lg shadow dark:bg-gray-700 cursor-move">
             <button onclick="closeModal('ConfirmReservationModal')" type="button" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="popup-modal">
                 <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                     <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
@@ -37,49 +37,41 @@
         </div>
     </div>
 </div>
+<script>
+    let confirmReservationModal = document.querySelector('#ConfirmReservationModal');
+    let headerConfirmReservationModal = document.querySelector('#ConfirmReservationModal [name="header"]');
+    let isMouseDownHeaderConfirmReservationModal = false;
+    let isMouseOverActionsConfirmReservationModal = false;
+
+    let offsetXConfirmReservationModal = 0;
+    let offsetYConfirmReservationModal = 0;
 
 
-{% comment %}
-<div id="ConfirmReservationModal" tabindex="-1" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
-    <div class="relative p-4 w-full max-w-lg max-h-full">
-        <div class="relative bg-gray-50 rounded-lg shadow dark:bg-gray-700">
-            <button onclick="closeModal('ConfirmReservationModal')" type="button" class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="popup-modal">
-                <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                </svg>
-                <span class="sr-only">Close modal</span>
-            </button>
-            <div class="py-4 px-4 text-center">
-                <i class="fa-solid fa-book-open fa-3x mx-auto mb-4 text-gray-900 w-12 h-12 dark:text-gray-50"></i>
+    headerConfirmReservationModal.addEventListener('mousedown', e=> {
+        if (isMouseOverActionsConfirmReservationModal) return;
+        console.log("JEST NA HEADER CHANGEOPTIONS = ")
 
-                <div class="text-left">
-                    <h3 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-50">
-                        <a id="clientProfileLinkConfirmReservationModal" href="" class="hover:text-orange-400"><span id="clientNameAndSurname"></span></a>
-                    </h3>
-                    <h3 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-50">
-                        <a id="serviceProviderProfileLinkConfirmReservationModal" href="" class="hover:text-green-500"><span id="serviceProviderNameAndSurname"></span></a>
-                    </h3>
-                    <h3 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-50">
-                        Termin: <span id="dateRangeConfirmReservationModal"></span>
-                    </h3>
-                    <h3 class="mb-1 text-lg font-semibold text-gray-900 dark:text-gray-50">
-                        <span id="visitTimeConfirmReservationModal"></span>
-                    </h3>
-                </div>
+        isMouseDownHeaderConfirmReservationModal = true;
+        offsetXConfirmReservationModal = confirmReservationModal.offsetLeft - e.clientX;
+        offsetYConfirmReservationModal = confirmReservationModal.offsetTop - e.clientY;
+    });
 
+    document.addEventListener('mousemove', e => {
+        if (isMouseOverActionsConfirmReservationModal) return;
+        if (!isMouseDownHeaderConfirmReservationModal) return;
+        e.preventDefault()
 
-                <h3 id="optionQuestionConfirmReservationModal" class="mb-3 mt-5 text-lg font-semibold text-gray-900 dark:text-gray-50"></h3>
-                <input type="hidden" name="selectedReservationId" id="idConfirmReservationModal" value="">
-                <button onclick="optionSelectedModal(2, 'ConfirmReservationModal')" id="confirmReservationBtn" class="w-2/5 text-gray-50 bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-extrabold rounded-lg text-2xl px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                    <i class="fa-solid fa-check fa-lg"></i>
-                    <span id="btnOption1TextConfirmReservationModal" class="ms-3 whitespace-nowrap"></span>
-                </button>
-                <button onclick="closeModal('ConfirmReservationModal')"  class="w-2/5 text-gray-50 bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-extrabold rounded-lg text-2xl px-5 py-2.5 text-center me-2">
-                    <i class="fa-solid fa-x fa-lg"></i>
-                    <span id="btnOption2TextConfirmReservationModal" class="ms-3 whitespace-nowrap"></span>
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endcomment %}
+        confirmReservationModal.classList.remove('top-20');
+        confirmReservationModal.classList.remove('right-0');
+        confirmReservationModal.classList.remove('bottom-0');
+        confirmReservationModal.classList.remove('left-0');
+
+        confirmReservationModal.style.left = e.clientX + offsetXConfirmReservationModal + "px";
+        confirmReservationModal.style.top = e.clientY + offsetYConfirmReservationModal + "px";
+    });
+
+    document.addEventListener('mouseup', e => {
+        if (isMouseOverActionsConfirmReservationModal) return;
+        isMouseDownHeaderConfirmReservationModal = false;
+    });
+</script>
