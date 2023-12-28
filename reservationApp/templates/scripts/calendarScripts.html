@@ -84,7 +84,7 @@
                 },
             },
             {#dodawanie dostepnych terminow#}
-            select: function (data){
+            select: function(data){
                 if ("{{ request.user }}" === 'AnonymousUser') { return; }
                 let modalId = "AddEditModal"
                 selectedEventId = -1
@@ -121,7 +121,7 @@
                 }
             },
             {#edycja/usuwanie dostepnych terminow#}
-            eventClick: function (info) {
+            eventClick: function(info) {
                 if ("{{ request.user }}" === 'AnonymousUser') { return; }
                 currentUserId = {{ request.user.id }};
                 let serviceProviderId = info.event.extendedProps.serviceProviderId;
@@ -217,8 +217,24 @@
                 }
                 console.log(currentUserRole);
             },
+            {% comment %}eventRender: function(info) {
+                info.el.dataset.eventId = info.event.id;
+            },{% endcomment %}
 
-            eventMouseEnter: function (info) {
+            eventDidMount: function(info) {
+                var tooltip = new Tooltip(info.el, {
+                    title: info.event.title,
+                    placement: 'top',
+                    trigger: 'hover',
+                    container: 'body',
+                });
+            },
+
+            eventMouseEnter: function(info) {
+                //console.error("JSEvent = ", info.jsEvent)
+                //console.error("INFO = ", info)
+                //eventHoverStart(info)
+
                 //console.log("HOVER")
                 let hoveredEvent = info.event;
                 if ("{{ request.user }}" === 'AnonymousUser') { hoveredEvent.setProp('editable', false); return; }
@@ -240,7 +256,10 @@
                 //console.log("Nie ma uprawnien do przesuwania tego")
                 hoveredEvent.setProp('editable', false)
             },
-            eventDrop: function (info) {
+            eventMouseLeave: function(info) {
+                //eventHoverEnd(info)
+            },
+            eventDrop: function(info) {
                 if ("{{ request.user }}" === 'AnonymousUser') { return; }
                 currentUserId = {{ request.user.id }}
                 console.log("Przeciągnieto event: ", info)
@@ -303,6 +322,38 @@
         calendar.render();
         //let refetchInterval = setInterval(function() { calendar.refetchEvents(); console.log("regular refetch events of every 60 seconds");}, 60000);
     });
+
+    function eventHoverStart(info){
+        //openModalNewVersion('EventInformationModal', false, false, true, false)
+
+        console.error("NAJECHANO MYSZA")
+        {% comment %}console.error("jsEvent = ", info.jsEvent.screenX, info.jsEvent.screenY)
+        console.error("offset = ", info.el.offsetLeft, info.el.offsetTop){% endcomment %}
+
+        let eventId = info.event.id
+        var eventElement = document.querySelector(`[data-event-id="${eventId}"]`);
+        console.error("Element = ", eventElement)
+        var rect = eventElement.getBoundingClientRect();
+        console.log('Event position:', rect.left, rect.top);
+
+        {% comment %}const eventModal = document.getElementById('EventInformationModal');
+        eventModal.style.display = 'block';
+        // Calculate and set the position based on the event element
+        const calendarEvent = document.getElementById(info.event.id);
+        const rect = calendarEvent.getBoundingClientRect();
+        eventModal.style.top = rect.bottom + 'px';
+        eventModal.style.left = rect.left + 'px';
+        // Show the modal
+        modal.classList.remove('hidden');
+        console.error("SHOW THIS SHIT"){% endcomment %}
+    };
+    function eventHoverEnd(info){
+        {% comment %}const eventModal = document.getElementById('EventInformationModal');
+        eventModal.style.display = 'none';
+        closeModal('EventInformationModal')
+        console.error("HIDE THIS SHIT"){% endcomment %}
+    };
+
     function getMainEventData() {
         let info = selectedEventInfo;
         if (info){
@@ -327,7 +378,7 @@
         }
     };
     function getEventTitle(arg) {
-        const start = getDateDetails(arg.event.start, '.', 'YMD')
+        {% comment %}const start = getDateDetails(arg.event.start, '.', 'YMD')
         const end = getDateDetails(arg.event.end, '.', 'YMD')
         let title = '';
         let isDarkTheme = '{{ is_dark_theme }}';
@@ -342,7 +393,8 @@
         if (arg.event.extendedProps.serviceProviderId != -1) {title += `<div class="fc-title ${textColor}"><a href="/userProfile/${arg.event.extendedProps.serviceProviderId}/">${arg.event.extendedProps.serviceProviderNameAndSurname}</a></div>`}
         if (arg.event.extendedProps.clientId != -1) {title += `<div class="fc-title ${textColor}"><a href="/userProfile/${arg.event.extendedProps.clientId}/">${arg.event.extendedProps.clientNameAndSurname}</a></div>`}
         if (arg.event.extendedProps.intervalTimeInt) {title += `<div class="fc-title ${textColor}">Czas wizyty: ${arg.event.extendedProps.intervalTimeString}</div>`}
-        return { html: title}
+        return { html: title}{% endcomment %}
+        return { html: `<div class="fc-title">${arg.event.title}</div>` }
     };
     function filter() {
         console.log("DZIALA")
@@ -490,11 +542,8 @@
     function openModalNewVersion(modalId, datesDisplay=false, intervalDisplay=false, setTextsOption=true, fillInputsOption=true) {
         console.log("OPEN MODAL NEW VERSION = ", modalId)
         let modal = document.getElementById(modalId);
-
         if (setTextsOption) { setTextsInTemplate(modalId, getMainEventData()) }
         if (fillInputsOption) { fillInputs(modalId) }
-
-
         if ( modalId === 'AddEditModal') {
             console.log("Dates display =", datesDisplay)
             if (datesDisplay) {
@@ -515,7 +564,6 @@
                 document.getElementById('endTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-2");
                 document.getElementById('startTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-2");
             }
-
             console.log("intervalDisply = ", intervalDisplay)
             if (intervalDisplay) {
                 console.log("JEST INTERWAL")

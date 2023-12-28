@@ -8,6 +8,9 @@
             <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
 {#            Kalendarz z https://fullcalendar.io/docs/initialize-globals #}
             <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.9/index.global.min.js'></script>
+{#            Tooltips dodanie kiedy najedzie sie event#}
+            <script src='https://unpkg.com/popper.js/dist/umd/popper.min.js'></script>
+            <script src='https://unpkg.com/tooltip.js/dist/umd/tooltip.min.js'></script>
 {#            Flowbite chyba i tak nie dziala wiec zaakomentuje nie wiem czy potrzebny czy tailwind nie wystarcza, ale niech zostatnie XD#}
 {#            <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.0/datepicker.min.js"></script>#}
 
@@ -40,6 +43,7 @@
 
                 {% include 'filter/filterServiceProviders.html' %}
 
+                {% include 'calendar/eventInformation.html' %}
                 {% include 'calendar/changeOptions.html' %}
                 {% include 'calendar/addEdit.html' %}
                 {% include 'calendar/delete.html' %}
