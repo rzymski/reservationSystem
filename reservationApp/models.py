@@ -5,6 +5,7 @@ from django.db.models.signals import post_save
 from django.core.exceptions import ValidationError
 from icecream import ic
 from datetime import timedelta
+from django.utils import timezone
 
 
 class AvailableBookingDate(models.Model):
@@ -145,6 +146,35 @@ def create_profile(sender, instance, created, **kwargs):
 post_save.connect(create_profile, sender=User)
 
 
+class Notification(models.Model):
+    # 0 - potwierdził twoją rezerwacje
+    # 1 - zaakceptował twoją propozycje terminu
+    # 2 - zaproponował termin rezerwacji
+    # 3 - anululował potwierdzony termin rezerwacji
+    # 4 - usunął twoją rezerwacje
+    # 5 - usunął twoją propozycje terminu
+    # 6 - usunął twój dostępny termin
+    # 7 - edytował twój dostępny termin
+    # 8 - edytował twoją propozycje terminu
+    # 9 - edytował swój dostępny termin poza przedział twojej rezerwacji
+    notificationType = models.IntegerField()
+    toUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notification_to', null=True)
+    fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notification_from', null=True)
+    availableBookingDate = models.ForeignKey(AvailableBookingDate, on_delete=models.CASCADE, null=True, blank=True)
+    reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, null=True, blank=True)
+    hasBeenSeen = models.BooleanField(default=False)
+    date = models.DateTimeField(default=timezone.now)
+
+
+
+
+
+
+
+
+
+
+
 class Post(models.Model):
     title = models.CharField(max_length=200)
     content = models.TextField()
@@ -152,14 +182,3 @@ class Post(models.Model):
     def __str__(self):
         return str(self.title)
 
-# class Events(models.Model):
-#     id = models.AutoField(primary_key=True)
-#     name = models.CharField(max_length=255, null=True, blank=True)
-#     start = models.DateTimeField(null=True, blank=True)
-#     end = models.DateTimeField(null=True, blank=True)
-#
-#     def __str__(self):
-#         return f"{self.name} {self.start}:{self.end}"
-#
-#     class Meta:
-#         db_table = "tblevents"

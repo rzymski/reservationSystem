@@ -1,0 +1,51 @@
+<button id="notificationsButton" class="h-8 relative inline-flex items-center p-3 text-center mr-20">
+    <i class="fa-solid fa-bell fa-xl"></i>
+    <div class="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 border-2 border-white rounded-full -top-2 -end-1 dark:border-gray-900">0</div>
+</button>
+
+<div id="notificationsDropdown" class="absolute z-10 hidden bg-gray-50 divide-y divide-gray-100 rounded-lg shadow w-80 dark:bg-gray-700 dark:divide-gray-600 top-16">
+    <div class="p-2 font-normal text-sm text-gray-900 dark:text-white whitespace-nowrap">
+        <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }} zaakceptował twoją propozycje terminu</a>
+        <div>2023-10-20 19:35:20</div>
+    </div>
+    <div class="p-2 font-normal text-sm text-gray-900 dark:text-white whitespace-nowrap">
+        <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }} potwierdził twoją rezerwacje</a>
+        <div>2023-10-20 19:35:20</div>
+    </div>
+    <div class="p-2 font-normal text-sm text-gray-900 dark:text-white">
+        <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }} zaproponował termin rezerwacji</a>
+        <div>2023-10-20 19:35:20</div>
+    </div>
+    <div class="p-2 font-normal text-sm text-gray-900 dark:text-white">
+        <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }} anululował potwierdzony termin</a>
+        <div>2023-10-20 19:35:20</div>
+    </div>
+    <div class="p-2 font-normal text-sm text-gray-900 dark:text-white">
+        <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }} usunął twój dostępny termin</a>
+        <div>2023-10-20 19:35:20</div>
+    </div>
+    <div class="p-2 font-normal text-sm text-gray-900 dark:text-white">
+        <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }} edytował twój dostępny termin</a>
+        <div>2023-10-20 19:35:20</div>
+    </div>
+    <div class="p-2 font-normal text-sm text-gray-900 dark:text-white">
+        <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }} edytował swój dostępny termin poza przedział twojej rezerwacji</a>
+        <div>2023-10-20 19:35:20</div>
+    </div>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        let notificationsButton = document.getElementById("notificationsButton");
+        if(!notificationsButton) { return; }
+        let notificationsDropdown = document.getElementById("notificationsDropdown");
+        notificationsButton.addEventListener("click", function (event) {
+            //event.stopPropagation();
+            notificationsDropdown.classList.toggle("hidden");
+        });
+        document.addEventListener("click", function (event) {
+            if (!event.target.closest("#notificationsButton") && !event.target.closest("#notificationsDropdown")) {
+                notificationsDropdown.classList.add("hidden");
+            }
+        });
+    });
+</script>

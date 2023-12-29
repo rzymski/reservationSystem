@@ -10,6 +10,7 @@ def unauthenticatedUser(viewFunc):
             return viewFunc(request, *args, **kwargs)
     return wrappedFunc
 
+
 def allowedUsers(allowedGroups=[]):
     def decorator(viewFunc):
         def wrappedFunc(request, *args, **kwargs):

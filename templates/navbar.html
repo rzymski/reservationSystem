@@ -3,7 +3,7 @@
         <i class="fa-regular fa-calendar-days fa-2xl"></i>
         <a class="text-xl font-extrabold dark:text-white whitespace-nowrap" href="{% url 'index' %}">System rezerwacji terminów</a>
     </div>
-    <ul class="flex px-8">
+    <ul class="flex gap-8">
         <li class="px-4">
             <a href="{% url 'myTest' %}" class="text-3xl font-semibold dark:text-gray-50 no-underline">TEST</a>
         </li>
@@ -16,14 +16,17 @@
     </ul>
     <div class="relative flex items-center">
         {% if request.user.is_authenticated %}
-            <img id="avatarButton" type="button" data-dropdown-toggle="userDropdown" data-dropdown-placement="bottom-start" class="w-14 h-14 rounded-full cursor-pointer mr-10 border border-slate-600 dark:border-slate-700" src="{{ profileImageUrl }}" alt="User dropdown">
+            <!-- Notification badge -->
+            {% include 'notifications/notificationsDropdown.html' %}
+            <!-- Avatar image -->
+            <img id="avatarButton" type="button" data-dropdown-toggle="userDropdown" data-dropdown-placement="bottom-end" class="w-14 h-14 rounded-full cursor-pointer mr-10 border border-slate-600 dark:border-slate-700" src="{{ profileImageUrl }}" alt="User dropdown">
             <!-- Dropdown menu -->
-            <div id="userDropdown" class="absolute z-10 hidden bg-gray-50 divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600 top-16">
+            <div id="userDropdown" class="absolute z-10 hidden bg-gray-50 divide-y divide-gray-100 rounded-lg shadow w-52 dark:bg-gray-700 dark:divide-gray-600 top-16" style="right: -10px">
                 <div class="px-4 py-3 font-bold text-xl text-gray-900 dark:text-white">
                     <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }}</a>
                 </div>
                 {% if userRole == 'admin' %}
-                    <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="avatarButton">
+                    <ul class="py-2 text-base text-gray-700 dark:text-gray-200" aria-labelledby="avatarButton">
                         <li>
                             <a href="admin/" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Strona administracyjna</a>
                         </li>
@@ -32,7 +35,7 @@
 {#                        </li>#}
                     </ul>
                 {% endif %}
-                <ul class="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="avatarButton">
+                <ul class="py-2 text-base text-gray-700 dark:text-gray-200" aria-labelledby="avatarButton">
                     <li>
                         <a href="{% url 'userProfile' pk=request.user.id %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Profil</a>
                     </li>
@@ -41,7 +44,7 @@
                     </li>
                 </ul>
                 <div class="py-1">
-                    <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Wyloguj się</a>
+                    <a href="{% url 'logout' %}" class="block px-4 py-2 text-base text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Wyloguj się</a>
                 </div>
             </div>
         {% else %}
@@ -58,10 +61,11 @@
     </div>
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            var avatarButton = document.getElementById("avatarButton");
-            var userDropdown = document.getElementById("userDropdown");
+            let avatarButton = document.getElementById("avatarButton");
+            if(!avatarButton) { return; }
+            let userDropdown = document.getElementById("userDropdown");
             avatarButton.addEventListener("click", function (event) {
-                event.stopPropagation();
+                //event.stopPropagation();
                 userDropdown.classList.toggle("hidden");
             });
             document.body.addEventListener("click", function (event) {
