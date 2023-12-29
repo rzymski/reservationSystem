@@ -248,30 +248,14 @@
         tooltipContent += `<div>Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div>`;
         tooltipContent += `${info.event.extendedProps.intervalTimeInt ? `<div>Czas wizyty: ${info.event.extendedProps.intervalTimeString}</div>` : ''}`;
         tooltipContent += `</div>`;
+        let calendarContainer = document.getElementById('calendar');
         let tooltip = new Tooltip(info.el, {
             title: tooltipContent,
-            placement: 'auto',
-            //fallbackPlacements: ['top', 'bottom', 'left', 'right'],
+            placement: 'top',
             trigger: 'hover',
-            container: document.getElementById('calendar'),
+            container: 'body',
             html: true,
-            {% comment %}modifiers: [
-                {
-                    name: 'preventOverflow',
-                    enabled: true,
-                    options: {
-                        mainAxis: false,
-                        padding: 8,
-                    },
-                },
-                {
-                    name: 'flip',
-                    enabled: false,
-                    options: {
-                        fallbackPlacements: ['top', 'bottom', 'left', 'right', 'auto'],
-                    },
-                },
-            ],{% endcomment %}
+            delay: 500,
         });
     };
     function eventTooltipClicked(eventId) {
