@@ -135,7 +135,7 @@
                     setTextsInTextVariables({
                         reserveOptionConfirmation: false,
                         eventType: 0,
-                        question: 'Co chcesz zrobić z wybranym dostępnym terminem rezerwacji?',
+                        question: 'Co chcesz zrobić z wybranym dostępnym terminem?',
                         buttonOption1: 'Edytuj dostępny termin rezerwacji',
                         buttonOption2: 'Usuń dostępny termin rezerwacji'})
                     openOptionModal('ChangeOptionsModal')
@@ -217,25 +217,51 @@
                 }
                 console.log(currentUserRole);
             },
-            {% comment %}eventRender: function(info) {
-                info.el.dataset.eventId = info.event.id;
-            },{% endcomment %}
-
             eventDidMount: function(info) {
-                var tooltip = new Tooltip(info.el, {
-                    title: info.event.title,
-                    placement: 'top',
+
+                const start = getDateDetails(info.event.start, '.', 'YMD')
+                const end = getDateDetails(info.event.end, '.', 'YMD')
+
+                {% comment %}let eventTypeDiv = modal.querySelector('#eventTypeTooltip');
+                eventTypeDiv.textContent = `${info.event.extendedProps.eventType}`;
+
+                let startDiv = modal.querySelector('#eventStartTooltip');
+                if (start) { startDiv.textContent = `Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}`; }
+                let endDiv = modal.querySelector('#eventEndTooltip');
+                if (end) { endDiv.textContent = `Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}`; }
+
+                let serviceProviderDiv = modal.querySelector('#serviceProviderTooltip');
+                console.error(info.event.extendedProps.serviceProviderId, typeof info.event.extendedProps.serviceProviderId)
+                if (info.event.extendedProps.serviceProviderId !== -1) { serviceProviderDiv.textContent = `${info.event.extendedProps.serviceProviderNameAndSurname}`; }
+
+                let clientDiv = modal.querySelector('#clientTooltip');
+                if (info.event.extendedProps.clientId !== -1) { clientDiv.textContent = `${info.event.extendedProps.clientNameAndSurname}`; }{% endcomment %}
+
+                {#<div class="w-60 absolute z-10 p-10 text-left whitespace-nowrap border-2 border-solid dark:border-gray-50">#}
+                let tooltipContent = `<div class="text-left font-semibold mb-1 text-lg whitespace-nowrap p-5 border-2 border-solid rounded-lg dark:bg-slate-500 dark:border-gray-50 bg-slate-200 border-gray-950">`;
+                if (info.event.extendedProps.eventType === 0) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Dostępny termin</div>`;}
+                if (info.event.extendedProps.eventType === 1) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Propozycja rezerwacji</div>`;}
+                if (info.event.extendedProps.eventType === 2) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Potwierdzona rezerwacja</div>`;}
+                if (info.event.extendedProps.eventType === 3) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Propozycja terminu</div>`;}
+                tooltipContent += `${info.event.extendedProps.serviceProviderId !== -1 ? `<div><a href="/userProfile/${info.event.extendedProps.serviceProviderId}/" class="hover:text-green-500">Usługodawca: ${info.event.extendedProps.serviceProviderNameAndSurname}</a></div>` : ''}`;
+                tooltipContent += `${info.event.extendedProps.clientId !== -1 ? `<div><a href="/userProfile/${info.event.extendedProps.clientId}/" class="hover:text-orange-400">Usługobiorca: ${info.event.extendedProps.clientNameAndSurname}</a></div>` : ''}`;
+                tooltipContent += `<div>Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}</div>`;
+                tooltipContent += `<div>Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div>`;
+                tooltipContent += `${info.event.extendedProps.intervalTimeInt ? `<div>Czas wizyty: ${info.event.extendedProps.intervalTimeString}</div>` : ''}`;
+                tooltipContent += `</div>`;
+
+                {% comment %}<a href="" class="hover:text-orange-400"></a>
+                <a href="" class="hover:text-green-500">"Usługodawca: " + data.serviceProviderNameAndSurname</a>{% endcomment %}
+
+                let tooltip = new Tooltip(info.el, {
+                    title: tooltipContent,
+                    placement: 'auto',
                     trigger: 'hover',
                     container: 'body',
+                    html: true,
                 });
             },
-
             eventMouseEnter: function(info) {
-                //console.error("JSEvent = ", info.jsEvent)
-                //console.error("INFO = ", info)
-                //eventHoverStart(info)
-
-                //console.log("HOVER")
                 let hoveredEvent = info.event;
                 if ("{{ request.user }}" === 'AnonymousUser') { hoveredEvent.setProp('editable', false); return; }
                 currentUserId = {{ request.user.id }};
@@ -255,9 +281,6 @@
                 }
                 //console.log("Nie ma uprawnien do przesuwania tego")
                 hoveredEvent.setProp('editable', false)
-            },
-            eventMouseLeave: function(info) {
-                //eventHoverEnd(info)
             },
             eventDrop: function(info) {
                 if ("{{ request.user }}" === 'AnonymousUser') { return; }
@@ -322,38 +345,6 @@
         calendar.render();
         //let refetchInterval = setInterval(function() { calendar.refetchEvents(); console.log("regular refetch events of every 60 seconds");}, 60000);
     });
-
-    function eventHoverStart(info){
-        //openModalNewVersion('EventInformationModal', false, false, true, false)
-
-        console.error("NAJECHANO MYSZA")
-        {% comment %}console.error("jsEvent = ", info.jsEvent.screenX, info.jsEvent.screenY)
-        console.error("offset = ", info.el.offsetLeft, info.el.offsetTop){% endcomment %}
-
-        let eventId = info.event.id
-        var eventElement = document.querySelector(`[data-event-id="${eventId}"]`);
-        console.error("Element = ", eventElement)
-        var rect = eventElement.getBoundingClientRect();
-        console.log('Event position:', rect.left, rect.top);
-
-        {% comment %}const eventModal = document.getElementById('EventInformationModal');
-        eventModal.style.display = 'block';
-        // Calculate and set the position based on the event element
-        const calendarEvent = document.getElementById(info.event.id);
-        const rect = calendarEvent.getBoundingClientRect();
-        eventModal.style.top = rect.bottom + 'px';
-        eventModal.style.left = rect.left + 'px';
-        // Show the modal
-        modal.classList.remove('hidden');
-        console.error("SHOW THIS SHIT"){% endcomment %}
-    };
-    function eventHoverEnd(info){
-        {% comment %}const eventModal = document.getElementById('EventInformationModal');
-        eventModal.style.display = 'none';
-        closeModal('EventInformationModal')
-        console.error("HIDE THIS SHIT"){% endcomment %}
-    };
-
     function getMainEventData() {
         let info = selectedEventInfo;
         if (info){
@@ -525,12 +516,8 @@
             }
         }
         if(data){
-            if (data.serviceProviderId !== -1){
-                fillServiceProviderInformation(modal, data, modalId)
-            }
-            if (data.clientId !== -1) {
-                fillClientData(modal, data, modalId)
-            }
+            fillServiceProviderInformation(modal, data, modalId)
+            fillClientData(modal, data, modalId)
             if (data.intervalTimeInt && data.intervalTimeInt != 0) {
                 console.log("DOSTALES =", modalId, modal)
                 fillIntervalSelectsInTemplate(modal, data, modalId)
@@ -843,13 +830,21 @@
         let clientProfileElement = modal.querySelector('#clientProfileLink'+modalId);
         if (clientProfileElement) { clientProfileElement.href = "/userProfile/"+data.clientId+"/"; }
         let clientNameAndSurnameElement = modal.querySelector('#clientNameAndSurname'+modalId);
-        if (clientNameAndSurnameElement) { clientNameAndSurnameElement.textContent = "Usługobiorca: " + data.clientNameAndSurname }
+        if (clientNameAndSurnameElement) {
+            if (data.clientNameAndSurname) {
+                clientNameAndSurnameElement.textContent = "Usługobiorca: " + data.clientNameAndSurname;
+            } else { clientNameAndSurnameElement.textContent = ""; }
+        }
     };
     function fillServiceProviderInformation(modal, data, modalId){
         let serviceProviderProfileElement = modal.querySelector('#serviceProviderProfileLink'+modalId);
         if (serviceProviderProfileElement) { serviceProviderProfileElement.href = "/userProfile/"+data.serviceProviderId+"/"; }
         let serviceProviderNameAndSurnameElement = modal.querySelector('#serviceProviderNameAndSurname'+modalId);
-        if (serviceProviderNameAndSurnameElement) { serviceProviderNameAndSurnameElement.textContent = "Usługodawca: " + data.serviceProviderNameAndSurname; }
+        if (serviceProviderNameAndSurnameElement) {
+            if (data.serviceProviderNameAndSurname) {
+                serviceProviderNameAndSurnameElement.textContent = "Usługodawca: " + data.serviceProviderNameAndSurname;
+            } else { serviceProviderNameAndSurnameElement.textContent = ""; }
+        }
     }
     function fillDateRange(modalId, data, elementName){
         let modal = document.getElementById(modalId);

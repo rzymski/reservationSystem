@@ -67,20 +67,25 @@
 
 
 
-
 .popper,
 .tooltip {
   position: absolute;
-  z-index: 9999;
-  background: #FFC107;
-  color: black;
-  width: 150px;
-  border-radius: 3px;
-  box-shadow: 0 0 2px rgba(0,0,0,0.5);
-  padding: 10px;
-  text-align: center;
+  z-index: 19;
+
+  /*background: #FFC107;
+  color: black;*/
+
+  /*width: 250px;*/
+    width: fit-content;
+
+  /*border-radius: 3px;
+  box-shadow: 0 0 2px rgba(0,0,0,0.5);*/
+  /*padding: 10px;*/
+
+  /*text-align: center;*/
 }
-.style5 .tooltip {
+
+/*.style5 .tooltip {
   background: #1E252B;
   color: #FFFFFF;
   max-width: 200px;
@@ -88,6 +93,7 @@
   font-size: .8rem;
   padding: .5em 1em;
 }
+
 .popper .popper__arrow,
 .tooltip .tooltip-arrow {
   width: 0;
@@ -163,4 +169,4 @@
   top: calc(50% - 5px);
   margin-left: 0;
   margin-right: 0;
-}
+}*/
