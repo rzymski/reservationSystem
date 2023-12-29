@@ -21,6 +21,7 @@
 }
 
 .fc-title {
+    padding-left: 4px;
     text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
     font-weight: bold;
     color: white;
@@ -65,27 +66,27 @@
 }
 
 
-
-
 .popper,
 .tooltip {
-  position: absolute;
-  z-index: 19;
-
-  /*background: #FFC107;
-  color: black;*/
-
-  /*width: 250px;*/
+    position: absolute;
+    z-index: 19;
     width: fit-content;
-
-  /*border-radius: 3px;
-  box-shadow: 0 0 2px rgba(0,0,0,0.5);*/
-  /*padding: 10px;*/
-
-  /*text-align: center;*/
 }
 
-/*.style5 .tooltip {
+/*
+.popper,
+.tooltip {
+    position: absolute;
+    z-index: 20;
+    background: #FFC107;
+    color: black;
+    width: 300px;
+    border-radius: 3px;
+    box-shadow: 0 0 2px rgba(0,0,0,0.5);
+    padding: 10px;
+    text-align: center;
+}
+.style5 .tooltip {
   background: #1E252B;
   color: #FFFFFF;
   max-width: 200px;
@@ -169,4 +170,5 @@
   top: calc(50% - 5px);
   margin-left: 0;
   margin-right: 0;
-}*/
+}
+*/

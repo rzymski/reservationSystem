@@ -83,268 +83,281 @@
                     dayHeaderContent: myDaydayHeaderContent,
                 },
             },
-            {#dodawanie dostepnych terminow#}
             select: function(data){
-                if ("{{ request.user }}" === 'AnonymousUser') { return; }
-                let modalId = "AddEditModal"
-                selectedEventId = -1
-                selectedEventInfo = null
-                let selectedView = calendar.view.type;
-                const startDateTime = new Date(data.startStr)
-                let startDateOnly = startDateTime.toISOString().split('T')[0];
-                let startTimeOnly = startDateTime.toLocaleTimeString().slice(0, 5);
-                const endDateTime = new Date(data.endStr)
-                if (selectedView === 'dayGridMonth') { endDateTime.setDate(endDateTime.getDate() - 1) }
-                let endDateOnly = endDateTime.toISOString().split('T')[0];
-                let endTimeOnly = endDateTime.toLocaleTimeString().slice(0, 5);
-                if (selectedView !== 'dayGridMonth'){
-                    console.log("OK")
-                    {#dotyczy widoku kalendarza widoku tygodniowego/dniowego gdzie uzupelnia od razu godzine startu i konca#}
-                    $('#'+modalId+' [name="startTime"]').val(startTimeOnly);
-                    $('#'+modalId+' [name="endTime"]').val(endTimeOnly);
-                } else {
-                    {#$('#addAvailableBookingDateByCalendarModal [name="startTime"]').val('12:00');#}
-                    {#$('#addAvailableBookingDateByCalendarModal [name="endTime"]').val('23:00');#}
-                }
-                $('#startDate'+modalId).val(startDateOnly);
-                $('#endDate'+modalId).val(endDateOnly);
-
-                if (currentUserRole !== "client")
-                {
-                    console.log("Wykonalo sie dodanie dostepnego terminu")
-                    setTextsInTextVariables({reserveOptionConfirmation: false, eventType: 0, title : 'Dodaj dostępny termin świadczenie usług', mainButton : 'Dodaj dostępny termin'});
-                    openModalNewVersion(modalId, false, true, true, true)
-                } else {
-                    console.log("Dodaj propozycje rezerwacji")
-                    setTextsInTextVariables({reserveOptionConfirmation: false, eventType: 3, title : 'Dodaj propozycje nowego terminu', mainButton : 'Dodaj propozycje'});
-                    openModalNewVersion(modalId, false, false, true, true)
-                }
+                eventSelect(data)
             },
-            {#edycja/usuwanie dostepnych terminow#}
             eventClick: function(info) {
-                if ("{{ request.user }}" === 'AnonymousUser') { return; }
-                currentUserId = {{ request.user.id }};
-                let serviceProviderId = info.event.extendedProps.serviceProviderId;
-                let clientId = info.event.extendedProps.clientId;
-                let eventType = info.event.extendedProps.eventType;
-                let intervalTimeInt = info.event.extendedProps.intervalTimeInt;
-                selectedEventId = info.event.id
-                selectedEventInfo = info
-                if (eventType === 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ //edycja/usuwanie dostępnego terminu
-                    console.log("EDYCJA START EVENT CLICK")
-                    setTextsInTextVariables({
-                        reserveOptionConfirmation: false,
-                        eventType: 0,
-                        question: 'Co chcesz zrobić z wybranym dostępnym terminem?',
-                        buttonOption1: 'Edytuj dostępny termin rezerwacji',
-                        buttonOption2: 'Usuń dostępny termin rezerwacji'})
-                    openOptionModal('ChangeOptionsModal')
-                }else if (eventType === 0 && currentUserRole === "client" && !intervalTimeInt) { //proba rezerwacji prze klienta jesli nie ma interwalow w spotkaniu
-                    console.log("Wybrano opcje proba rezerwacji", intervalTimeInt)
-                    setTextsInTextVariables({
-                        reserveOptionConfirmation: true,
-                        eventType: 0,
-                        question: 'Czy chcesz zaproponować rezerwacje tego terminu?',
-                        buttonOption1: 'Zarezerwuj cały dostępny termin',
-                        buttonOption2: 'Zarezerwuj część dostępnego terminu'})
-                    openOptionModal('ChangeOptionsModal')
-                } else if (eventType === 0 && currentUserRole === "client" && intervalTimeInt){ //proba rezerwacji przez klienta jesli sa interwaly w spotkaniu
-                    // dotepny termin z przedzialami
-                    console.log("Wybrano opcje rezerwacji interwalu")
-                    setTextsInTextVariables({
-                        reserveOptionConfirmation: true,
-                        eventType: 0,
-                        question: 'Czy chcesz zaproponować rezerwacje tego terminu?',
-                        mainButton: 'Zarezerwuj',})
-                    openModalNewVersion("ReserveIntervalOfBookingDateModal", false, false, true, false)
-                } else if (eventType === 1 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) { //potwierdzenie rezerwacji
-                    $('#confirmOrRejectReservationId').val(info.event.id)
-                    setTextsInTextVariables({
-                        reserveOptionConfirmation: false,
-                        eventType: 1,
-                        question: 'Czy chcesz zatwierdzić rezerwację?',
-                        buttonOption1: 'Tak, zatwierdź rezerwacje', //Tak, przyjmij
-                        buttonOption2: 'Nie, usuń rezerwacje'}) //Nie, nie przyjmuj
-                    openModalNewVersion('ConfirmReservationModal', false, false, true, false)
-                } else if (eventType === 1 && (serviceProviderId === currentUserId || clientId === currentUserId) && !intervalTimeInt) { //edytowanie/usuwanie niepotwierdzonej rezerwacji bez przedzialow
-                    console.log("Edytuj/USUN niepotwierdzona rezerwacje interval=", intervalTimeInt)
-                    setTextsInTextVariables({
-                        reserveOptionConfirmation: false,
-                        eventType: 1,
-                        question: 'Co chcesz zrobić z tą rezerwacją?',
-                        buttonOption1: 'Edytuj termin rezerwacji',
-                        buttonOption2: 'Usuń rezerwacje'})
-                    openOptionModal('ChangeOptionsModal')
-                    {#openModal('deleteReservationModal')#}
-                }else if (eventType === 1 && (serviceProviderId === currentUserId || clientId === currentUserId) && intervalTimeInt) { //edytowanie/usuwanie niepotwierdzonej rezerwacji z przedzialami
-                    console.log("Edytuj/USUN niepotwierdzona rezerwacje interval=", intervalTimeInt)
-                    setTextsInTextVariables({
-                        reserveOptionConfirmation: true,
-                        eventType: 1,
-                        question: 'Co chcesz zrobić z tą rezerwacją?',
-                        buttonOption1: 'Zmień termin rezerwacji',
-                        buttonOption2: 'Usuń rezerwacje'})
-                    openOptionModal('ChangeOptionsModal')
-                } else if (eventType === 2 && (serviceProviderId === currentUserId || clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) { //usuwanie potwierdzonej rezerwacji
-                    console.log("USUN potwierdzona rezerwacje")
-                    setTextsInTextVariables({
-                        reserveOptionConfirmation: false,
-                        eventType: 2,
-                        question: 'Czy napewno chcesz usunąć tą potwierdzoną rezerwacje?',
-                        buttonOption1: 'Tak, usuń rezerwacje',
-                        buttonOption2: 'Anuluj'})
-                    openModalNewVersion('DeleteModal', false, false, true, false)
-                }  else if (eventType === 3 && (currentUserRole === "serviceProvider")) { // potwierdzenie propozycji terminu klienta przez uslugodawce
-                    console.log("Można zaakceptować propozycje rezerwacji terminu klienta")
-                    setTextsInTextVariables({
-                        reserveOptionConfirmation: false,
-                        eventType: 3,
-                        question: 'Czy chcesz przyjąć ten proponowany termin?',
-                        buttonOption1: 'Tak, przyjmij ten termin', //Tak, przyjmij
-                        buttonOption2: 'Nie, nie przyjmuj tego terminu'}) //Nie, nie przyjmuj
-                    openModalNewVersion('ConfirmReservationModal', false, false, true, false)
-                } else if (eventType == 3 && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) { // edycja/usuwanie propozycji terminu klienta
-                    console.log("EDYTUJ LUB USUN SWOJA PROPOZYCJE")
-                    setTextsInTextVariables({
-                        reserveOptionConfirmation: false,
-                        eventType: 3,
-                        question: 'Co chcesz zrobić z wybranym proponowanym terminem?',
-                        buttonOption1: 'Edytuj proponowany termin',
-                        buttonOption2: 'Usuń proponowany termin'})
-                    openOptionModal('ChangeOptionsModal')
-                } else{
-                    console.log("Nie masz uprawnien, zeby to zrobic")
-                }
-                console.log(currentUserRole);
+                eventClick(info)
             },
             eventDidMount: function(info) {
-
-                const start = getDateDetails(info.event.start, '.', 'YMD')
-                const end = getDateDetails(info.event.end, '.', 'YMD')
-
-                {% comment %}let eventTypeDiv = modal.querySelector('#eventTypeTooltip');
-                eventTypeDiv.textContent = `${info.event.extendedProps.eventType}`;
-
-                let startDiv = modal.querySelector('#eventStartTooltip');
-                if (start) { startDiv.textContent = `Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}`; }
-                let endDiv = modal.querySelector('#eventEndTooltip');
-                if (end) { endDiv.textContent = `Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}`; }
-
-                let serviceProviderDiv = modal.querySelector('#serviceProviderTooltip');
-                console.error(info.event.extendedProps.serviceProviderId, typeof info.event.extendedProps.serviceProviderId)
-                if (info.event.extendedProps.serviceProviderId !== -1) { serviceProviderDiv.textContent = `${info.event.extendedProps.serviceProviderNameAndSurname}`; }
-
-                let clientDiv = modal.querySelector('#clientTooltip');
-                if (info.event.extendedProps.clientId !== -1) { clientDiv.textContent = `${info.event.extendedProps.clientNameAndSurname}`; }{% endcomment %}
-
-                {#<div class="w-60 absolute z-10 p-10 text-left whitespace-nowrap border-2 border-solid dark:border-gray-50">#}
-                let tooltipContent = `<div class="text-left font-semibold mb-1 text-lg whitespace-nowrap p-5 border-2 border-solid rounded-lg dark:bg-slate-500 dark:border-gray-50 bg-slate-200 border-gray-950">`;
-                if (info.event.extendedProps.eventType === 0) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Dostępny termin</div>`;}
-                if (info.event.extendedProps.eventType === 1) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Propozycja rezerwacji</div>`;}
-                if (info.event.extendedProps.eventType === 2) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Potwierdzona rezerwacja</div>`;}
-                if (info.event.extendedProps.eventType === 3) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Propozycja terminu</div>`;}
-                tooltipContent += `${info.event.extendedProps.serviceProviderId !== -1 ? `<div><a href="/userProfile/${info.event.extendedProps.serviceProviderId}/" class="hover:text-green-500">Usługodawca: ${info.event.extendedProps.serviceProviderNameAndSurname}</a></div>` : ''}`;
-                tooltipContent += `${info.event.extendedProps.clientId !== -1 ? `<div><a href="/userProfile/${info.event.extendedProps.clientId}/" class="hover:text-orange-400">Usługobiorca: ${info.event.extendedProps.clientNameAndSurname}</a></div>` : ''}`;
-                tooltipContent += `<div>Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}</div>`;
-                tooltipContent += `<div>Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div>`;
-                tooltipContent += `${info.event.extendedProps.intervalTimeInt ? `<div>Czas wizyty: ${info.event.extendedProps.intervalTimeString}</div>` : ''}`;
-                tooltipContent += `</div>`;
-
-                {% comment %}<a href="" class="hover:text-orange-400"></a>
-                <a href="" class="hover:text-green-500">"Usługodawca: " + data.serviceProviderNameAndSurname</a>{% endcomment %}
-
-                let tooltip = new Tooltip(info.el, {
-                    title: tooltipContent,
-                    placement: 'auto',
-                    trigger: 'hover',
-                    container: 'body',
-                    html: true,
-                });
+                eventDidMount(info)
             },
             eventMouseEnter: function(info) {
-                let hoveredEvent = info.event;
-                if ("{{ request.user }}" === 'AnonymousUser') { hoveredEvent.setProp('editable', false); return; }
-                currentUserId = {{ request.user.id }};
-                let serviceProviderId = hoveredEvent.extendedProps.serviceProviderId;
-                let clientId = hoveredEvent.extendedProps.clientId;
-                let eventType = hoveredEvent.extendedProps.eventType;
-                //console.log("SPRAWDZONO KTO TO: ",serviceProviderId, clientId, eventType, currentUserId, currentUserRole)
-                if(eventType == 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ // uslugodawca przesuwa swoj dostepny termin
-                    //console.log("Wlasciciel servieProvider")
-                    hoveredEvent.setProp('editable', true)
-                    return;
-                }
-                if((eventType == 3 || eventType == 1) && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ // klient przesuwa swoja propozycje
-                    //console.log("Wlasciciel client")
-                    hoveredEvent.setProp('editable', true)
-                    return;
-                }
-                //console.log("Nie ma uprawnien do przesuwania tego")
-                hoveredEvent.setProp('editable', false)
+                eventMouseEnter(info)
             },
             eventDrop: function(info) {
-                if ("{{ request.user }}" === 'AnonymousUser') { return; }
-                currentUserId = {{ request.user.id }}
-                console.log("Przeciągnieto event: ", info)
-                let serviceProviderId = info.event.extendedProps.serviceProviderId;
-                let eventType = info.event.extendedProps.eventType;
-                let clientId = info.event.extendedProps.clientId;
-                selectedEventId = info.event.id
-                selectedEventInfo = info
-                let oldDate = new Date(info.oldEvent.start.setMinutes(info.oldEvent.start.getMinutes() + info.oldEvent.start.getTimezoneOffset()));
-                let oldString = `${oldDate.getDate()}/${oldDate.getMonth()+1}/${oldDate.getFullYear()} ${oldDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`;
-                let startDate = new Date(info.event.start.setMinutes(info.event.start.getMinutes() + info.event.start.getTimezoneOffset()));
-                let startString = `${startDate.getDate()}/${startDate.getMonth()+1}/${startDate.getFullYear()} ${startDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`;
-                let endDate = new Date(info.event.end.setMinutes(info.event.end.getMinutes() + info.event.end.getTimezoneOffset()));
-                let endString = `${endDate.getDate()}/${endDate.getMonth()+1}/${endDate.getFullYear()} ${endDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`;
-                let minStart = new Date(info.event.extendedProps.availableBookingDateStart);
-                let maxEnd = new Date(info.event.extendedProps.availableBookingDateEnd);
-                let intervalTimeInt = info.event.extendedProps.intervalTimeInt;
-                let intervalTimeValue = 0;
-                if ( info.event.extendedProps.intervalTimeInt ) { intervalTimeValue = parseInt(info.event.extendedProps.intervalTimeInt, 10) }
-                let breakBetweenIntervalsValue = 0;
-                if ( info.event.extendedProps.breakBetweenIntervals ) { breakBetweenIntervalsValue = parseInt(info.event.extendedProps.breakBetweenIntervals, 10) }
-                const totalMinutes = (intervalTimeValue + breakBetweenIntervalsValue);
-                let validationFailed = true;
-                if (eventType === 1 && (startDate < minStart || endDate > maxEnd)){
-                    console.error("Revert Przekroczono zakres mozliwej daty", info.event.start, minStart)
-                    console.log(info.event.end, maxEnd)
-                    info.revert()
-                    return;
-                }
-                console.log("Interval =", intervalTimeInt, typeof(intervalTimeInt))
-                if (eventType === 1 && (intervalTimeInt)){
-                    let startDateHelp = new Date(info.event.start.setMinutes(info.event.start.getMinutes() + info.event.start.getTimezoneOffset()));
-                    while (startDateHelp < maxEnd) {
-                        startDateHelp.setMinutes(startDateHelp.getMinutes() + totalMinutes);
-                        if (startDateHelp.getTime() === maxEnd.getTime()) {
-                            console.log("Petla", startDateHelp, maxEnd)
-                            validationFailed = false;
-                            break;
-                        }
-                    }
-                    if(validationFailed){
-                        console.error("REVERT Probowano przeciagnac poza przedzial", info.event.start, intervalTimeInt)
-                        info.revert()
-                        return;
-                    }
-                }
-                if ((eventType === 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller"))
-                    || ((eventType === 3 || eventType === 1) && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller"))){
-                    dragEventData = {
-                        'selectedDragEventId': info.event.id,
-                        'newStart': startString,
-                        'newEnd': endString,
-                        'eventType': eventType,
-                    }
-                    fillDateRange('ConfirmOrRejectDragModal', data = {startAvailableBookingDate: info.oldEvent.start, endAvailableBookingDate: info.oldEvent.end}, 'oldDateRangeConfirmOrRejectDragModal')
-                    openModalNewVersion('ConfirmOrRejectDragModal', false, false, true, false)
-                }
+                eventDrop(info)
             },
         });
         calendar.render();
         //let refetchInterval = setInterval(function() { calendar.refetchEvents(); console.log("regular refetch events of every 60 seconds");}, 60000);
     });
+    function eventSelect(data) {
+        if ("{{ request.user }}" === 'AnonymousUser') { return; }
+        let modalId = "AddEditModal"
+        selectedEventId = -1
+        selectedEventInfo = null
+        let selectedView = calendar.view.type;
+        const startDateTime = new Date(data.startStr)
+        let startDateOnly = startDateTime.toISOString().split('T')[0];
+        let startTimeOnly = startDateTime.toLocaleTimeString().slice(0, 5);
+        const endDateTime = new Date(data.endStr)
+        if (selectedView === 'dayGridMonth') { endDateTime.setDate(endDateTime.getDate() - 1) }
+        let endDateOnly = endDateTime.toISOString().split('T')[0];
+        let endTimeOnly = endDateTime.toLocaleTimeString().slice(0, 5);
+        if (selectedView !== 'dayGridMonth'){
+            console.log("OK")
+            {#dotyczy widoku kalendarza widoku tygodniowego/dniowego gdzie uzupelnia od razu godzine startu i konca#}
+            $('#'+modalId+' [name="startTime"]').val(startTimeOnly);
+            $('#'+modalId+' [name="endTime"]').val(endTimeOnly);
+        } else {
+            {#$('#addAvailableBookingDateByCalendarModal [name="startTime"]').val('12:00');#}
+            {#$('#addAvailableBookingDateByCalendarModal [name="endTime"]').val('23:00');#}
+        }
+        $('#startDate'+modalId).val(startDateOnly);
+        $('#endDate'+modalId).val(endDateOnly);
+
+        if (currentUserRole !== "client")
+        {
+            console.log("Wykonalo sie dodanie dostepnego terminu")
+            setTextsInTextVariables({reserveOptionConfirmation: false, eventType: 0, title : 'Dodaj dostępny termin świadczenie usług', mainButton : 'Dodaj dostępny termin'});
+            openModalNewVersion(modalId, false, true, true, true)
+        } else {
+            console.log("Dodaj propozycje rezerwacji")
+            setTextsInTextVariables({reserveOptionConfirmation: false, eventType: 3, title : 'Dodaj propozycje nowego terminu', mainButton : 'Dodaj propozycje'});
+            openModalNewVersion(modalId, false, false, true, true)
+        }
+    };
+    function eventClick(info) {
+        if ("{{ request.user }}" === 'AnonymousUser') { return; }
+        currentUserId = {{ request.user.id }};
+        let serviceProviderId = info.event.extendedProps.serviceProviderId;
+        let clientId = info.event.extendedProps.clientId;
+        let eventType = info.event.extendedProps.eventType;
+        let intervalTimeInt = info.event.extendedProps.intervalTimeInt;
+        selectedEventId = info.event.id
+        selectedEventInfo = info
+        if (eventType === 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ //edycja/usuwanie dostępnego terminu
+            console.log("EDYCJA START EVENT CLICK")
+            setTextsInTextVariables({
+                reserveOptionConfirmation: false,
+                eventType: 0,
+                question: 'Co chcesz zrobić z wybranym dostępnym terminem?',
+                buttonOption1: 'Edytuj dostępny termin rezerwacji',
+                buttonOption2: 'Usuń dostępny termin rezerwacji'})
+            openOptionModal('ChangeOptionsModal')
+        }else if (eventType === 0 && currentUserRole === "client" && !intervalTimeInt) { //proba rezerwacji prze klienta jesli nie ma interwalow w spotkaniu
+            console.log("Wybrano opcje proba rezerwacji", intervalTimeInt)
+            setTextsInTextVariables({
+                reserveOptionConfirmation: true,
+                eventType: 0,
+                question: 'Czy chcesz zaproponować rezerwacje tego terminu?',
+                buttonOption1: 'Zarezerwuj cały dostępny termin',
+                buttonOption2: 'Zarezerwuj część dostępnego terminu'})
+            openOptionModal('ChangeOptionsModal')
+        } else if (eventType === 0 && currentUserRole === "client" && intervalTimeInt){ //proba rezerwacji przez klienta jesli sa interwaly w spotkaniu
+            // dotepny termin z przedzialami
+            console.log("Wybrano opcje rezerwacji interwalu")
+            setTextsInTextVariables({
+                reserveOptionConfirmation: true,
+                eventType: 0,
+                question: 'Czy chcesz zaproponować rezerwacje tego terminu?',
+                mainButton: 'Zarezerwuj',})
+            openModalNewVersion("ReserveIntervalOfBookingDateModal", false, false, true, false)
+        } else if (eventType === 1 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) { //potwierdzenie rezerwacji
+            $('#confirmOrRejectReservationId').val(info.event.id)
+            setTextsInTextVariables({
+                reserveOptionConfirmation: false,
+                eventType: 1,
+                question: 'Czy chcesz zatwierdzić rezerwację?',
+                buttonOption1: 'Tak, zatwierdź rezerwacje', //Tak, przyjmij
+                buttonOption2: 'Nie, usuń rezerwacje'}) //Nie, nie przyjmuj
+            openModalNewVersion('ConfirmReservationModal', false, false, true, false)
+        } else if (eventType === 1 && (serviceProviderId === currentUserId || clientId === currentUserId) && !intervalTimeInt) { //edytowanie/usuwanie niepotwierdzonej rezerwacji bez przedzialow
+            console.log("Edytuj/USUN niepotwierdzona rezerwacje interval=", intervalTimeInt)
+            setTextsInTextVariables({
+                reserveOptionConfirmation: false,
+                eventType: 1,
+                question: 'Co chcesz zrobić z tą rezerwacją?',
+                buttonOption1: 'Edytuj termin rezerwacji',
+                buttonOption2: 'Usuń rezerwacje'})
+            openOptionModal('ChangeOptionsModal')
+            {#openModal('deleteReservationModal')#}
+        }else if (eventType === 1 && (serviceProviderId === currentUserId || clientId === currentUserId) && intervalTimeInt) { //edytowanie/usuwanie niepotwierdzonej rezerwacji z przedzialami
+            console.log("Edytuj/USUN niepotwierdzona rezerwacje interval=", intervalTimeInt)
+            setTextsInTextVariables({
+                reserveOptionConfirmation: true,
+                eventType: 1,
+                question: 'Co chcesz zrobić z tą rezerwacją?',
+                buttonOption1: 'Zmień termin rezerwacji',
+                buttonOption2: 'Usuń rezerwacje'})
+            openOptionModal('ChangeOptionsModal')
+        } else if (eventType === 2 && (serviceProviderId === currentUserId || clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) { //usuwanie potwierdzonej rezerwacji
+            console.log("USUN potwierdzona rezerwacje")
+            setTextsInTextVariables({
+                reserveOptionConfirmation: false,
+                eventType: 2,
+                question: 'Czy napewno chcesz usunąć tą potwierdzoną rezerwacje?',
+                buttonOption1: 'Tak, usuń rezerwacje',
+                buttonOption2: 'Anuluj'})
+            openModalNewVersion('DeleteModal', false, false, true, false)
+        }  else if (eventType === 3 && (currentUserRole === "serviceProvider")) { // potwierdzenie propozycji terminu klienta przez uslugodawce
+            console.log("Można zaakceptować propozycje rezerwacji terminu klienta")
+            setTextsInTextVariables({
+                reserveOptionConfirmation: false,
+                eventType: 3,
+                question: 'Czy chcesz przyjąć ten proponowany termin?',
+                buttonOption1: 'Tak, przyjmij ten termin', //Tak, przyjmij
+                buttonOption2: 'Nie, nie przyjmuj tego terminu'}) //Nie, nie przyjmuj
+            openModalNewVersion('ConfirmReservationModal', false, false, true, false)
+        } else if (eventType == 3 && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")) { // edycja/usuwanie propozycji terminu klienta
+            console.log("EDYTUJ LUB USUN SWOJA PROPOZYCJE")
+            setTextsInTextVariables({
+                reserveOptionConfirmation: false,
+                eventType: 3,
+                question: 'Co chcesz zrobić z wybranym proponowanym terminem?',
+                buttonOption1: 'Edytuj proponowany termin',
+                buttonOption2: 'Usuń proponowany termin'})
+            openOptionModal('ChangeOptionsModal')
+        } else{
+            console.log("Nie masz uprawnien, zeby to zrobic")
+        }
+        console.log(currentUserRole);
+    };
+    function eventDidMount(info) {
+        const start = getDateDetails(info.event.start, '.', 'YMD')
+        const end = getDateDetails(info.event.end, '.', 'YMD')
+        let tooltipContent = `<div onclick="eventTooltipClicked(${info.event.id})" class="text-left font-semibold mb-1 text-lg whitespace-nowrap p-5 border-2 border-solid rounded-lg dark:bg-slate-500 dark:border-gray-50 bg-slate-200 border-gray-950">`;
+        if (info.event.extendedProps.eventType === 0) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Dostępny termin</div>`;}
+        if (info.event.extendedProps.eventType === 1) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Propozycja rezerwacji</div>`;}
+        if (info.event.extendedProps.eventType === 2) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Potwierdzona rezerwacja</div>`;}
+        if (info.event.extendedProps.eventType === 3) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Propozycja terminu</div>`;}
+        tooltipContent += `${info.event.extendedProps.serviceProviderId !== -1 ? `<div><a href="/userProfile/${info.event.extendedProps.serviceProviderId}/" class="hover:text-green-500">Usługodawca: ${info.event.extendedProps.serviceProviderNameAndSurname}</a></div>` : ''}`;
+        tooltipContent += `${info.event.extendedProps.clientId !== -1 ? `<div><a href="/userProfile/${info.event.extendedProps.clientId}/" class="hover:text-orange-400">Usługobiorca: ${info.event.extendedProps.clientNameAndSurname}</a></div>` : ''}`;
+        tooltipContent += `<div>Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}</div>`;
+        tooltipContent += `<div>Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div>`;
+        tooltipContent += `${info.event.extendedProps.intervalTimeInt ? `<div>Czas wizyty: ${info.event.extendedProps.intervalTimeString}</div>` : ''}`;
+        tooltipContent += `</div>`;
+        let tooltip = new Tooltip(info.el, {
+            title: tooltipContent,
+            placement: 'auto',
+            //fallbackPlacements: ['top', 'bottom', 'left', 'right'],
+            trigger: 'hover',
+            container: document.getElementById('calendar'),
+            html: true,
+            {% comment %}modifiers: [
+                {
+                    name: 'preventOverflow',
+                    enabled: true,
+                    options: {
+                        mainAxis: false,
+                        padding: 8,
+                    },
+                },
+                {
+                    name: 'flip',
+                    enabled: false,
+                    options: {
+                        fallbackPlacements: ['top', 'bottom', 'left', 'right', 'auto'],
+                    },
+                },
+            ],{% endcomment %}
+        });
+    };
+    function eventTooltipClicked(eventId) {
+        let event = calendar.getEventById(eventId);
+        eventClick({event: event})
+    };
+    function eventMouseEnter(info) {
+        let hoveredEvent = info.event;
+        if ("{{ request.user }}" === 'AnonymousUser') { hoveredEvent.setProp('editable', false); return; }
+        currentUserId = {{ request.user.id }};
+        let serviceProviderId = hoveredEvent.extendedProps.serviceProviderId;
+        let clientId = hoveredEvent.extendedProps.clientId;
+        let eventType = hoveredEvent.extendedProps.eventType;
+        //console.log("SPRAWDZONO KTO TO: ",serviceProviderId, clientId, eventType, currentUserId, currentUserRole)
+        if(eventType == 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ // uslugodawca przesuwa swoj dostepny termin
+            //console.log("Wlasciciel servieProvider")
+            hoveredEvent.setProp('editable', true)
+            return;
+        }
+        if((eventType == 3 || eventType == 1) && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ // klient przesuwa swoja propozycje
+            //console.log("Wlasciciel client")
+            hoveredEvent.setProp('editable', true)
+            return;
+        }
+        //console.log("Nie ma uprawnien do przesuwania tego")
+        hoveredEvent.setProp('editable', false)
+    };
+    function eventDrop(info) {
+        if ("{{ request.user }}" === 'AnonymousUser') { return; }
+        currentUserId = {{ request.user.id }}
+        console.log("Przeciągnieto event: ", info)
+        let serviceProviderId = info.event.extendedProps.serviceProviderId;
+        let eventType = info.event.extendedProps.eventType;
+        let clientId = info.event.extendedProps.clientId;
+        selectedEventId = info.event.id
+        selectedEventInfo = info
+        let oldDate = new Date(info.oldEvent.start.setMinutes(info.oldEvent.start.getMinutes() + info.oldEvent.start.getTimezoneOffset()));
+        let oldString = `${oldDate.getDate()}/${oldDate.getMonth()+1}/${oldDate.getFullYear()} ${oldDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`;
+        let startDate = new Date(info.event.start.setMinutes(info.event.start.getMinutes() + info.event.start.getTimezoneOffset()));
+        let startString = `${startDate.getDate()}/${startDate.getMonth()+1}/${startDate.getFullYear()} ${startDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`;
+        let endDate = new Date(info.event.end.setMinutes(info.event.end.getMinutes() + info.event.end.getTimezoneOffset()));
+        let endString = `${endDate.getDate()}/${endDate.getMonth()+1}/${endDate.getFullYear()} ${endDate.toLocaleTimeString({ hour: 'numeric', minute: 'numeric' }).slice(0, 5)}`;
+        let minStart = new Date(info.event.extendedProps.availableBookingDateStart);
+        let maxEnd = new Date(info.event.extendedProps.availableBookingDateEnd);
+        let intervalTimeInt = info.event.extendedProps.intervalTimeInt;
+        let intervalTimeValue = 0;
+        if ( info.event.extendedProps.intervalTimeInt ) { intervalTimeValue = parseInt(info.event.extendedProps.intervalTimeInt, 10) }
+        let breakBetweenIntervalsValue = 0;
+        if ( info.event.extendedProps.breakBetweenIntervals ) { breakBetweenIntervalsValue = parseInt(info.event.extendedProps.breakBetweenIntervals, 10) }
+        const totalMinutes = (intervalTimeValue + breakBetweenIntervalsValue);
+        let validationFailed = true;
+        if (eventType === 1 && (startDate < minStart || endDate > maxEnd)){
+            console.error("Revert Przekroczono zakres mozliwej daty", info.event.start, minStart)
+            console.log(info.event.end, maxEnd)
+            info.revert()
+            return;
+        }
+        console.log("Interval =", intervalTimeInt, typeof(intervalTimeInt))
+        if (eventType === 1 && (intervalTimeInt)){
+            let startDateHelp = new Date(info.event.start.setMinutes(info.event.start.getMinutes() + info.event.start.getTimezoneOffset()));
+            while (startDateHelp < maxEnd) {
+                startDateHelp.setMinutes(startDateHelp.getMinutes() + totalMinutes);
+                if (startDateHelp.getTime() === maxEnd.getTime()) {
+                    console.log("Petla", startDateHelp, maxEnd)
+                    validationFailed = false;
+                    break;
+                }
+            }
+            if(validationFailed){
+                console.error("REVERT Probowano przeciagnac poza przedzial", info.event.start, intervalTimeInt)
+                info.revert()
+                return;
+            }
+        }
+        if ((eventType === 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller"))
+            || ((eventType === 3 || eventType === 1) && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller"))){
+            dragEventData = {
+                'selectedDragEventId': info.event.id,
+                'newStart': startString,
+                'newEnd': endString,
+                'eventType': eventType,
+            }
+            fillDateRange('ConfirmOrRejectDragModal', data = {startAvailableBookingDate: info.oldEvent.start, endAvailableBookingDate: info.oldEvent.end}, 'oldDateRangeConfirmOrRejectDragModal')
+            openModalNewVersion('ConfirmOrRejectDragModal', false, false, true, false)
+        }
+    };
     function getMainEventData() {
         let info = selectedEventInfo;
         if (info){
@@ -369,22 +382,6 @@
         }
     };
     function getEventTitle(arg) {
-        {% comment %}const start = getDateDetails(arg.event.start, '.', 'YMD')
-        const end = getDateDetails(arg.event.end, '.', 'YMD')
-        let title = '';
-        let isDarkTheme = '{{ is_dark_theme }}';
-        let textColor;
-        if (isDarkTheme === 'True'){
-            textColor = 'text-gray-50'
-        } else {
-            textColor = 'text-black'
-        }
-        if (start.dateWithoutTime === end.dateWithoutTime) { title += `<div class="fc-title ${textColor}">${start.time} - ${end.time}</div>`}
-        if (start.dateWithoutTime !== end.dateWithoutTime) { title += `<div class="fc-title ${textColor}">Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}</div><div class="fc-title ${textColor}">Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div>`}
-        if (arg.event.extendedProps.serviceProviderId != -1) {title += `<div class="fc-title ${textColor}"><a href="/userProfile/${arg.event.extendedProps.serviceProviderId}/">${arg.event.extendedProps.serviceProviderNameAndSurname}</a></div>`}
-        if (arg.event.extendedProps.clientId != -1) {title += `<div class="fc-title ${textColor}"><a href="/userProfile/${arg.event.extendedProps.clientId}/">${arg.event.extendedProps.clientNameAndSurname}</a></div>`}
-        if (arg.event.extendedProps.intervalTimeInt) {title += `<div class="fc-title ${textColor}">Czas wizyty: ${arg.event.extendedProps.intervalTimeString}</div>`}
-        return { html: title}{% endcomment %}
         return { html: `<div class="fc-title">${arg.event.title}</div>` }
     };
     function filter() {
