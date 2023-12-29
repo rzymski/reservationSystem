@@ -18,9 +18,14 @@ class AvailableBookingDate(models.Model):
 
     def __str__(self):
         if self.intervalTime:
-            return f"{self.user} {self.start.strftime('%H:%M %d/%m/%Y')} - {self.end.strftime('%H:%M %d/%m/%Y')} interval={self.intervalTime} break={self.breakBetweenIntervals}"
+            return f"Dostępny termin {self.user} od {self.start.strftime('%H:%M %d/%m/%Y')} do {self.end.strftime('%H:%M %d/%m/%Y')}. Czas wizyty = {self.intervalTime}"
         else:
-            return f"{self.user} {self.start.strftime('%H:%M %d/%m/%Y')} - {self.end.strftime('%H:%M %d/%m/%Y')}"
+            return f"Dostępny termin {self.user} od {self.start.strftime('%H:%M %d/%m/%Y')} do {self.end.strftime('%H:%M %d/%m/%Y')}"
+    # def __str__(self):
+    #     if self.intervalTime:
+    #         return f"{self.user} {self.start.strftime('%H:%M %d/%m/%Y')} - {self.end.strftime('%H:%M %d/%m/%Y')} interval={self.intervalTime} break={self.breakBetweenIntervals}"
+    #     else:
+    #         return f"{self.user} {self.start.strftime('%H:%M %d/%m/%Y')} - {self.end.strftime('%H:%M %d/%m/%Y')}"
 
     def clean(self):
         if self.start and self.end and self.start >= self.end:
@@ -74,6 +79,12 @@ class Reservation(models.Model):
     start = models.DateTimeField(null=True, blank=True)
     end = models.DateTimeField(null=True, blank=True)
     isAccepted = models.BooleanField(default=False)
+
+    def __str__(self):
+        if self.isAccepted:
+            return f"Potwierdzona rezerwacja {self.bookingPerson} od {self.start.strftime('%H:%M %d/%m/%Y')} do {self.end.strftime('%H:%M %d/%m/%Y')}"
+        else:
+            return f"Proponowana rezerwacja {self.bookingPerson} od {self.start.strftime('%H:%M %d/%m/%Y')} do {self.end.strftime('%H:%M %d/%m/%Y')}"
 
     def clean(self):
         if self.start and self.end and self.start >= self.end:
@@ -164,6 +175,7 @@ class Notification(models.Model):
     reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, null=True, blank=True)
     hasBeenSeen = models.BooleanField(default=False)
     date = models.DateTimeField(default=timezone.now)
+    # isDeleted ???
 
 
 

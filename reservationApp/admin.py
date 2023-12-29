@@ -49,7 +49,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('toUser', 'fromUser', 'hasBeenSeen')
+    list_display = ('fromUser', 'toUser', 'notificationType', 'hasBeenSeen', 'date', 'availableBookingDate', 'reservation')
 
 
 @admin.register(Post)

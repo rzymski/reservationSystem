@@ -1,9 +1,10 @@
+{% load custom_tags %}
 <nav class="flex justify-between items-center h-20 bg-slate-400 dark:bg-slate-900 text-gray-900 dark:text-gray-100 px-4">
     <div class="flex justify-center items-center gap-2">
         <i class="fa-regular fa-calendar-days fa-2xl"></i>
         <a class="text-xl font-extrabold dark:text-white whitespace-nowrap" href="{% url 'index' %}">System rezerwacji terminów</a>
     </div>
-    <ul class="flex gap-8">
+    <ul class="flex px-8">
         <li class="px-4">
             <a href="{% url 'myTest' %}" class="text-3xl font-semibold dark:text-gray-50 no-underline">TEST</a>
         </li>
@@ -17,7 +18,8 @@
     <div class="relative flex items-center">
         {% if request.user.is_authenticated %}
             <!-- Notification badge -->
-            {% include 'notifications/notificationsDropdown.html' %}
+            {% comment %}{% include 'notifications/notificationsDropdown.html' %}{% endcomment %}
+            {% showNotificationsInDropdown %}
             <!-- Avatar image -->
             <img id="avatarButton" type="button" data-dropdown-toggle="userDropdown" data-dropdown-placement="bottom-end" class="w-14 h-14 rounded-full cursor-pointer mr-10 border border-slate-600 dark:border-slate-700" src="{{ profileImageUrl }}" alt="User dropdown">
             <!-- Dropdown menu -->
