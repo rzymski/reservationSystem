@@ -15,6 +15,7 @@ class AvailableBookingDate(models.Model):
     end = models.DateTimeField(null=True, blank=True)
     intervalTime = models.IntegerField(null=True, blank=True)
     breakBetweenIntervals = models.IntegerField(default=0)
+    isDeleted = models.BooleanField(default=False)
 
     def __str__(self):
         if self.intervalTime:
@@ -43,7 +44,7 @@ class AvailableBookingDate(models.Model):
                 raise ValidationError("Nie można zatwierdzić terminu. Start wraz z czasami pracy nie równa się Końcowi.", code="wrongIntervals")
         # Check consistency with related reservations
         if self.id:
-            for reservation in self.reservation_set.filter(isAccepted=True):
+            for reservation in self.reservation_set.filter(isAccepted=True, isDeleted=False):
                 if self.intervalTime and int(self.intervalTime) > 0 and ((reservation.end - reservation.start) != timedelta(minutes=(int(self.intervalTime) + int(self.breakBetweenIntervals)))):
                     raise ValidationError(f"Dostepny termin posiada zatwierdzoną rezerwację z innym przedziałem czasowym.", code="durationMismatchWithReservation")
                 # Check if the is reservation with bigger range
@@ -55,21 +56,25 @@ class AvailableBookingDate(models.Model):
                 user=self.user,
                 start__lt=self.end,
                 end__gt=self.start,
+                isDeleted=False
             ).exclude(id=self.id)
             if conflictDates.exists():
                 raise ValidationError(f"Nie można zatwierdzić terminu. Użytkownik już ma dostępny termin w tym czasie.", code="userAlreadyHaveExistingAvailableBookingDateInThisTime")
 
     def save(self, *args, **kwargs):
+        fromUser = kwargs.pop('fromUser', None)
         self.clean()
         super().save(*args, **kwargs)
-        for reservation in self.reservation_set.filter(isAccepted=False):
+        for reservation in self.reservation_set.filter(isAccepted=False, isDeleted=False):
             if self.intervalTime and int(self.intervalTime) > 0:
                 if (reservation.end - reservation.start) != timedelta(minutes=(int(self.intervalTime)) + int(self.breakBetweenIntervals)):
                     reservation.availableBookingDate = None
                     reservation.save()
+                    Notification.createNotification(9, reservation.bookingPerson, fromUser, None, reservation)
             if reservation.end > self.end or reservation.start < self.start:
                 reservation.availableBookingDate = None
                 reservation.save()
+                Notification.createNotification(9, reservation.bookingPerson, fromUser, None, reservation)
 
 
 class Reservation(models.Model):
@@ -79,6 +84,7 @@ class Reservation(models.Model):
     start = models.DateTimeField(null=True, blank=True)
     end = models.DateTimeField(null=True, blank=True)
     isAccepted = models.BooleanField(default=False)
+    isDeleted = models.BooleanField(default=False)
 
     def __str__(self):
         if self.isAccepted:
@@ -96,6 +102,7 @@ class Reservation(models.Model):
                 isAccepted=True,
                 start__lt=self.end,
                 end__gt=self.start,
+                isDeleted=False
             ).exclude(pk=self.pk)  # Exclude self if instance is being updated
             if conflicting_reservations.exists():
                 raise ValidationError("Nie można zatwierdzić rezerwacji. Następuje kolizja terminów.", code="conflict")
@@ -114,6 +121,7 @@ class Reservation(models.Model):
                     availableBookingDate=self.availableBookingDate,
                     start__lt=self.end,
                     end__gt=self.start,
+                    isDeleted=False
                 ).exclude(id=self.id)
                 if conflictDates.exists():
                     raise ValidationError(f"Nie można dodac rezerwacji. Użytkownik już ma rezerwacje w tym czasie w tym dostepnym terminie.", code="userAlreadyHaveExistingReservationInThisAvailableBookingDateInThisTime")
@@ -168,6 +176,7 @@ class Notification(models.Model):
     # 7 - edytował twój dostępny termin
     # 8 - edytował twoją propozycje terminu
     # 9 - edytował swój dostępny termin poza przedział twojej rezerwacji
+    id = models.AutoField(primary_key=True)
     notificationType = models.IntegerField()
     toUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notification_to', null=True)
     fromUser = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notification_from', null=True)
@@ -175,7 +184,19 @@ class Notification(models.Model):
     reservation = models.ForeignKey(Reservation, on_delete=models.CASCADE, null=True, blank=True)
     hasBeenSeen = models.BooleanField(default=False)
     date = models.DateTimeField(default=timezone.now)
-    # isDeleted ???
+    isDeleted = models.BooleanField(default=False)
+
+    @staticmethod
+    def createNotification(notificationType, toUser, fromUser, availableBookingDate=None, reservation=None):
+        notification = Notification.objects.create(
+            notificationType=notificationType,
+            toUser=toUser,
+            fromUser=fromUser,
+            availableBookingDate=availableBookingDate,
+            reservation=reservation,
+            hasBeenSeen=False,
+            isDeleted=False,
+        )
 
 
 

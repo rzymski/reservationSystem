@@ -183,7 +183,7 @@
                 buttonOption1: 'Tak, zatwierdź rezerwacje', //Tak, przyjmij
                 buttonOption2: 'Nie, usuń rezerwacje'}) //Nie, nie przyjmuj
             openModalNewVersion('ConfirmReservationModal', false, false, true, false)
-        } else if (eventType === 1 && (serviceProviderId === currentUserId || clientId === currentUserId) && !intervalTimeInt) { //edytowanie/usuwanie niepotwierdzonej rezerwacji bez przedzialow
+        } else if (eventType === 1 && (clientId === currentUserId) && !intervalTimeInt) { //edytowanie/usuwanie niepotwierdzonej rezerwacji bez przedzialow
             console.log("Edytuj/USUN niepotwierdzona rezerwacje interval=", intervalTimeInt)
             setTextsInTextVariables({
                 reserveOptionConfirmation: false,
@@ -234,6 +234,7 @@
         }
         console.log(currentUserRole);
     };
+    let tooltips = [];
     function eventDidMount(info) {
         const start = getDateDetails(info.event.start, '.', 'YMD')
         const end = getDateDetails(info.event.end, '.', 'YMD')
@@ -257,6 +258,15 @@
             html: true,
             delay: 500,
         });
+        tooltips.push(tooltip)
+    };
+    function destroyAllTooltips() {
+        //console.error("DESTROY ALL TOOLTIPS")
+        tooltips.forEach((tooltip) => {
+            //console.error("USUNIETO tooltip-a = ", tooltip)
+            tooltip.dispose();
+        });
+        tooltips = [];
     };
     function eventTooltipClicked(eventId) {
         let event = calendar.getEventById(eventId);
@@ -741,6 +751,7 @@
             data: data,
             success: function(response) {
                 if (response.status === 'success') {
+                    destroyAllTooltips()
                     console.log("Refetch Pelny skuces: ", response.message)
                     setTimeout(function () { calendar.refetchEvents(); }, 50);
                     setTimeout(function () { calendar.refetchEvents(); }, 250);

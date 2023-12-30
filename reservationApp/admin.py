@@ -49,7 +49,21 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('fromUser', 'toUser', 'notificationType', 'hasBeenSeen', 'date', 'availableBookingDate', 'reservation')
+    list_display = ('fromUser', 'toUser', 'notificationType', 'hasBeenSeen', 'dateDisplay', 'availableBookingDate', 'reservation')
+
+    def dateDisplay(self, obj):
+        return obj.date.astimezone(timezone.get_current_timezone()).strftime('%H:%M  %a  %d/%m/%Y')
+    dateDisplay.short_description = 'Date of creation'
+    dateDisplay.admin_order_field = 'date'
+
+
+
+
+
+
+
+
+
 
 
 @admin.register(Post)

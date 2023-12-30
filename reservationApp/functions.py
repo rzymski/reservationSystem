@@ -3,7 +3,7 @@ from icecream import ic
 
 
 def getAvailableTimeRanges(availableBookingDate):
-    reservations = Reservation.objects.filter(availableBookingDate=availableBookingDate, isAccepted=True).order_by('start')
+    reservations = Reservation.objects.filter(availableBookingDate=availableBookingDate, isAccepted=True, isDeleted=False).order_by('start')
     if not reservations:
         return [(availableBookingDate.start, availableBookingDate.end)]
     # Dodanie czasu pomiędzy początkiem pierwszej rezerwacji a początkiem dostępnego czasu
@@ -46,7 +46,7 @@ def getTimeStringValue(timeIntValue):
     return timeStringValue
 
 
-def saveReservationWhichCouldBePartOfAvailableBookingData(reservation):
+def saveReservationWhichCouldBePartOfAvailableBookingData(reservation, userWhoConfirmedReservation=None):
     availableBookingDate = reservation.availableBookingDate
     try:
         if availableBookingDate.start != reservation.start or availableBookingDate.end != reservation.end:
@@ -77,7 +77,7 @@ def saveReservationWhichCouldBePartOfAvailableBookingData(reservation):
                 )
             reservation.availableBookingDate = availableBookingDateInReservationTime
             reservation.isAccepted = True
-            otherReservations = Reservation.objects.filter(availableBookingDate=availableBookingDate).exclude(id=reservation.id)
+            otherReservations = Reservation.objects.filter(availableBookingDate=availableBookingDate, isDeleted=False).exclude(id=reservation.id)
             for otherReservation in otherReservations:
                 if availableBookingDateBeforeReservation and availableBookingDateBeforeReservation.start <= otherReservation.start and otherReservation.end <= availableBookingDateBeforeReservation.end:
                     otherReservation.availableBookingDate = availableBookingDateBeforeReservation
@@ -87,7 +87,8 @@ def saveReservationWhichCouldBePartOfAvailableBookingData(reservation):
                     otherReservation.availableBookingDate = availableBookingDateInReservationTime
                 else:
                     otherReservation.availableBookingDate = None
-            availableBookingDate.delete()
+            availableBookingDate.isDeleted = True
+            availableBookingDate.save(fromUser=userWhoConfirmedReservation)
             availableBookingDateInReservationTime.save()
             reservation.save()
             if availableBookingDateBeforeReservation:
@@ -99,5 +100,8 @@ def saveReservationWhichCouldBePartOfAvailableBookingData(reservation):
         else:
             reservation.isAccepted = True
             reservation.save()
+        Notification.createNotification(0, reservation.bookingPerson, userWhoConfirmedReservation, None, reservation)
+        if userWhoConfirmedReservation != reservation.availableBookingDate.user:
+            Notification.createNotification(10, reservation.availableBookingDate.user, userWhoConfirmedReservation, reservation.availableBookingDate, reservation)
     except ValidationError as e:
         return e.message
