@@ -6,7 +6,7 @@ from django.utils import timezone
 
 @admin.register(AvailableBookingDate)
 class AvailableBookingDateAdmin(admin.ModelAdmin):
-    list_display = ('id', 'user', 'start_display', 'end_display', 'intervalTime', 'breakBetweenIntervals')
+    list_display = ('id', 'user', 'start_display', 'end_display', 'intervalTime', 'breakBetweenIntervals', 'isDeleted')
     list_filter = ('id', 'user', 'start', 'end', 'intervalTime', 'breakBetweenIntervals')
     search_fields = ('id', 'start', 'end', 'intervalTime', 'breakBetweenIntervals')
     ordering = ('id', 'user', 'start', 'end', 'intervalTime', 'breakBetweenIntervals')
@@ -23,7 +23,7 @@ class AvailableBookingDateAdmin(admin.ModelAdmin):
 
 @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
-    list_display = ('id', 'bookingPerson', 'availableBookingDate', 'start_display', 'end_display', 'isAccepted')
+    list_display = ('id', 'bookingPerson', 'availableBookingDate', 'start_display', 'end_display', 'isAccepted', 'isDeleted')
     list_filter = ('id', 'bookingPerson', 'isAccepted', 'start', 'end', 'availableBookingDate')
     search_fields = ('id', 'bookingPerson__username', 'start', 'end', 'isAccepted')
     ordering = ('id', 'bookingPerson', 'availableBookingDate', 'start', 'end', 'isAccepted')
@@ -49,7 +49,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 @admin.register(Notification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('fromUser', 'toUser', 'notificationType', 'hasBeenSeen', 'dateDisplay', 'availableBookingDate', 'reservation')
+    list_display = ('fromUser', 'toUser', 'notificationType', 'hasBeenSeen', 'dateDisplay', 'availableBookingDate', 'reservation', 'isDeleted')
 
     def dateDisplay(self, obj):
         return obj.date.astimezone(timezone.get_current_timezone()).strftime('%H:%M  %a  %d/%m/%Y')

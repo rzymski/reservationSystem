@@ -234,7 +234,7 @@
         }
         console.log(currentUserRole);
     };
-    let tooltips = [];
+    let tooltipMap = {};
     function eventDidMount(info) {
         const start = getDateDetails(info.event.start, '.', 'YMD')
         const end = getDateDetails(info.event.end, '.', 'YMD')
@@ -250,6 +250,11 @@
         tooltipContent += `${info.event.extendedProps.intervalTimeInt ? `<div>Czas wizyty: ${info.event.extendedProps.intervalTimeString}</div>` : ''}`;
         tooltipContent += `</div>`;
         let calendarContainer = document.getElementById('calendar');
+        const eventId = info.event.id;
+        if (tooltipMap[eventId]) {
+            //console.error("Usunieto tooltip-a dla = ", eventId)
+            tooltipMap[eventId].dispose();
+        }
         let tooltip = new Tooltip(info.el, {
             title: tooltipContent,
             placement: 'top',
@@ -258,15 +263,7 @@
             html: true,
             delay: 500,
         });
-        tooltips.push(tooltip)
-    };
-    function destroyAllTooltips() {
-        //console.error("DESTROY ALL TOOLTIPS")
-        tooltips.forEach((tooltip) => {
-            //console.error("USUNIETO tooltip-a = ", tooltip)
-            tooltip.dispose();
-        });
-        tooltips = [];
+        tooltipMap[eventId] = tooltip;
     };
     function eventTooltipClicked(eventId) {
         let event = calendar.getEventById(eventId);
@@ -751,7 +748,6 @@
             data: data,
             success: function(response) {
                 if (response.status === 'success') {
-                    destroyAllTooltips()
                     console.log("Refetch Pelny skuces: ", response.message)
                     setTimeout(function () { calendar.refetchEvents(); }, 50);
                     setTimeout(function () { calendar.refetchEvents(); }, 250);
