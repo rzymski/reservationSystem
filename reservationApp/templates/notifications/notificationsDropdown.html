@@ -1,55 +1,41 @@
 <button id="notificationsButton" class="h-8 relative inline-flex items-center p-3 text-center mr-10">
     <i class="fa-solid fa-bell fa-xl"></i>
-    {% if notifications.count > 0 %}
-        <div class="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 border-2 border-neutral-300 dark:border-slate-900 rounded-full -top-2 -end-1">{{ notifications.count }}</div>
+    {% if numberOfNotificationsHasNotBeenSeen > 0 %}
+        <div class="absolute inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 border-2 border-neutral-300 dark:border-slate-900 rounded-full -top-2 -end-1">{{ numberOfNotificationsHasNotBeenSeen }}</div>
     {% endif %}
 </button>
 
-<div id="notificationsDropdown" class="absolute z-10 hidden bg-gray-50 divide-y divide-gray-100 shadow w-96 dark:bg-gray-700 dark:divide-gray-600 right-52 border border-black" style="top: 67px">
+<div id="notificationsDropdown" class="absolute z-10 hidden bg-gray-50 divide-y divide-gray-100 shadow w-96 dark:bg-gray-700 dark:divide-gray-600 right-52 border border-black overflow-y-hidden hover:overflow-y-auto" style="top: 67px; max-height: 30vh;">
     {%  for notification in notifications %}
-        <div class="p-2 font-normal text-sm text-gray-900 dark:text-white">
-            <div>
+        {% if notification.hasBeenSeen %}
+             <div class="p-2 font-normal text-sm text-gray-400">
                 <a href="{% url 'userProfile' pk=notification.fromUser.id %}" class="font-bold hover:text-blue-700 dark:hover:text-blue-400 whitespace-nowrap">{{ notification.fromUser.first_name }} {{ notification.fromUser.last_name }}</a>
-                {% if notification.notificationType == 0 %}
-                    potwierdził twoją <a href="" class="whitespace-nowrap">rezerwacje {{ notification.availableBookingDate.id }}</a>
-                {% elif notification.notificationType == 1 %}
-                    zaakceptował twoją <a href="" class="whitespace-nowrap">propozycje terminu {{ notification.reservation.id }}</a>
-                {% endif %}
+                <span onclick="navigateToEvent({{ notification.id }},'{{ notification.availableBookingDate.start|date:'Y-m-d\TH:i:s' }}', '{{ notification.reservation.start|date:'Y-m-d\TH:i:s' }}')">
+                    {{ notification.content }}
+                    <div>{{ notification.date|date:"Y-m-d H:i:s" }}</div>
+                </span>
             </div>
-            <div>{{ notification.date|date:"Y-m-d H:i" }}</div>
-        </div>
+        {% else %}
+            <div class="p-2 font-normal text-sm text-gray-900 dark:text-white">
+                <a href="{% url 'userProfile' pk=notification.fromUser.id %}" class="font-bold hover:text-blue-700 dark:hover:text-blue-400 whitespace-nowrap">{{ notification.fromUser.first_name }} {{ notification.fromUser.last_name }}</a>
+                <span onclick="navigateToEvent({{ notification.id }},'{{ notification.availableBookingDate.start|date:'Y-m-d\TH:i:s' }}', '{{ notification.reservation.start|date:'Y-m-d\TH:i:s' }}')">
+                    {{ notification.content }}
+                    <div>{{ notification.date|date:"Y-m-d H:i:s" }}</div>
+                </span>
+            </div>
+        {% endif %}
     {% endfor %}
-
-    {% comment %}<div class="p-2 font-normal text-sm text-gray-900 dark:text-white whitespace-nowrap">
-        <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }} zaakceptował twoją propozycje terminu</a>
-        <div>2023-10-20 19:35:20</div>
-    </div>
-    <div class="p-2 font-normal text-sm text-gray-900 dark:text-white whitespace-nowrap">
-        <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }} potwierdził twoją rezerwacje</a>
-        <div>2023-10-20 19:35:20</div>
-    </div>
-    <div class="p-2 font-normal text-sm text-gray-900 dark:text-white">
-        <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }} zaproponował termin rezerwacji</a>
-        <div>2023-10-20 19:35:20</div>
-    </div>
-    <div class="p-2 font-normal text-sm text-gray-900 dark:text-white">
-        <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }} anululował potwierdzony termin</a>
-        <div>2023-10-20 19:35:20</div>
-    </div>
-    <div class="p-2 font-normal text-sm text-gray-900 dark:text-white">
-        <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }} usunął twój dostępny termin</a>
-        <div>2023-10-20 19:35:20</div>
-    </div>
-    <div class="p-2 font-normal text-sm text-gray-900 dark:text-white">
-        <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }} edytował twój dostępny termin</a>
-        <div>2023-10-20 19:35:20</div>
-    </div>
-    <div class="p-2 font-normal text-sm text-gray-900 dark:text-white">
-        <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }} edytował swój dostępny termin poza przedział twojej rezerwacji</a>
-        <div>2023-10-20 19:35:20</div>
-    </div>{% endcomment %}
 </div>
 <script>
+    function navigateToEvent(notificationId, availableBookingDateStartDate, reservationStartDate){
+        console.error("Id = ", notificationId," Navigate = ", availableBookingDateStartDate, " lub ", reservationStartDate)
+        let navigateDate = null
+        if(reservationStartDate) { navigateDate = new Date(reservationStartDate); }
+        else if (availableBookingDateStartDate) { navigateDate = new Date(availableBookingDateStartDate); }
+
+        if(navigateDate){ calendar.gotoDate(navigateDate) }
+        passDataByAJAX('/changeNotificationStatus/', {'id' : notificationId, 'hasBeenSeen':'true'}, false)
+    };
     document.addEventListener("DOMContentLoaded", function () {
         let notificationsButton = document.getElementById("notificationsButton");
         if(!notificationsButton) { return; }

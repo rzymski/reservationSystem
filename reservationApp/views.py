@@ -293,7 +293,7 @@ def deleteEvent(request):
                     Notification.createNotification(4, reservation.bookingPerson, currentUser, None, reservation)
                 elif int(eventTypeId) == 2:
                     print(f"{currentUser} usunal potwierdzony termin dotyczacy {reservation.bookingPerson} i {reservation.availableBookingDate.user}")
-                    Notification.createNotification(3, reservation.bookingPerson, currentUser, None, reservation)
+                    Notification.createNotification(3, reservation.bookingPerson, currentUser, reservation.availableBookingDate, reservation)
                 elif int(eventTypeId) == 3:
                     print(f"{currentUser} usunal propozycje terminu uzytkownika {reservation.bookingPerson}")
                     Notification.createNotification(5, reservation.bookingPerson, currentUser, None, reservation)
@@ -301,7 +301,7 @@ def deleteEvent(request):
                     raise Exception(f"To nie powinno sie wydarzyc. eventType = {eventTypeId}")
             elif int(eventTypeId) == 2 and reservation.availableBookingDate.user != currentUser:
                 print(f"{currentUser} usunal potwierdzony termin dotyczacy {reservation.bookingPerson} i {reservation.availableBookingDate.user}")
-                Notification.createNotification(3, reservation.bookingPerson, currentUser, reservation.availableBookingDate, None)
+                Notification.createNotification(3, reservation.bookingPerson, currentUser, reservation.availableBookingDate, reservation)
     return JsonResponse({'status': 'success', 'message': 'Usunieto.'})
 
 
@@ -453,6 +453,21 @@ def logoutUser(request):
     return redirect('index')
 
 
+def changeNotificationStatus(request):
+    ic("Przeczytano powiadomienie")
+    if request.method == 'POST':
+        ic(request.POST)
+        responseData = {'status': 'successWithoutNeedToRefetch', 'message': 'Zmieniono status powiadomienia.'}
+        notificationId = request.POST.get('id')
+        notification = Notification.objects.get(pk=int(notificationId))
+        hasBeenSeen = request.POST.get('hasBeenSeen')
+        isDeleted = request.POST.get('isDeleted')
+        if hasBeenSeen:
+            notification.hasBeenSeen = True if hasBeenSeen == 'true' else False
+        if isDeleted:
+            notification.isDeleted = True if isDeleted == 'true' else False
+        notification.save()
+        return JsonResponse(responseData)
 
 
 # TESTY

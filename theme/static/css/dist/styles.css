@@ -1246,6 +1246,10 @@ select {
   overflow-x: hidden;
 }
 
+.overflow-y-hidden {
+  overflow-y: hidden;
+}
+
 .whitespace-nowrap {
   white-space: nowrap;
 }
@@ -1747,6 +1751,10 @@ select {
 
 .ease-in-out {
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover\:overflow-y-auto:hover {
+  overflow-y: auto;
 }
 
 .hover\:bg-blue-700:hover {

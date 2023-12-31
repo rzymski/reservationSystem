@@ -19,12 +19,13 @@ urlpatterns = [
 
     path('filterServiceProviders/', views.filterServiceProviders, name='filterServiceProviders'),
 
-
     path('addEditAvailableBookingDate/', views.addEditAvailableBookingDate, name='addEditAvailableBookingDate'),
     path('deleteEvent/', views.deleteEvent, name='deleteEvent'),
     path('addEditReservation/', views.addEditReservation, name='addEditReservation'),
     path('confirmOrRejectReservation/', views.confirmOrRejectReservation, name='confirmOrRejectReservation'),
     path('dragEvent/', views.dragEvent, name='dragEvent'),
+
+    path('changeNotificationStatus/', views.changeNotificationStatus, name='changeNotificationStatus'),
 
 
     path('test/main/', views.PostListView.as_view(), name='main'),
