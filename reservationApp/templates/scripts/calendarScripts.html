@@ -50,18 +50,17 @@
                 minute: '2-digit',
                 hour12: false
             },
-
             firstDay: 1,
             selectable: true,
             editable: true,
+
             {#contentHeight: 1500,#}
-
             height: '100%',
-
             {#aspectRatio: 2.5,#}
 
             expandRows: true,
             allDayText: 'czas',
+            navLinks: true,
             eventContent: function(arg) {
                 return getEventTitle(arg);
             },
@@ -73,6 +72,8 @@
                     {% comment %}eventContent: function(arg) {
                         return getEventTitle(arg);
                     },{% endcomment %}
+                    dayMaxEventRows: 6,
+                    dayPopoverFormat: myDayTitleFormat,
                 },
                 timeGridWeek:{
                     titleFormat: myWeekTitleFormat,
@@ -91,6 +92,9 @@
             },
             eventDidMount: function(info) {
                 eventDidMount(info)
+            },
+            eventWillUnmount: function(info){
+                eventWillUnmount(info)
             },
             eventMouseEnter: function(info) {
                 eventMouseEnter(info)
@@ -234,7 +238,7 @@
         }
         console.log(currentUserRole);
     };
-    let tooltipMap = {};
+    //let tooltipMap = {};
     function eventDidMount(info) {
         const start = getDateDetails(info.event.start, '.', 'YMD')
         const end = getDateDetails(info.event.end, '.', 'YMD')
@@ -251,10 +255,11 @@
         tooltipContent += `</div>`;
         let calendarContainer = document.getElementById('calendar');
         const eventId = info.event.id;
-        if (tooltipMap[eventId]) {
-            //console.error("Usunieto tooltip-a dla = ", eventId)
+        {% comment %}if (tooltipMap[eventId]) {
+            console.error("Usunieto tooltip-a dla = ", eventId, " t = ", tooltipMap[eventId])
             tooltipMap[eventId].dispose();
-        }
+            console.error("Usunieto tooltip-a dla = ", eventId, " t = ", tooltipMap[eventId])
+        }{% endcomment %}
         let tooltip = new Tooltip(info.el, {
             title: tooltipContent,
             placement: 'top',
@@ -263,7 +268,15 @@
             html: true,
             delay: 500,
         });
-        tooltipMap[eventId] = tooltip;
+        //tooltipMap[eventId] = tooltip;
+        var tooltips = info.event.extendedProps['tooltips'] || [];
+        tooltips.push(tooltip);
+        info.event.setExtendedProp('tooltips', tooltips);
+    };
+    function eventWillUnmount(info) {
+        for (let tooltip of info.event.extendedProps['tooltips']) {
+            tooltip.dispose();
+        }
     };
     function eventTooltipClicked(eventId) {
         let event = calendar.getEventById(eventId);
@@ -445,9 +458,9 @@
     };
     function myDayTitleFormat(date) {
         const startDate = new Date(date.start.marker);
-        const endDate = new Date(date.end.marker);
+        //const endDate = new Date(date.end.marker);
         const start = getDateDetails(startDate, '.', 'YMD')
-        const end = getDateDetails(endDate, '.', 'YMD')
+        //const end = getDateDetails(endDate, '.', 'YMD')
         return start.day + " " + start.namedMonth + " " + start.year
     };
     function myMonthdayHeaderContent(date){
