@@ -93,9 +93,6 @@
             eventDidMount: function(info) {
                 eventDidMount(info)
             },
-            eventWillUnmount: function(info){
-                eventWillUnmount(info)
-            },
             eventMouseEnter: function(info) {
                 eventMouseEnter(info)
             },
@@ -238,7 +235,7 @@
         }
         console.log(currentUserRole);
     };
-    //let tooltipMap = {};
+    let tooltipMap = {};
     function eventDidMount(info) {
         const start = getDateDetails(info.event.start, '.', 'YMD')
         const end = getDateDetails(info.event.end, '.', 'YMD')
@@ -255,28 +252,37 @@
         tooltipContent += `</div>`;
         let calendarContainer = document.getElementById('calendar');
         const eventId = info.event.id;
-        {% comment %}if (tooltipMap[eventId]) {
-            console.error("Usunieto tooltip-a dla = ", eventId, " t = ", tooltipMap[eventId])
+        if (tooltipMap[eventId]) {
+            //console.error("Usunieto tooltip-a dla = ", eventId, " t = ", tooltipMap[eventId])
+            const tooltipElement = tooltipMap[eventId].reference;
+            tooltipMap[eventId].hide;
             tooltipMap[eventId].dispose();
-            console.error("Usunieto tooltip-a dla = ", eventId, " t = ", tooltipMap[eventId])
-        }{% endcomment %}
+            tooltipElement.remove();
+            console.error("Usunieto tooltip-a dla = ", eventId, " t = ", tooltipMap[eventId], " z elementem = ", tooltipElement)
+        }
         let tooltip = new Tooltip(info.el, {
             title: tooltipContent,
             placement: 'top',
             trigger: 'hover',
-            container: 'body',
+            container: calendarContainer,
             html: true,
             delay: 500,
         });
-        //tooltipMap[eventId] = tooltip;
-        var tooltips = info.event.extendedProps['tooltips'] || [];
-        tooltips.push(tooltip);
-        info.event.setExtendedProp('tooltips', tooltips);
+        tooltipMap[eventId] = tooltip;
+        hideBadTooltips()
     };
-    function eventWillUnmount(info) {
-        for (let tooltip of info.event.extendedProps['tooltips']) {
-            tooltip.dispose();
-        }
+    function hideBadTooltips() {
+        const tooltips = document.querySelectorAll('.tooltip');
+        tooltips.forEach(tooltip => {
+            const computedStyle = window.getComputedStyle(tooltip);
+            const transformValue = computedStyle.getPropertyValue('transform');
+            if (transformValue === 'matrix(1, 0, 0, 1, -10, 5)') {
+                //console.error("ZNALAZL ZLEGO w =", nr)
+                tooltip.style.display = 'none';
+                tooltip.remove()
+                //console.error("USUN GOWNO")
+            }
+        });
     };
     function eventTooltipClicked(eventId) {
         let event = calendar.getEventById(eventId);
