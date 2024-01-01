@@ -85,19 +85,25 @@
                 },
             },
             select: function(data){
-                eventSelect(data)
+                eventSelect(data);
             },
             eventClick: function(info) {
-                eventClick(info)
+                eventClick(info);
+            },
+            eventMouseEnter: function(info) {
+                eventMouseEnter(info);
+            },
+            eventMouseLeave:  function(info) {
+                eventMouseLeave(info);
             },
             eventDidMount: function(info) {
                 eventDidMount(info)
             },
-            eventMouseEnter: function(info) {
-                eventMouseEnter(info)
+            eventWillUnmount: function(info) {
+                eventWillUnmount(info)
             },
             eventDrop: function(info) {
-                eventDrop(info)
+                eventDrop(info);
             },
         });
         calendar.render();
@@ -235,8 +241,7 @@
         }
         console.log(currentUserRole);
     };
-    let tooltipMap = {};
-    function eventDidMount(info) {
+    function getTooltipContent(info){
         const start = getDateDetails(info.event.start, '.', 'YMD')
         const end = getDateDetails(info.event.end, '.', 'YMD')
         let tooltipContent = `<div onclick="eventTooltipClicked(${info.event.id})" class="text-left font-semibold mb-1 text-lg whitespace-nowrap p-5 border-2 border-solid rounded-lg dark:bg-slate-500 dark:border-gray-50 bg-slate-200 border-gray-950">`;
@@ -250,40 +255,56 @@
         tooltipContent += `<div>Do: ${end.dateWithoutTime} ${end.dayOfTheWeek} ${end.time}</div>`;
         tooltipContent += `${info.event.extendedProps.intervalTimeInt ? `<div>Czas wizyty: ${info.event.extendedProps.intervalTimeString}</div>` : ''}`;
         tooltipContent += `</div>`;
+        return tooltipContent
+    };
+    {% comment %}let tooltipData;
+    function showTooltip(tooltipData) {
+        let eventElement = tooltipData.eventElement;
+        let tooltipContent = tooltipData.tooltipContent;
         let calendarContainer = document.getElementById('calendar');
-        const eventId = info.event.id;
-        if (tooltipMap[eventId]) {
-            //console.error("Usunieto tooltip-a dla = ", eventId, " t = ", tooltipMap[eventId])
-            const tooltipElement = tooltipMap[eventId].reference;
-            tooltipMap[eventId].hide;
-            tooltipMap[eventId].dispose();
-            tooltipElement.remove();
-            console.error("Usunieto tooltip-a dla = ", eventId, " t = ", tooltipMap[eventId], " z elementem = ", tooltipElement)
-        }
-        let tooltip = new Tooltip(info.el, {
+        const tooltip = new Tooltip(eventElement, {
             title: tooltipContent,
             placement: 'top',
-            trigger: 'hover',
+            trigger: 'manual',
             container: calendarContainer,
             html: true,
             delay: 500,
         });
-        tooltipMap[eventId] = tooltip;
-        hideBadTooltips()
-    };
-    function hideBadTooltips() {
-        const tooltips = document.querySelectorAll('.tooltip');
-        tooltips.forEach(tooltip => {
-            const computedStyle = window.getComputedStyle(tooltip);
-            const transformValue = computedStyle.getPropertyValue('transform');
-            if (transformValue === 'matrix(1, 0, 0, 1, -10, 5)') {
-                //console.error("ZNALAZL ZLEGO w =", nr)
-                tooltip.style.display = 'none';
-                tooltip.remove()
-                //console.error("USUN GOWNO")
-            }
+        tooltip.show();
+        //console.error("POKAZ TOOLTIP = ", eventElement)
+        {#let isMouseOverTooltip = false;#}
+        {#let isMouseOverEvent = false;#}
+        eventElement.addEventListener('mouseenter', () => {
+            tooltipData.isMouseOverEvent = true;
         });
+        eventElement.addEventListener('mouseleave', () => {
+            tooltipData.isMouseOverEvent = false;
+            setTimeout(function() {hideTooltip(tooltipData)}, 100);
+        });
+        tooltip.popperInstance.popper.addEventListener('mouseenter', () => {
+            tooltipData.isMouseOverTooltip = true;
+        });
+        tooltip.popperInstance.popper.addEventListener('mouseleave', () => {
+            tooltipData.isMouseOverTooltip = false;
+            setTimeout(function() {hideTooltip(tooltipData)}, 100);
+        });
+        return tooltip
     };
+    function hideTooltip(tooltipData) {
+        let isMouseOverTooltip = tooltipData.isMouseOverTooltip;
+        let isMouseOverEvent = tooltipData.isMouseOverEvent;
+        //console.error("T = ", tooltipData.tooltipObject)
+        if (tooltipData.tooltipObject && !isMouseOverEvent && !isMouseOverTooltip) {
+            //console.error(tooltipData.tooltipObject)
+            tooltipData.tooltipObject.dispose();
+            tooltipData.tooltipObject.popperInstance.destroy();
+            tooltipData.tooltipObject.popperInstance.popper.style.display = 'none';
+            let tooltips = document.querySelectorAll('.tooltip');
+            tooltips.forEach(tooltip => { tooltip.style.display = 'none'; });
+            //console.error("DZIALA CHOWANIE usuwanie obiektu")
+        }
+        //console.error("koniec hide")
+    };{% endcomment %}
     function eventTooltipClicked(eventId) {
         let event = calendar.getEventById(eventId);
         eventClick({event: event})
@@ -297,17 +318,40 @@
         let eventType = hoveredEvent.extendedProps.eventType;
         //console.log("SPRAWDZONO KTO TO: ",serviceProviderId, clientId, eventType, currentUserId, currentUserRole)
         if(eventType == 0 && (serviceProviderId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ // uslugodawca przesuwa swoj dostepny termin
-            //console.log("Wlasciciel servieProvider")
             hoveredEvent.setProp('editable', true)
-            return;
-        }
-        if((eventType == 3 || eventType == 1) && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ // klient przesuwa swoja propozycje
-            //console.log("Wlasciciel client")
+        } else if((eventType == 3 || eventType == 1) && (clientId === currentUserId || currentUserRole === "admin" || currentUserRole === "controller")){ // klient przesuwa swoja propozycje
             hoveredEvent.setProp('editable', true)
-            return;
+        } else {
+            hoveredEvent.setProp('editable', false)
         }
-        //console.log("Nie ma uprawnien do przesuwania tego")
-        hoveredEvent.setProp('editable', false)
+        //tooltipData = getTooltipData(info)
+        //tooltipData.tooltipObject = showTooltip(tooltipData)
+        //console.error(tooltipData)
+    };
+    function eventMouseLeave(info) {
+    };
+    let tooltips = new Map();
+    function eventDidMount(info){
+        //hideTooltip(tooltipData)
+        let tooltipContent = getTooltipContent(info)
+        let calendarContainer = document.getElementById('calendar');
+        if(!info.isMirror && !tooltips.has(info.event.id)){
+            let tooltip = new Tooltip(info.el, {
+                title: tooltipContent,
+                placement: 'top',
+                trigger: 'hover',
+                container: calendarContainer,
+                html: true,
+                delay: 500,
+            });
+            tooltips.set(info.event.id, tooltip);
+        }
+    };
+    function eventWillUnmount(info){
+        tooltips.forEach((value, key) => {
+            value.dispose();
+        });
+        tooltips.clear()
     };
     function eventDrop(info) {
         if ("{{ request.user }}" === 'AnonymousUser') { return; }
