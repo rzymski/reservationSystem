@@ -453,21 +453,29 @@ def logoutUser(request):
     return redirect('index')
 
 
-def changeNotificationStatus(request):
+def deleteNotification(request):
+    ic("Usunieto powiadomienie")
+    if request.method == 'POST':
+        ic(request.POST)
+        responseData = {'status': 'successWithoutNeedToRefetch', 'message': 'Usunieto powiadomienie.'}
+        notificationId = request.POST.get('id')
+        notification = Notification.objects.get(pk=int(notificationId))
+        notification.isDeleted = True
+        notification.save()
+        return JsonResponse(responseData)
+
+
+def readNotification(request):
     ic("Przeczytano powiadomienie")
     if request.method == 'POST':
         ic(request.POST)
-        responseData = {'status': 'successWithoutNeedToRefetch', 'message': 'Zmieniono status powiadomienia.'}
+        responseData = {'status': 'successWithoutNeedToRefetch', 'message': 'Przeczytano powiadomienie.'}
         notificationId = request.POST.get('id')
         notification = Notification.objects.get(pk=int(notificationId))
-        hasBeenSeen = request.POST.get('hasBeenSeen')
-        isDeleted = request.POST.get('isDeleted')
-        if hasBeenSeen:
-            notification.hasBeenSeen = True if hasBeenSeen == 'true' else False
-        if isDeleted:
-            notification.isDeleted = True if isDeleted == 'true' else False
+        notification.hasBeenSeen = True
         notification.save()
         return JsonResponse(responseData)
+
 
 
 # TESTY

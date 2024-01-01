@@ -13,6 +13,10 @@
         {# Fontawesome icons #}
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 	    {% tailwind_css %}
+        {#link do jQuery#}
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+        {#my universal scripts#}
+        <script src="{% static 'reservationApp/js/universalScripts.js' %}"></script>
     </head>
 
 	<body class="bg-gray-50 dark:bg-slate-700 text-black dark:text-gray-50 min-h-screen flex flex-col overflow-x-hidden">
@@ -41,7 +45,6 @@
             {% endwith %}
 
             {% block content %}
-
             {% endblock %}
         </main>
         <script src="https://cdn.jsdelivr.net/npm/tw-elements/dist/js/tw-elements.umd.min.js"></script> {% comment %}for multiple select TW elements{% endcomment %}

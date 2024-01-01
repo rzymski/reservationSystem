@@ -25,7 +25,8 @@ urlpatterns = [
     path('confirmOrRejectReservation/', views.confirmOrRejectReservation, name='confirmOrRejectReservation'),
     path('dragEvent/', views.dragEvent, name='dragEvent'),
 
-    path('changeNotificationStatus/', views.changeNotificationStatus, name='changeNotificationStatus'),
+    path('deleteNotification/', views.deleteNotification, name='deleteNotification'),
+    path('readNotification/', views.readNotification, name='readNotification'),
 
 
     path('test/main/', views.PostListView.as_view(), name='main'),

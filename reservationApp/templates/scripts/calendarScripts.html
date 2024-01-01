@@ -108,7 +108,30 @@
         });
         calendar.render();
         //let refetchInterval = setInterval(function() { calendar.refetchEvents(); console.log("regular refetch events of every 60 seconds");}, 60000);
+        doActionsFromUrl()
     });
+    function doActionsFromUrl(){
+        let eventId = getUrlParameter('id');
+        let notificationId = getUrlParameter('notificationId');
+        if(eventId){
+            setTimeout(function () {
+                console.error("Dostal = ", eventId, notificationId)
+                let event = calendar.getEventById(parseInt(eventId));
+                calendar.gotoDate(event.start);
+                {#passDataByAJAX('/readNotification/', {'id' : notificationId}, false)#}
+                console.error("WYKONALO SIE = ", eventId, notificationId)
+            }, 1000);
+        }
+    };
+    function getUrlParameter(sParam) {
+        let sPageURL = decodeURIComponent(window.location.search.substring(1)), sURLVariables = sPageURL.split('&'), sParameterName, i;
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : sParameterName[1];
+            }
+        }
+    };
     function eventSelect(data) {
         if ("{{ request.user }}" === 'AnonymousUser') { return; }
         let modalId = "AddEditModal"
@@ -772,7 +795,8 @@
                 return response;
             },
             error: function (response) {
-                console.error("Cos poszło nie tak:", response.message)
+                if(!response.message){ return response; }
+                console.error("Cos poszło nie tak", response.message)
                 return response;
             }
         });
