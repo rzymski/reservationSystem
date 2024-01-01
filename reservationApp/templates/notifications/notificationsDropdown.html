@@ -9,10 +9,18 @@
     {%  for notification in notifications %}
         {% if notification.hasBeenSeen %}
              <div onclick="navigateToEvent({{ notification.id }},'{{ notification.availableBookingDate.id }}', '{{ notification.reservation.id }}', event)" class="p-2 font-normal text-sm text-gray-400">
-                <a href="{% url 'userProfile' pk=notification.fromUser.id %}" class="linkToUserProfile font-bold hover:text-blue-700 dark:hover:text-blue-400 whitespace-nowrap">{{ notification.fromUser.first_name }} {{ notification.fromUser.last_name }}</a>
                 <span>
+                    <a href="{% url 'userProfile' pk=notification.fromUser.id %}" class="linkToUserProfile font-bold hover:text-blue-700 dark:hover:text-blue-400 whitespace-nowrap">{{ notification.fromUser.first_name }} {{ notification.fromUser.last_name }}</a>
                     {{ notification.content }}
                     <div>{{ notification.date|date:"Y-m-d H:i:s" }}</div>
+                    {% comment %}<div class="flex justify-between items-center">
+                        <a href="{% url 'userProfile' pk=notification.fromUser.id %}" class="linkToUserProfile font-bold hover:text-blue-700 dark:hover:text-blue-400 whitespace-nowrap">{{ notification.fromUser.first_name }} {{ notification.fromUser.last_name }}</a>
+                        <span class="flex-grow ml-2">{{ notification.content }}</span>
+                        <span class="ml-2">
+                            <i class="fa-solid fa-x"></i>
+                        </span>
+                    </div>
+                    <div>{{ notification.date|date:"Y-m-d H:i:s" }}</div>{% endcomment %}
                 </span>
             </div>
         {% else %}
@@ -27,33 +35,19 @@
     {% endfor %}
 </div>
 <script>
-    {% comment %}async function changeWindowLocation(url){
-        setTimeout(function(){console.log("KURWA"); window.location.href = url;}, 3000)
-    }
-    async function passDataChangeWindowLocation(ajaxUrl, ajaxData, windowUrl){
-        console.error(ajaxUrl, ajaxData)
-        await passDataByAJAXUniversal(ajaxUrl, ajaxData);
-        await changeWindowLocation(windowUrl);
-    };{% endcomment %}
     function changeWindowLocation(url){
         return new Promise(function(resolve) {
-            {#setTimeout(function(){#}
-            {#    console.log("KURWA");#}
-            {#    window.location.href = url;#}
-            {#    resolve();}, 3000);#}
             window.location.href = url;
             resolve();
         });
     }
     function passDataChangeWindowLocation(ajaxUrl, ajaxData, windowUrl){
         console.error(ajaxUrl, ajaxData)
-        //passDataByAJAXUniversal(ajaxUrl, ajaxData).then(changeWindowLocation(windowUrl))
         passDataByAJAXUniversal(ajaxUrl, ajaxData)
         .then(function() {
             return changeWindowLocation(windowUrl);
         })
     };
-
     function navigateToEvent(notificationId, availableBookingDateId, reservationId, e){
         console.error("Id = ", notificationId," Navigate = ", availableBookingDateId, " lub ", reservationId, " event = ", e)
         let eventId = null
@@ -61,9 +55,6 @@
         else if (availableBookingDateId) { eventId = availableBookingDateId; }
 
         if (!e.target.classList.contains('linkToUserProfile')) {
-            //window.location.reload();
-            //passDataByAJAXUniversal('/readNotification/', {'id': notificationId})
-            //window.location.href = '/?id='+eventId+'&notificationId='+notificationId;
             let url = '/?id='+eventId+'&notificationId='+notificationId;
             passDataChangeWindowLocation('/readNotification/', {'id': notificationId}, url)
 
@@ -83,18 +74,4 @@
             }
         });
     });
-
-    {% comment %}function navigateToEvent(notificationId, availableBookingDateStartDate, reservationStartDate){
-        console.error("Id = ", notificationId," Navigate = ", availableBookingDateStartDate, " lub ", reservationStartDate)
-        let navigateDate = null
-        if(reservationStartDate) { navigateDate = new Date(reservationStartDate); }
-        else if (availableBookingDateStartDate) { navigateDate = new Date(availableBookingDateStartDate); }
-
-        let numberOfNotificationsDiv = document.getElementById('numberOfNotificationsDiv');
-        let numberOfNotifications = parseInt(numberOfNotificationsDiv.innerText, 10);
-        numberOfNotificationsDiv.innerText = numberOfNotifications-1;
-
-        if(navigateDate){ calendar.gotoDate(navigateDate) }
-        passDataByAJAX('/changeNotificationStatus/', {'id' : notificationId, 'hasBeenSeen':'true'}, false)
-    };{% endcomment %}
 </script>
