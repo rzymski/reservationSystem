@@ -72,8 +72,11 @@
                     {% comment %}eventContent: function(arg) {
                         return getEventTitle(arg);
                     },{% endcomment %}
-                    dayMaxEventRows: 6,
-                    dayPopoverFormat: myDayTitleFormat,
+                    //dayMaxEventRows: 6,
+                    dayMaxEvents: 6,
+                    moreLinkClick: "day",
+                    //moreLinkClick: function(arg) { console.log("Wywolalo sie = ", arg); eventWillUnmount() },
+                    //dayPopoverFormat: myDayTitleFormat,
                 },
                 timeGridWeek:{
                     titleFormat: myWeekTitleFormat,
@@ -92,9 +95,6 @@
             },
             eventMouseEnter: function(info) {
                 eventMouseEnter(info);
-            },
-            eventMouseLeave:  function(info) {
-                eventMouseLeave(info);
             },
             eventDidMount: function(info) {
                 eventDidMount(info)
@@ -257,54 +257,6 @@
         tooltipContent += `</div>`;
         return tooltipContent
     };
-    {% comment %}let tooltipData;
-    function showTooltip(tooltipData) {
-        let eventElement = tooltipData.eventElement;
-        let tooltipContent = tooltipData.tooltipContent;
-        let calendarContainer = document.getElementById('calendar');
-        const tooltip = new Tooltip(eventElement, {
-            title: tooltipContent,
-            placement: 'top',
-            trigger: 'manual',
-            container: calendarContainer,
-            html: true,
-            delay: 500,
-        });
-        tooltip.show();
-        //console.error("POKAZ TOOLTIP = ", eventElement)
-        {#let isMouseOverTooltip = false;#}
-        {#let isMouseOverEvent = false;#}
-        eventElement.addEventListener('mouseenter', () => {
-            tooltipData.isMouseOverEvent = true;
-        });
-        eventElement.addEventListener('mouseleave', () => {
-            tooltipData.isMouseOverEvent = false;
-            setTimeout(function() {hideTooltip(tooltipData)}, 100);
-        });
-        tooltip.popperInstance.popper.addEventListener('mouseenter', () => {
-            tooltipData.isMouseOverTooltip = true;
-        });
-        tooltip.popperInstance.popper.addEventListener('mouseleave', () => {
-            tooltipData.isMouseOverTooltip = false;
-            setTimeout(function() {hideTooltip(tooltipData)}, 100);
-        });
-        return tooltip
-    };
-    function hideTooltip(tooltipData) {
-        let isMouseOverTooltip = tooltipData.isMouseOverTooltip;
-        let isMouseOverEvent = tooltipData.isMouseOverEvent;
-        //console.error("T = ", tooltipData.tooltipObject)
-        if (tooltipData.tooltipObject && !isMouseOverEvent && !isMouseOverTooltip) {
-            //console.error(tooltipData.tooltipObject)
-            tooltipData.tooltipObject.dispose();
-            tooltipData.tooltipObject.popperInstance.destroy();
-            tooltipData.tooltipObject.popperInstance.popper.style.display = 'none';
-            let tooltips = document.querySelectorAll('.tooltip');
-            tooltips.forEach(tooltip => { tooltip.style.display = 'none'; });
-            //console.error("DZIALA CHOWANIE usuwanie obiektu")
-        }
-        //console.error("koniec hide")
-    };{% endcomment %}
     function eventTooltipClicked(eventId) {
         let event = calendar.getEventById(eventId);
         eventClick({event: event})
@@ -324,18 +276,12 @@
         } else {
             hoveredEvent.setProp('editable', false)
         }
-        //tooltipData = getTooltipData(info)
-        //tooltipData.tooltipObject = showTooltip(tooltipData)
-        //console.error(tooltipData)
-    };
-    function eventMouseLeave(info) {
     };
     let tooltips = new Map();
     function eventDidMount(info){
-        //hideTooltip(tooltipData)
-        let tooltipContent = getTooltipContent(info)
         let calendarContainer = document.getElementById('calendar');
         if(!info.isMirror && !tooltips.has(info.event.id)){
+            let tooltipContent = getTooltipContent(info)
             let tooltip = new Tooltip(info.el, {
                 title: tooltipContent,
                 placement: 'top',

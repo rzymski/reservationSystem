@@ -44,40 +44,6 @@
   transition: color 0.3s ease-in-out;
 }
 
-.fc-popover {
-    z-index: 18 !important;
-}
-
-.fc-popover-header {
-  background-color: #fff;
-  color: #333;
-}
-.dark .fc-popover-header {
-  background-color: #111827;
-  color: #f9fafb;
-}
-.fc-popover-body {
-  background-color: #fff;
-  color: #333;
-}
-.dark .fc-popover-body {
-  background-color: #4b5563;
-}
-.fc-popover-close {
-    color: #000;
-    border: 1px;
-    border-radius: 0.5rem;
-    opacity: 1 !important;
-}
-.dark .fc-popover-close {
-    color: #f9fafb;
-}
-.fc-popover-close:hover {
-    color: red;
-    background-color: white;
-}
-
-
 .headerContainer {
     padding: 2cqw;
     font-size: 3cqw;
@@ -198,4 +164,39 @@
   top: calc(50% - 5px);
   margin-left: 0;
   margin-right: 0;
+}
+
+
+/*popover when is too much events in one row*/
+.fc-popover {
+    z-index: 18 !important;
+}
+
+.fc-popover-header {
+  background-color: #fff;
+  color: #333;
+}
+.dark .fc-popover-header {
+  background-color: #111827;
+  color: #f9fafb;
+}
+.fc-popover-body {
+  background-color: #fff;
+  color: #333;
+}
+.dark .fc-popover-body {
+  background-color: #4b5563;
+}
+.fc-popover-close {
+    color: #000;
+    border: 1px;
+    border-radius: 0.5rem;
+    opacity: 1 !important;
+}
+.dark .fc-popover-close {
+    color: #f9fafb;
+}
+.fc-popover-close:hover {
+    color: red;
+    background-color: white;
 }
