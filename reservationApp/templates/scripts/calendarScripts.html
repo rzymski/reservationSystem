@@ -1,11 +1,4 @@
 <script>
-    const socket = new WebSocket('ws://' + window.location.host + '/ws/test/');
-    socket.onopen = function(event) {
-        socket.send('1');
-    };
-
-
-
     let csrf_token = "{{ csrf_token }}";
     let screenWidth = window.innerWidth;
     let currentUserId;
