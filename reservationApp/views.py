@@ -12,6 +12,15 @@ from datetime import datetime, timedelta
 from icecream import ic
 import json
 
+# from django.views import View
+# class Index(View):
+#     def get(self, request):
+#         return render(request, 'chatrooms/index.html')
+# class Rooom(View):
+#     def get(self, request, room_name):
+#         return render(request, 'chatrooms/room.html', {'room_name': room_name})
+def counter(request):
+    return render(request, 'chatrooms/counter.html', {'counter': 'hello world'})
 
 def index(request):
     serviceProviders = User.objects.filter(availablebookingdate__isnull=False, availablebookingdate__isDeleted=False).distinct()

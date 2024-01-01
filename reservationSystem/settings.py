@@ -26,12 +26,13 @@ SECRET_KEY = 'django-insecure-rclivr%ef#7qm3+1fw-ivvdd$w3bw#l5igxh5s+r0@1&w)lyl1
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    'channels',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -89,6 +90,8 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'reservationSystem.wsgi.application'
+ASGI_APPLICATION = 'reservationSystem.asgi.application'
+
 
 
 # Database

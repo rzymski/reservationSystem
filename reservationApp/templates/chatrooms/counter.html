@@ -1,0 +1,48 @@
+{% comment %}<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Title</title>
+    </head>
+    <body>
+        <div>STALA CZESC</div>
+        <h1 id="number">{{ count }}</h1>
+    </body>
+    <script>
+        console.error("Window = " ,window.location.host)
+
+        //const socket = new WebSocket('ws://localhost/ws/counter');
+        const socket = new WebSocket('ws://' + window.location.host + '/ws/receive/');
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            console.log(data)
+            document.querySelector('#number').innerText = data.message
+        }
+    </script>
+</html>{% endcomment %}
+
+<!-- counter.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visit Counter</title>
+</head>
+<body>
+    <div>Visit Counter:</div>
+    <div id="visitCount">0</div>
+
+    <script>
+        const visitCountElement = document.getElementById('visitCount');
+        const socket = new WebSocket('ws://' + window.location.host + '/ws/test/');
+
+        // Handle incoming messages from the WebSocket consumer
+        socket.onmessage = function(event) {
+            console.error("DOSTAL WIADOMOSC")
+            const data = JSON.parse(event.data);
+            // Update the UI with the new visit count
+            visitCountElement.innerText = data.message.toString();
+        };
+    </script>
+</body>
+</html>

@@ -4,6 +4,11 @@ from . import views
 
 
 urlpatterns = [
+
+    path('counter/', views.counter, name='counter'),
+    # path('index/', views.Index.as_view(), name='Index'),
+    # path('<str:room_name>', views.Rooom.as_view(), name='room'),
+
     path('', views.index, name='index'),
 
     path('register/', views.registerUser, name='register'),
