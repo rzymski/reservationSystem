@@ -12,6 +12,14 @@ from datetime import datetime, timedelta
 from icecream import ic
 import json
 
+from django.http import HttpResponse
+from django.core.mail import send_mail
+def simpleMail(request):
+    send_mail(subject='Temat maila',
+              message='Tresc maila ktory wyslalem',
+              from_email='django@mailtrap.club',
+              recipient_list=['piotrek.szumowski@gmail.com'])
+    return HttpResponse('Message sent')
 
 def index(request):
     serviceProviders = User.objects.filter(availablebookingdate__isnull=False, availablebookingdate__isDeleted=False).distinct()
@@ -199,7 +207,7 @@ def addEditAvailableBookingDate(request):
                 availableBookingDate.save(fromUser=request.user)
                 if currentUser != availableBookingDate.user:
                     print(f"{currentUser} zmienił dostepny termin uzytkownika {availableBookingDate.user}")
-                    Notification.createNotification(7, availableBookingDate.user, currentUser, availableBookingDate, None)
+                    createNotificationAndSendMail(7, availableBookingDate.user, currentUser, availableBookingDate, None)
         except ValidationError as e:
             # messages.error(request, e.message)
             responseData = {'status': 'error', 'message': e.message}
@@ -236,7 +244,7 @@ def addEditReservation(request):
                     start=start,
                     end=end,
                 )
-                Notification.createNotification(2, reservation.availableBookingDate.user, currentUser, reservation.availableBookingDate, reservation)
+                createNotificationAndSendMail(2, reservation.availableBookingDate.user, currentUser, reservation.availableBookingDate, reservation)
             if eventType == 1:  # edytowanie istniejacej rezerwacji
                 ic("edytowanie istniejacej rezerwacji")
                 reservation = Reservation.objects.get(pk=eventId)
@@ -261,7 +269,7 @@ def addEditReservation(request):
                     reservation.save()
                     if currentUser != reservation.bookingPerson:
                         print(f"{currentUser} edytował propozycje terminu uzytkownika {reservation.bookingPerson}")
-                        Notification.createNotification(8, reservation.bookingPerson, currentUser, None, reservation)
+                        createNotificationAndSendMail(8, reservation.bookingPerson, currentUser, None, reservation)
         except ValidationError as e:
             responseData = {'status': 'error', 'message': e.message}
         return JsonResponse(responseData)
@@ -281,7 +289,7 @@ def deleteEvent(request):
             ic("Usunieto dostepny termin")
             if currentUser != availableBookingDate.user:
                 print(f"{currentUser} usunal dostepny termin uzytkownika {availableBookingDate.user}")
-                Notification.createNotification(6, availableBookingDate.user, currentUser, availableBookingDate, None)
+                createNotificationAndSendMail(6, availableBookingDate.user, currentUser, availableBookingDate, None)
         else:
             reservation = Reservation.objects.get(pk=int(eventId))
             reservation.isDeleted = True
@@ -290,18 +298,18 @@ def deleteEvent(request):
             if currentUser != reservation.bookingPerson:
                 if int(eventTypeId) == 1:
                     print(f"{currentUser} usunal rezerwacje uzytkownika {reservation.bookingPerson}")
-                    Notification.createNotification(4, reservation.bookingPerson, currentUser, None, reservation)
+                    createNotificationAndSendMail(4, reservation.bookingPerson, currentUser, None, reservation)
                 elif int(eventTypeId) == 2:
                     print(f"{currentUser} usunal potwierdzony termin dotyczacy {reservation.bookingPerson} i {reservation.availableBookingDate.user}")
-                    Notification.createNotification(3, reservation.bookingPerson, currentUser, reservation.availableBookingDate, reservation)
+                    createNotificationAndSendMail(3, reservation.bookingPerson, currentUser, reservation.availableBookingDate, reservation)
                 elif int(eventTypeId) == 3:
                     print(f"{currentUser} usunal propozycje terminu uzytkownika {reservation.bookingPerson}")
-                    Notification.createNotification(5, reservation.bookingPerson, currentUser, None, reservation)
+                    createNotificationAndSendMail(5, reservation.bookingPerson, currentUser, None, reservation)
                 else:
                     raise Exception(f"To nie powinno sie wydarzyc. eventType = {eventTypeId}")
             elif int(eventTypeId) == 2 and reservation.availableBookingDate.user != currentUser:
                 print(f"{currentUser} usunal potwierdzony termin dotyczacy {reservation.bookingPerson} i {reservation.availableBookingDate.user}")
-                Notification.createNotification(3, reservation.bookingPerson, currentUser, reservation.availableBookingDate, reservation)
+                createNotificationAndSendMail(3, reservation.bookingPerson, currentUser, reservation.availableBookingDate, reservation)
     return JsonResponse({'status': 'success', 'message': 'Usunieto.'})
 
 
@@ -326,7 +334,7 @@ def confirmOrRejectReservation(request):
                 reservation.availableBookingDate = newAvailableBookingDate
                 reservation.isAccepted = True
                 reservation.save()
-                Notification.createNotification(1, reservation.bookingPerson, userWhoConfirmedReservation, None, reservation)
+                createNotificationAndSendMail(1, reservation.bookingPerson, userWhoConfirmedReservation, None, reservation)
             elif action == 'confirmExist':
                 errorMessage = saveReservationWhichCouldBePartOfAvailableBookingData(reservation, userWhoConfirmedReservation)
                 if errorMessage:
@@ -334,7 +342,7 @@ def confirmOrRejectReservation(request):
             elif action == 'reject':
                 reservation.isDeleted = True
                 reservation.save()
-                Notification.createNotification(4, reservation.bookingPerson, userWhoConfirmedReservation, None, reservation)
+                createNotificationAndSendMail(4, reservation.bookingPerson, userWhoConfirmedReservation, None, reservation)
         except ValidationError as e:
             ic("JEST ERROR?", e)
             responseData = {'status': 'error', 'message': e.message}
@@ -365,7 +373,7 @@ def dragEvent(request):
                 availableBookingDate.save(fromUser=request.user)
                 if currentUser != availableBookingDate.user:
                     print(f"{currentUser} zmienił dostepny termin uzytkownika {availableBookingDate.user}")
-                    Notification.createNotification(7, availableBookingDate.user, currentUser, availableBookingDate, None)
+                    createNotificationAndSendMail(7, availableBookingDate.user, currentUser, availableBookingDate, None)
             if eventType == 3 or eventType == 1:
                 reservation = Reservation.objects.get(id=eventId)
                 reservation.start = newStartDate
@@ -373,7 +381,7 @@ def dragEvent(request):
                 reservation.save()
                 if currentUser != reservation.bookingPerson and eventType == 3:
                     print(f"{currentUser} edytował propozycje terminu uzytkownika {reservation.bookingPerson}")
-                    Notification.createNotification(8, reservation.bookingPerson, currentUser, None, reservation)
+                    createNotificationAndSendMail(8, reservation.bookingPerson, currentUser, None, reservation)
         except ValidationError as e:
             ic("JEST ERROR?", e)
             responseData = {'status': 'error', 'message': e.message}

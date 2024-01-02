@@ -28,6 +28,8 @@ urlpatterns = [
     path('deleteNotification/', views.deleteNotification, name='deleteNotification'),
     path('readNotification/', views.readNotification, name='readNotification'),
 
+    path('mail/', views.simpleMail, name="simpleMail"),
+
 
     path('test/main/', views.PostListView.as_view(), name='main'),
     path('test/<pk>/', views.PostDetailView.as_view(), name='detail'),

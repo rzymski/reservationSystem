@@ -732,6 +732,8 @@
     }
     // wersja1 zatwierdzenie
     function addEditEvent() {
+        console.error("CZAS start = ", new Date().getSeconds(), " ", new Date().getMilliseconds())
+
         let conditionsMet = validationModalForm('AddEditModal', null, false)
         console.log("Przeszedl validacje na frontendzie = ", conditionsMet, "  eventType = ", eventTypeInt, "   reservation = ", reserveOption)
         if (typeof reserveOption === 'undefined' || reserveOption === null) { throw 'ReservationOption nie ma wartosci' }
@@ -805,7 +807,7 @@
         {% comment %}setTimeout(function () { singleRefetch().then(function () {hideBadTooltips();});  }, 50);
         setTimeout(function () { singleRefetch().then(function () {hideBadTooltips();}); }, 250);
         setTimeout(function () { singleRefetch().then(function () {hideBadTooltips();}); }, 2500);{% endcomment %}
-        setTimeout(function () { singleRefetch().then(function () {hideBadTooltips();}); }, 1000);
+        setTimeout(function () { singleRefetch().then(function () {hideBadTooltips();}); }, 500);
     };
     // wyslanie danych Ajax-em do view
     function passDataByAJAX(url, data, possibleNeedRevert=false) {
@@ -824,6 +826,7 @@
                     {#setTimeout(function () { calendar.refetchEvents(); }, 250);#}
                     {#setTimeout(function () { calendar.refetchEvents(); }, 2500);#}
                     refetchCalendarEvents();
+                    console.error("CZAS end = ", new Date().getSeconds(), " ", new Date().getMilliseconds())
                     return response;
                 } else if (response.status === 'successWithoutNeedToRefetch') { return response; }
                 console.error("Error na backendzie", response.message)

@@ -197,6 +197,17 @@ class Notification(models.Model):
             hasBeenSeen=False,
             isDeleted=False,
         )
+        return notification
+
+    def __str__(self):
+        if self.reservation:
+            return f"Typ: {self.notificationType} do: {self.toUser} od: {self.fromUser} {self.reservation}"
+        elif self.availableBookingDate:
+            return f"Typ: {self.notificationType} do: {self.toUser} od: {self.fromUser} {self.availableBookingDate}"
+        else:
+            return f"Typ: {self.notificationType} do: {self.toUser} od: {self.fromUser}"
+
+
 
 
 

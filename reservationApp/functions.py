@@ -1,5 +1,7 @@
 from .models import *
 from icecream import ic
+from django.core.mail import send_mail
+import threading
 
 
 def getAvailableTimeRanges(availableBookingDate):
@@ -100,8 +102,68 @@ def saveReservationWhichCouldBePartOfAvailableBookingData(reservation, userWhoCo
         else:
             reservation.isAccepted = True
             reservation.save()
-        Notification.createNotification(0, reservation.bookingPerson, userWhoConfirmedReservation, None, reservation)
+        createNotificationAndSendMail(0, reservation.bookingPerson, userWhoConfirmedReservation, None, reservation)
         if userWhoConfirmedReservation != reservation.availableBookingDate.user:
-            Notification.createNotification(10, reservation.availableBookingDate.user, userWhoConfirmedReservation, reservation.availableBookingDate, reservation)
+            createNotificationAndSendMail(10, reservation.availableBookingDate.user, userWhoConfirmedReservation, reservation.availableBookingDate, reservation)
     except ValidationError as e:
         return e.message
+
+
+def createNotificationAndSendMail(notificationType, toUser, fromUser, availableBookingDate=None, reservation=None):
+    ic("Create notification and send mail")
+    notification = Notification.createNotification(notificationType, toUser, fromUser, availableBookingDate, reservation)
+    ic(notification)
+    subject, message, receivers = getMailData(notification)
+    sendMail(subject, message, receivers)
+
+
+def getMailData(notification):
+    activity = ""
+    if notification.notificationType == 0:
+        activity += 'potwierdził twoją rezerwacje'
+    elif notification.notificationType == 1:
+        activity += 'zaakceptował twoją propozycje terminu'
+    elif notification.notificationType == 2:
+        activity += 'zaproponował termin rezerwacji'
+    elif notification.notificationType == 3:
+        activity += 'anululował potwierdzony termin rezerwacji'
+    elif notification.notificationType == 4:
+        activity += 'usunął twoją rezerwacje'
+    elif notification.notificationType == 5:
+        activity += 'usunął twoją propozycje terminu'
+    elif notification.notificationType == 6:
+        activity += 'usunął twój dostępny termin'
+    elif notification.notificationType == 7:
+        activity += 'edytował twój dostępny termin'
+    elif notification.notificationType == 8:
+        activity += 'edytował twoją propozycje terminu'
+    elif notification.notificationType == 9:
+        activity += 'edytował swój dostępny termin poza przedział twojej rezerwacji'
+    elif notification.notificationType == 10:
+        activity += 'zaakceptował rezerwacje w twoim terminie'
+    fromUser = f"{ notification.fromUser.first_name.capitalize() } { notification.fromUser.last_name.capitalize() } "
+    subject = fromUser + activity + "."
+    eventData = ""
+    if notification.reservation:
+        eventData += f"Termin {notification.reservation.start} - {notification.reservation.end}."
+    elif notification.availableBookingDate:
+        eventData += f"Termin {notification.availableBookingDate.start} - {notification.availableBookingDate.end}."
+    messageContent = subject + "\n" + eventData
+    receivers = [notification.fromUser.email]
+    return activity, messageContent, receivers
+
+
+def sendMail(subject, message, receivers):
+    ic(subject, message, receivers)
+    EmailThread(subject, message, receivers).start()
+
+
+class EmailThread(threading.Thread):
+    def __init__(self, subject, message, recipient_list):
+        self.subject = subject
+        self.recipient_list = recipient_list
+        self.message = message
+        threading.Thread.__init__(self)
+
+    def run(self):
+        send_mail(subject=self.subject, message=self.message, from_email='django@mailtrap.club', recipient_list=self.recipient_list)
