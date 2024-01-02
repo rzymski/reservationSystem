@@ -21,10 +21,182 @@
 }
 
 .fc-title {
+    padding-left: 4px;
+    text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
     font-weight: bold;
     color: white;
 }
 
 .fc-title a:hover {
     color: blue;
+}
+
+.fc-daygrid-day-number[data-navlink]:hover {
+    color: red;
+    text-decoration: none !important;
+}
+.fc-col-header-cell-cushion[data-navlink]:hover {
+    color: red;
+    text-decoration: none !important;
+}
+.fc-daygrid-day-number[data-navlink],
+.fc-col-header-cell-cushion[data-navlink] {
+  transition: color 0.3s ease-in-out;
+}
+
+.headerContainer {
+    padding: 2cqw;
+    font-size: 3cqw;
+}
+
+.headerContainer .iconContainer {
+    width: 6cqw;
+    height: 6cqw
+}
+
+.contentContainer {
+    padding: 1cqw 2cqw 1cqw 2cqw;
+}
+
+.contentContainer :is(input, select) {
+    line-height: 3.5cqw;
+    font-size: 2.5cqw;
+}
+
+.contentContainer :is(label, span, p) {
+    font-size: 2.5cqw;
+}
+
+.contentContainer button {
+    line-height: 5cqw;
+    font-size: 3.5cqw;
+    padding: 1.5cqw 0cqw 1.5cqw 0cqw;
+}
+
+.contentContainer label {
+    margin-bottom: 0.5rem;
+}
+
+
+/*.popper,
+.tooltip {
+    position: absolute;
+    z-index: 19;
+    width: fit-content;
+}*/
+
+.popper,
+.tooltip {
+    position: absolute;
+    z-index: 19 !important;
+    width: fit-content;
+    /*border-radius: 3px;
+    box-shadow: 0 0 2px rgba(0,0,0,0.5);*/
+}
+
+.popper .popper__arrow,
+.tooltip .tooltip-arrow {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  position: absolute;
+  margin: 0px;
+}
+
+.popper[x-placement^="top"],
+.tooltip[x-placement^="top"] {
+  margin-bottom: -5px;
+}
+
+
+.popper .popper__arrow,
+.tooltip .tooltip-arrow {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  position: absolute;
+}
+
+.tooltip .tooltip-arrow,
+.popper .popper__arrow {
+  border-color: #FFFFFF;
+}
+.popper[x-placement^="top"] .popper__arrow,
+.tooltip[x-placement^="top"] .tooltip-arrow {
+  border-width: 5px 5px 0 5px;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  bottom: 0px;
+  left: calc(50% - 5px);
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.tooltip[x-placement^="bottom"] .tooltip-arrow,
+.popper[x-placement^="bottom"] .popper__arrow {
+  border-width: 0 5px 5px 5px;
+  border-left-color: transparent;
+  border-right-color: transparent;
+  border-top-color: transparent;
+  top: -5px;
+  left: calc(50% - 5px);
+  margin-top: 0;
+  margin-bottom: 0;
+}
+.popper[x-placement^="right"] .popper__arrow,
+.tooltip[x-placement^="right"] .tooltip-arrow {
+  border-width: 5px 5px 5px 0;
+  border-left-color: transparent;
+  border-top-color: transparent;
+  border-bottom-color: transparent;
+  left: -5px;
+  top: calc(50% - 5px);
+  margin-left: 0;
+  margin-right: 0;
+}
+.popper[x-placement^="left"] .popper__arrow,
+.tooltip[x-placement^="left"] .tooltip-arrow {
+  border-width: 5px 0 5px 5px;
+  border-top-color: transparent;
+  border-right-color: transparent;
+  border-bottom-color: transparent;
+  right: -5px;
+  top: calc(50% - 5px);
+  margin-left: 0;
+  margin-right: 0;
+}
+
+
+/*popover when is too much events in one row*/
+.fc-popover {
+    z-index: 18 !important;
+}
+
+.fc-popover-header {
+  background-color: #fff;
+  color: #333;
+}
+.dark .fc-popover-header {
+  background-color: #111827;
+  color: #f9fafb;
+}
+.fc-popover-body {
+  background-color: #fff;
+  color: #333;
+}
+.dark .fc-popover-body {
+  background-color: #4b5563;
+}
+.fc-popover-close {
+    color: #000;
+    border: 1px;
+    border-radius: 0.5rem;
+    opacity: 1 !important;
+}
+.dark .fc-popover-close {
+    color: #f9fafb;
+}
+.fc-popover-close:hover {
+    color: red;
+    background-color: white;
 }
