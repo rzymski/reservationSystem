@@ -36,12 +36,10 @@ def showNotificationsInDropdown(context):
         else:
             print("NIE POWINNO BYC TAKIEJ OPCJI")
         notification.content = content
+        if notification.reservation:
+            notification.event = notification.reservation
+        else:
+            notification.event = notification.availableBookingDate
         notificationsWithContent.append(notification)
     numberOfNotificationsHasNotBeenSeen = Notification.objects.filter(toUser=request_user, isDeleted=False, hasBeenSeen=False).count()
     return {'notifications': notificationsWithContent, 'numberOfNotificationsHasNotBeenSeen': numberOfNotificationsHasNotBeenSeen}
-
-# @register.inclusion_tag('notifications/notificationsDropdown.html', takes_context=True)
-# def showNotificationsInDropdown(context):
-#     request_user = context['request'].user
-#     notifications = Notification.objects.filter(toUser=request_user, isDeleted=False).exclude(hasBeenSeen=True).order_by('-date')
-#     return {'notifications': notifications}

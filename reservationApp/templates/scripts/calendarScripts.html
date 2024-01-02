@@ -16,6 +16,7 @@
     let buttonOption1Text;
     let buttonOption2Text;
     let reserveOption;
+    let actualChosenEventId=null;
     document.addEventListener('DOMContentLoaded', function() {
         var calendarEl = document.getElementById('calendar');
         calendar = new FullCalendar.Calendar(calendarEl, {
@@ -109,22 +110,23 @@
             eventDrop: function(info) {
                 eventDrop(info);
             },
+            viewDidMount: function(info){
+                doActionsFromUrl()
+            },
         });
         calendar.render();
         //let refetchInterval = setInterval(function() { calendar.refetchEvents(); console.log("regular refetch events of every 60 seconds");}, 60000);
-        doActionsFromUrl()
     });
     function doActionsFromUrl(){
         let eventId = getUrlParameter('id');
-        let notificationId = getUrlParameter('notificationId');
+        let notificationStartDate = getUrlParameter('date');
+        if (notificationStartDate) {
+            calendar.gotoDate(new Date(notificationStartDate));
+            console.error("Go to date = ", notificationStartDate)
+        };
         if(eventId){
-            setTimeout(function () {
-                console.error("Dostal = ", eventId, notificationId)
-                let event = calendar.getEventById(parseInt(eventId));
-                calendar.gotoDate(event.start);
-                {#passDataByAJAX('/readNotification/', {'id' : notificationId}, false)#}
-                console.error("WYKONALO SIE = ", eventId, notificationId)
-            }, 1000);
+            actualChosenEventId = eventId;
+            console.error("Ustawion jako wybrany event = ",  actualChosenEventId)
         }
     };
     function getUrlParameter(sParam) {
@@ -319,6 +321,11 @@
             tooltips.set(info.event.id, tooltip);
         }
         hideBadTooltips()
+        if(actualChosenEventId && actualChosenEventId === info.event.id){
+            info.el.style.backgroundColor = 'gold';
+            info.el.style.border = '2px solid red';
+            console.error("El = ", info.el)
+        }
     };
     function hideBadTooltips() {
         const tooltips = document.querySelectorAll('.tooltip');

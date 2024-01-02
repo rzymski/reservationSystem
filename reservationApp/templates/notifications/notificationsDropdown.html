@@ -8,7 +8,7 @@
 <div id="notificationsDropdown" class="absolute z-10 hidden bg-gray-50 divide-y divide-gray-100 shadow w-96 dark:bg-gray-700 dark:divide-gray-600 right-52 border border-black overflow-y-hidden hover:overflow-y-auto" style="top: 67px; max-height: 30vh;">
     {%  for notification in notifications %}
         {% if notification.hasBeenSeen %}
-             <div onclick="navigateToEvent({{ notification.id }},'{{ notification.availableBookingDate.id }}', '{{ notification.reservation.id }}', event)" class="p-2 font-normal text-sm text-gray-400">
+             <div onclick="navigateToEvent({{ notification.id }},'{{ notification.event.id }}', '{{ notification.event.start|date:'Y-m-d\TH:i:s' }}', event)" class="p-2 font-normal text-sm text-gray-400">
                 <span>
                     <a href="{% url 'userProfile' pk=notification.fromUser.id %}" class="linkToUserProfile font-bold hover:text-blue-700 dark:hover:text-blue-400 whitespace-nowrap">{{ notification.fromUser.first_name }} {{ notification.fromUser.last_name }}</a>
                     {{ notification.content }}
@@ -24,7 +24,7 @@
                 </span>
             </div>
         {% else %}
-            <div onclick="navigateToEvent({{ notification.id }},'{{ notification.availableBookingDate.id }}', '{{ notification.reservation.id }}', event)" class="p-2 font-normal text-sm text-gray-900 dark:text-white">
+            <div onclick="navigateToEvent({{ notification.id }},'{{ notification.event.id }}', '{{ notification.event.start|date:'Y-m-d\TH:i:s' }}', event)" class="p-2 font-normal text-sm text-gray-900 dark:text-white">
                 <a href="{% url 'userProfile' pk=notification.fromUser.id %}" class="linkToUserProfile font-bold hover:text-blue-700 dark:hover:text-blue-400 whitespace-nowrap">{{ notification.fromUser.first_name }} {{ notification.fromUser.last_name }}</a>
                 <span>
                     {{ notification.content }}
@@ -48,14 +48,10 @@
             return changeWindowLocation(windowUrl);
         })
     };
-    function navigateToEvent(notificationId, availableBookingDateId, reservationId, e){
-        console.error("Id = ", notificationId," Navigate = ", availableBookingDateId, " lub ", reservationId, " event = ", e)
-        let eventId = null
-        if(reservationId) { eventId = reservationId; }
-        else if (availableBookingDateId) { eventId = availableBookingDateId; }
-
+    function navigateToEvent(notificationId, eventId, eventStart, e){
+        console.error("Id = ", notificationId," eventId = ", eventId, " event start = ", eventStart," event = ", e)
         if (!e.target.classList.contains('linkToUserProfile')) {
-            let url = '/?id='+eventId+'&notificationId='+notificationId;
+            let url = '/?id='+eventId+'&date='+eventStart;
             passDataChangeWindowLocation('/readNotification/', {'id': notificationId}, url)
 
         }
