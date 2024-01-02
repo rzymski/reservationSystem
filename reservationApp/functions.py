@@ -149,7 +149,7 @@ def getMailData(notification):
     elif notification.availableBookingDate:
         eventData += f"Termin {notification.availableBookingDate.start} - {notification.availableBookingDate.end}."
     messageContent = subject + "\n" + eventData
-    receivers = [notification.fromUser.email]
+    receivers = [notification.toUser.email]
     return activity, messageContent, receivers
 
 
@@ -166,4 +166,4 @@ class EmailThread(threading.Thread):
         threading.Thread.__init__(self)
 
     def run(self):
-        send_mail(subject=self.subject, message=self.message, from_email='django@mailtrap.club', recipient_list=self.recipient_list)
+        send_mail(subject=self.subject, message=self.message, from_email='pracainzynierska@gmail.com', recipient_list=self.recipient_list)

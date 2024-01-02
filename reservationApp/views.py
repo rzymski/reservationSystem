@@ -388,7 +388,6 @@ def dragEvent(request):
         return JsonResponse(responseData)
 
 
-@login_required(login_url='login')
 def userProfile(request, pk):
     userOwnerOfProfile = User.objects.get(pk=pk)
     userProfileInstance = UserProfile.objects.get(user=userOwnerOfProfile)
