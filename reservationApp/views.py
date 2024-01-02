@@ -300,7 +300,7 @@ def deleteEvent(request):
                     print(f"{currentUser} usunal rezerwacje uzytkownika {reservation.bookingPerson}")
                     createNotificationAndSendMail(4, reservation.bookingPerson, currentUser, None, reservation)
                 elif int(eventTypeId) == 2:
-                    print(f"{currentUser} usunal potwierdzony termin dotyczacy {reservation.bookingPerson} i {reservation.availableBookingDate.user}")
+                    print(f"{currentUser} usunal potwierdzony termin dotyczacy {reservation.bookingPerson} i {reservation.availableBookingDate.user} wywolane bo currentUser != klienta")
                     createNotificationAndSendMail(3, reservation.bookingPerson, currentUser, reservation.availableBookingDate, reservation)
                 elif int(eventTypeId) == 3:
                     print(f"{currentUser} usunal propozycje terminu uzytkownika {reservation.bookingPerson}")
@@ -308,8 +308,8 @@ def deleteEvent(request):
                 else:
                     raise Exception(f"To nie powinno sie wydarzyc. eventType = {eventTypeId}")
             elif int(eventTypeId) == 2 and reservation.availableBookingDate.user != currentUser:
-                print(f"{currentUser} usunal potwierdzony termin dotyczacy {reservation.bookingPerson} i {reservation.availableBookingDate.user}")
-                createNotificationAndSendMail(3, reservation.bookingPerson, currentUser, reservation.availableBookingDate, reservation)
+                print(f"{currentUser} usunal potwierdzony termin dotyczacy {reservation.bookingPerson} i {reservation.availableBookingDate.user} wywolane bo currentUser != uslugodawcy")
+                createNotificationAndSendMail(3, reservation.availableBookingDate.user, currentUser, reservation.availableBookingDate, reservation)
     return JsonResponse({'status': 'success', 'message': 'Usunieto.'})
 
 

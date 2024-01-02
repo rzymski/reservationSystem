@@ -150,7 +150,6 @@
         let endDateOnly = endDateTime.toISOString().split('T')[0];
         let endTimeOnly = endDateTime.toLocaleTimeString().slice(0, 5);
         if (selectedView !== 'dayGridMonth'){
-            console.log("OK")
             {#dotyczy widoku kalendarza widoku tygodniowego/dniowego gdzie uzupelnia od razu godzine startu i konca#}
             $('#'+modalId+' [name="startTime"]').val(startTimeOnly);
             $('#'+modalId+' [name="endTime"]').val(endTimeOnly);
@@ -344,7 +343,7 @@
     function eventDrop(info) {
         if ("{{ request.user }}" === 'AnonymousUser') { return; }
         currentUserId = {{ request.user.id }}
-        console.log("Przeciągnieto event: ", info)
+        //console.log("Przeciągnieto event: ", info)
         let serviceProviderId = info.event.extendedProps.serviceProviderId;
         let eventType = info.event.extendedProps.eventType;
         let clientId = info.event.extendedProps.clientId;
@@ -367,17 +366,17 @@
         let validationFailed = true;
         if (eventType === 1 && (startDate < minStart || endDate > maxEnd)){
             console.error("Revert Przekroczono zakres mozliwej daty", info.event.start, minStart)
-            console.log(info.event.end, maxEnd)
+            //console.log(info.event.end, maxEnd)
             info.revert()
             return;
         }
-        console.log("Interval =", intervalTimeInt, typeof(intervalTimeInt))
+        //console.log("Interval =", intervalTimeInt, typeof(intervalTimeInt))
         if (eventType === 1 && (intervalTimeInt)){
             let startDateHelp = new Date(info.event.start.setMinutes(info.event.start.getMinutes() + info.event.start.getTimezoneOffset()));
             while (startDateHelp < maxEnd) {
                 startDateHelp.setMinutes(startDateHelp.getMinutes() + totalMinutes);
                 if (startDateHelp.getTime() === maxEnd.getTime()) {
-                    console.log("Petla", startDateHelp, maxEnd)
+                    //console.log("Petla", startDateHelp, maxEnd)
                     validationFailed = false;
                     break;
                 }
@@ -427,9 +426,9 @@
         return { html: `<div class="fc-title">${arg.event.title}</div>` }
     };
     function filter() {
-        console.log("DZIALA")
+        //console.log("DZIALA")
         let selectedOptions = $('#selectServiceProviders').val();
-        console.log("Selected Options:", selectedOptions);
+        //console.log("Selected Options:", selectedOptions);
         $.ajax({
             type: 'POST',
             url: '/filterServiceProviders/',
@@ -440,7 +439,7 @@
                 'selectedOptions': JSON.stringify(selectedOptions)
             },
             success: function(response) {
-                console.log(response);
+                //console.log(response);
                 if ('error' in response) {
                     console.error("Error:", response.error)
                 } else {
@@ -522,7 +521,7 @@
     // najpierw ustawiamy wartosci zmiennych textowych potrzebnych do wyswietlania w modal-u
     function setTextsInTextVariables ( {reserveOptionConfirmation, eventType, title, mainButton, question, buttonOption1, buttonOption2} ) {
         if (typeof reserveOptionConfirmation !== 'undefined' && reserveOptionConfirmation !== null) { reserveOption = reserveOptionConfirmation; }
-        if (typeof eventType !== 'undefined' && eventType !== null) { eventTypeInt = eventType; console.log("USTAWIONO = ", eventType); }
+        if (typeof eventType !== 'undefined' && eventType !== null) { eventTypeInt = eventType; }
         if (typeof title !== 'undefined' && title !== null) { titleText = title; }
         if (typeof mainButton !== 'undefined' && mainButton !== null) { buttonText = mainButton; }
         if (typeof question !== 'undefined' && question !== null) { optionQuestionText = question; }
@@ -558,7 +557,7 @@
             fillServiceProviderInformation(modal, data, modalId)
             fillClientData(modal, data, modalId)
             if (data.intervalTimeInt && data.intervalTimeInt != 0) {
-                console.log("DOSTALES =", modalId, modal)
+                //console.log("DOSTALES =", modalId, modal)
                 fillIntervalSelectsInTemplate(modal, data, modalId)
             }
             fillDateRange(modalId, data, 'dateRange'+modalId)
@@ -566,12 +565,12 @@
     }
     // wersja1 otwarcie modal
     function openModalNewVersion(modalId, datesDisplay=false, intervalDisplay=false, setTextsOption=true, fillInputsOption=true) {
-        console.log("OPEN MODAL NEW VERSION = ", modalId)
+        //console.log("OPEN MODAL NEW VERSION = ", modalId)
         let modal = document.getElementById(modalId);
         if (setTextsOption) { setTextsInTemplate(modalId, getMainEventData()) }
         if (fillInputsOption) { fillInputs(modalId) }
         if ( modalId === 'AddEditModal') {
-            console.log("Dates display =", datesDisplay)
+            //console.log("Dates display =", datesDisplay)
             if (datesDisplay) {
                 document.getElementById('endDateContainer'+modalId).classList.remove("hidden");
                 document.getElementById('startDateContainer'+modalId).classList.remove("hidden");
@@ -590,13 +589,13 @@
                 document.getElementById('endTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-2");
                 document.getElementById('startTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-2");
             }
-            console.log("intervalDisply = ", intervalDisplay)
+            //console.log("intervalDisply = ", intervalDisplay)
             if (intervalDisplay) {
-                console.log("JEST INTERWAL")
+                //console.log("JEST INTERWAL")
                 document.getElementById('intervalTimeContainer'+modalId).classList.remove("hidden");
                 document.getElementById('breakBetweenIntervalsContainer'+modalId).classList.remove("hidden");
             } else {
-                console.log("NIE MA INTERWALOW")
+                //console.log("NIE MA INTERWALOW")
                 document.getElementById('intervalTimeContainer'+modalId).classList.add("hidden");
                 document.getElementById('breakBetweenIntervalsContainer'+modalId).classList.add("hidden");
             }
@@ -606,7 +605,7 @@
     };
     // wersja2 otwarcie modal z opcjami do wyboru otwarcia innego modal-u
     function openOptionModal(modalId) {
-        console.log("openOptionNewVersion ModalID =", modalId)
+        //console.log("openOptionNewVersion ModalID =", modalId)
         let modal = document.getElementById(modalId);
         setTextsInTemplate(modalId, getMainEventData())
         modal.classList.remove('hidden');
@@ -614,7 +613,7 @@
     };
     // po wykoanniu opcji2 otwarcie wlasciwego modal-u
     function optionSelectedModal(option, modalId) {
-        console.log("Event type = ", eventTypeInt,"   OPTION SELECTED =", option, "   Reservation option = ", reserveOption)
+        //console.log("Event type = ", eventTypeInt,"   OPTION SELECTED =", option, "   Reservation option = ", reserveOption)
         let data = getMainEventData()  //= getAllDataForInputs();
         if (eventTypeInt === 0 && option === 0 && !reserveOption) {
             setTextsInTextVariables({title: 'Edytuj dostepny termin świadczenia usługi', mainButton: 'Edytuj dostepny termin'})
@@ -626,16 +625,16 @@
             openModalNewVersion('DeleteModal', false, false, true, false)
         }
         else if (eventTypeInt === 0 && option === 0 && reserveOption) {
-            console.log("REV ENTIRE");
+            //console.log("REV ENTIRE");
             passDataByAJAX('/addEditReservation/', {...getAllDataForInputs(), 'eventType':0} ,false)
         }
         else if (eventTypeInt === 0 && option === 1 && reserveOption) {
-            console.log("REV PART")
+            //console.log("REV PART")
             setTextsInTextVariables({title: 'Rezerwuj część dostępngo terminu świadczenia usług', mainButton: 'Rezerwuj'})
             openModalNewVersion('AddEditModal', true, false, true, true)
         }
         else if ((eventTypeInt === 0 || eventTypeInt === 1) && option === 2 && reserveOption) {
-            console.log("REV interval")
+            //console.log("REV interval")
             let selected = document.getElementById('availableIntervalTimesReserveIntervalOfBookingDateModal').value
             let selectedDate = new Date(selected)
             selectedDate.setMinutes(selectedDate.getMinutes() + selectedEventInfo.event.extendedProps.intervalTimeInt + selectedEventInfo.event.extendedProps.breakBetweenIntervals - selectedDate.getTimezoneOffset()) //+ selectedDate.getTimezoneOffset()
@@ -807,11 +806,12 @@
         {% comment %}setTimeout(function () { singleRefetch().then(function () {hideBadTooltips();});  }, 50);
         setTimeout(function () { singleRefetch().then(function () {hideBadTooltips();}); }, 250);
         setTimeout(function () { singleRefetch().then(function () {hideBadTooltips();}); }, 2500);{% endcomment %}
-        setTimeout(function () { singleRefetch().then(function () {hideBadTooltips();}); }, 500);
+        //setTimeout(function () { singleRefetch().then(function () {hideBadTooltips();}); }, 500);
+        singleRefetch().then(function () {hideBadTooltips();});
     };
     // wyslanie danych Ajax-em do view
     function passDataByAJAX(url, data, possibleNeedRevert=false) {
-        console.log("OSTATECZNY URL =", url, "DATA =", data)
+        //console.log("OSTATECZNY URL =", url, "DATA =", data)
         $.ajax({
             type: 'POST',
             url: url,
@@ -821,7 +821,7 @@
             data: data,
             success: function(response) {
                 if (response.status === 'success') {
-                    console.log("Refetch Pelny skuces: ", response.message)
+                    //console.log("Refetch Pelny skuces: ", response.message)
                     {#setTimeout(function () { calendar.refetchEvents(); }, 50);#}
                     {#setTimeout(function () { calendar.refetchEvents(); }, 250);#}
                     {#setTimeout(function () { calendar.refetchEvents(); }, 2500);#}
@@ -829,7 +829,7 @@
                     console.error("CZAS end = ", new Date().getSeconds(), " ", new Date().getMilliseconds())
                     return response;
                 } else if (response.status === 'successWithoutNeedToRefetch') { return response; }
-                console.error("Error na backendzie", response.message)
+                //console.error("Error na backendzie", response.message)
                 displayBackendError(response.message)
                 if (possibleNeedRevert) {
                     selectedEventInfo.revert()
@@ -883,7 +883,6 @@
     function dragEventConfirmOrReject(modalId, confirm) {
         closeModal(modalId)
         if(confirm) {
-            console.log("Potwierdzono")
             passDataByAJAX('/dragEvent/', dragEventData, true)
         } else {
             selectedEventInfo.revert()
@@ -925,7 +924,7 @@
             let startTimeString = startDate.getMinutes() < 10 ? startDate.getHours() + ":0" + startDate.getMinutes() : startDate.getHours() + ":" + startDate.getMinutes();
             let endDateString = endDate.getDate() + " " + polishMonths[endDate.getMonth()]
             let endTimeString = endDate.getMinutes() < 10 ? endDate.getHours() + ":0" + endDate.getMinutes() : endDate.getHours() + ":" + endDate.getMinutes();
-            console.log("FilldataRange Modal id = " ,modalId)
+            //console.log("FilldataRange Modal id = " ,modalId)
             if (startDate.getDate() === endDate.getDate()){
                 dateRangeElement.textContent = startDayOfTheWeek + ", " + startDateString + " " + startTimeString + " - " + endTimeString
             }else{
