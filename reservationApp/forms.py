@@ -21,31 +21,49 @@ class LoginForm(AuthenticationForm):
 
 
 class CreateUserForm(UserCreationForm):
-    # username = forms.CharField(label="", max_length=50, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nick'}))
-    email = forms.EmailField(label="", widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Adres email'}))
+    username = forms.CharField(label="", max_length=50,
+                               widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nick'}),
+                               error_messages={
+                                   'invalid': 'Podaj prawidłową nazwe użytkownika.',
+                                   'unique': 'Nazwa jest już używana przez innego użytkownika.'})
+    email = forms.EmailField(label="",
+                             widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Adres email'}),
+                             error_messages={
+                                 'invalid': 'Podaj prawidłowy email.',
+                                 'unique': 'Email jest już używany przez innego użytkownika.'})
     first_name = forms.CharField(label="", max_length=50, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Imie'}))
     last_name = forms.CharField(label="", max_length=50, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nazwisko'}))
-    # password1 = forms.CharField(label="", max_length=50, widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Hasło'}))
-    # password2 = forms.CharField(label="", max_length=50, widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Powtórz hasło'}))
+    password1 = forms.CharField(label="", max_length=50,
+                                widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Hasło'}))
+    password2 = forms.CharField(label="", max_length=50,
+                                widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Powtórz hasło'}))
 
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'password1', 'password2']
 
-    def __init__(self, *args, **kwargs):
-        super(CreateUserForm, self).__init__(*args, **kwargs)
-        self.fields['username'].widget.attrs['class'] = 'form-control'
-        self.fields['username'].widget.attrs['placeholder'] = 'Nick'
-        self.fields['username'].label = ''
-        self.fields['username'].help_text = '<span class="form-text text-gray-950 dark:text-gray-50"><small>Wymagane pole. Maksymalnie 150 znaków. Dozwolone tylko litery, cyfry i @/./+/-/_.</small></span>'
-        self.fields['password1'].widget.attrs['class'] = 'form-control'
-        self.fields['password1'].widget.attrs['placeholder'] = 'Hasło'
-        self.fields['password1'].label = ''
-        self.fields['password1'].help_text = '<ul class="form-text text-gray-950 dark:text-gray-50 small"><li>Hasło nie może być podobne do innych personalnych informacji.</li><li>Hasło musi składać się z conajmniej 8 znaków.</li><li>Hasło nie może być powszechnie używane.</li><li>Hasło nie może składać się tylko z cyfr.</li></ul>'
-        self.fields['password2'].widget.attrs['class'] = 'form-control'
-        self.fields['password2'].widget.attrs['placeholder'] = 'Potwierdź hasło'
-        self.fields['password2'].label = ''
-        self.fields['password2'].help_text = '<span class="form-text text-gray-950 dark:text-gray-50"><small>Takie same hasło jak wcześniej w celu weryfikacji.</small></span>'
+    def clean(self):
+        cleaned_data = super().clean()
+        password1 = cleaned_data.get('password1')
+        password2 = cleaned_data.get('password2')
+        if password1 and password2 and password1 != password2:
+            raise ValidationError('Podane hasła nie są identyczne.')
+        return cleaned_data
+
+    # def __init__(self, *args, **kwargs):
+    #     super(CreateUserForm, self).__init__(*args, **kwargs)
+        # self.fields['username'].widget.attrs['class'] = 'form-control'
+        # self.fields['username'].widget.attrs['placeholder'] = 'Nick'
+        # self.fields['username'].label = ''
+        # self.fields['username'].help_text = '<span class="form-text text-gray-950 dark:text-gray-50"><small>Wymagane pole. Maksymalnie 150 znaków. Dozwolone tylko litery, cyfry i @/./+/-/_.</small></span>'
+        # self.fields['password1'].widget.attrs['class'] = 'form-control'
+        # self.fields['password1'].widget.attrs['placeholder'] = 'Hasło'
+        # self.fields['password1'].label = ''
+        # self.fields['password1'].help_text = '<ul class="form-text text-gray-950 dark:text-gray-50 small"><li>Hasło nie może być podobne do innych personalnych informacji.</li><li>Hasło musi składać się z conajmniej 8 znaków.</li><li>Hasło nie może być powszechnie używane.</li><li>Hasło nie może składać się tylko z cyfr.</li></ul>'
+        # self.fields['password2'].widget.attrs['class'] = 'form-control'
+        # self.fields['password2'].widget.attrs['placeholder'] = 'Potwierdź hasło'
+        # self.fields['password2'].label = ''
+        # self.fields['password2'].help_text = '<span class="form-text text-gray-950 dark:text-gray-50"><small>Takie same hasło jak wcześniej w celu weryfikacji.</small></span>'
 
 
 class UpdateUserForm(forms.ModelForm):

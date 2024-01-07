@@ -53,17 +53,30 @@
                                 </div>
                                 {{ form.password1|add_class:customClass }}
                             </div>
-                            <div class="form-text text-red-600 dark:text-red-500 small">{{ form.password1.errors }}</div>
                             <div class="relative flex items-stretch">
                                 <div class="flex items-center whitespace-nowrap rounded-l border border-solid border-gray-300 bg-gray-50 dark:bg-gray-700 dark:text-gray-50 dark:border-gray-600 px-4">
                                     <i class="fas fa-key text-xl"></i>
                                 </div>
                                 {{ form.password2|add_class:customClass }}
                             </div>
-                            <div class="form-text text-red-600 dark:text-red-500 small">{{ form.password2.errors }}</div>
-                            <div class="w-full text-gray-50 bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-bold rounded-lg text-3xl px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
-                                <input class="btn login_btn" type="submit" value="Zarejestruj się">
+                            <div class="form-text text-red-600 dark:text-red-500 small">
+                                {% for error in form.password2.errors %}
+                                    {% if error == "The two password fields didn’t match." %}
+                                        <p>Podane hasła nie są identyczne.</p>
+                                    {% elif error == "The password is too similar to the username." %}
+                                        <p>Podane hasła jest zbyt podobne do nazwy użytkownika.</p>
+                                    {% elif error == "This password is too short. It must contain at least 8 characters." %}
+                                        <p>Podane hasło jest zbyt krótkie. Hasło musi mieć przynajmniej 8 znaków.</p>
+                                    {% elif error == "This password is too common." %}
+                                        <p>Podane hasło jest zbyt powszechne.</p>
+                                    {% else %}
+                                        <p>{{ form.password2.errors }}</p>
+                                    {% endif %}
+                                {% endfor %}
                             </div>
+                            <button type="submit" class="w-full text-gray-50 bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-bold rounded-lg text-3xl px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
+                                Zarejestruj się
+                            </button>
                             <p class="text-xl font-light text-gray-500 dark:text-gray-400">
                               Masz konto? <a href="{% url 'login' %}" class="font-medium text-primary-600 hover:underline dark:text-primary-500">Zaloguj się</a>
                             </p>

@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-rclivr%ef#7qm3+1fw-ivvdd$w3bw#l5igxh5s+r0@1&w)lyl1'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'inzynierkatestpiotrszumowski.pythonanywhere.com']
 
@@ -159,10 +159,8 @@ MEDIA_URL = '/media/'  #  Public URL at the browser
 # Email configuration
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_HOST_USER = 'piotrszumowski.aplikacje@gmail.com'  # 'piotrek.szumowski@gmail.com'
-EMAIL_HOST_PASSWORD = 'giko udhk clab kxco'  # 'eadbsraklfspednv'
+EMAIL_HOST_USER = 'piotrszumowski.aplikacje@gmail.com'
+EMAIL_HOST_PASSWORD = 'giko udhk clab kxco'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = "praca inzynierska"
-
-

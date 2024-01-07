@@ -22,7 +22,7 @@
                 <div class="grid grid-flow-row-dense grid-cols-12">
                       <div class="col-span-2 flex items-center">
                           <div>
-                              <button id="filterOpenModalButton" onclick="openModalNewVersion('filterModal', false, false, false, false)" class="my-2 ml-2 mr-1 py-2 px-5 text-3xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Filtruj</button>
+                              <button id="filterOpenModalButton" onclick="openModalNewVersion('FilterModal', false, false, false, false)" class="my-2 ml-2 mr-1 py-2 px-5 text-3xl font-bold text-gray-900 focus:outline-none bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Filtruj</button>
                           </div>
                       </div>
                       <div class="col-span-4">
@@ -41,16 +41,12 @@
                 </div>
 
                 {% include 'filter/filterServiceProviders.html' %}
-
-                {% include 'calendar/eventInformation.html' %}
                 {% include 'calendar/changeOptions.html' %}
                 {% include 'calendar/addEdit.html' %}
                 {% include 'calendar/delete.html' %}
                 {% include 'calendar/reserveIntervalOfBookingDate.html' %}
                 {% include 'calendar/confirmReservation.html' %}
                 {% include 'calendar/confirmOrRejectDrag.html' %}
-
-                {% include 'calendar/eventTooltip.html' %}
 
             </div>
             <div style="height: calc(100vh - 10rem)">

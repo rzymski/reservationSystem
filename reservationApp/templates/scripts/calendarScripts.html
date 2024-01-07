@@ -434,8 +434,9 @@
     };
     function filter() {
         //console.log("DZIALA")
-        let selectedOptions = $('#selectServiceProviders').val();
-        //console.log("Selected Options:", selectedOptions);
+        let selectedServiceProviders = $('#selectServiceProvidersFilterModal').val();
+        let selectedClients = $('#selectClientsFilterModal').val();
+        console.log("Wybrani uslugodawcy: ", selectedServiceProviders, " wybrani klienci: ", selectedClients);
         $.ajax({
             type: 'POST',
             url: '/filterServiceProviders/',
@@ -443,7 +444,8 @@
                 'X-CSRFToken': csrf_token
             },
             data: {
-                'selectedOptions': JSON.stringify(selectedOptions)
+                'selectedServiceProviders': JSON.stringify(selectedServiceProviders),
+                'selectedClients': JSON.stringify(selectedClients),
             },
             success: function(response) {
                 //console.log(response);
@@ -464,7 +466,7 @@
                 displayBackendError(error.responseText)
             }
         });
-        closeModal('filterModal')
+        closeModal('FilterModal')
     };
     function getDateDetails(date, dateSeparator = '-' , dateOrder = 'YMD'){
         //console.log("Data =", date)

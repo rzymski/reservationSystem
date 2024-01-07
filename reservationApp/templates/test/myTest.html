@@ -1,14 +1,19 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
     <head>
         {% load static %}
         <link rel="stylesheet" type="text/css" href="{% static 'myCSS/calendar.css' %}">
     </head>
-
-    <body class="bg-yellow-600">
-        <div class="text-center">
+    <body>
+        <div class="bg-gray-400">
+            <select id="select" data-te-select-init multiple data-te-select-filter="true" data-te-select-placeholder="Wszyscy klienci" data-te-class-notch-leading-normal="hidden" data-te-class-notch-middle="hidden"> {% comment %}data-te-class-select-input="bg-red-400"{% endcomment %}
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+        </div>
+        <div class="text-center bg-gray-400">
             Moja strona
         </div>
         <div class="text-right">

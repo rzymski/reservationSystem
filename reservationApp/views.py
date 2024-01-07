@@ -11,32 +11,35 @@ from django.http import JsonResponse
 from datetime import datetime, timedelta
 from icecream import ic
 import json
+from django.db.models import Q
 
-from django.http import HttpResponse
-from django.core.mail import send_mail
-def simpleMail(request):
-    send_mail(subject='Temat maila',
-              message='Tresc maila ktory wyslalem',
-              from_email='django@mailtrap.club',
-              recipient_list=['piotrek.szumowski@gmail.com'])
-    return HttpResponse('Message sent')
 
 def index(request):
     serviceProviders = User.objects.filter(availablebookingdate__isnull=False, availablebookingdate__isDeleted=False).distinct()
     serviceProvidersWithImages = []
     for serviceProvider in serviceProviders:
         userProfileObject = UserProfile.objects.get(user=serviceProvider)
-        profileImageUrl = userProfileObject.profileImage.url if userProfile and userProfileObject.profileImage else None
+        profileImageUrl = userProfileObject.profileImage.url if userProfileObject and userProfileObject.profileImage else None
         serviceProvidersWithImages.append((serviceProvider, profileImageUrl))
+
+    clientGroup = Group.objects.get(name='client')
+    clients = User.objects.filter(groups=clientGroup)
+    clientsWithImages = []
+    for client in clients:
+        clientProfile = UserProfile.objects.get(user=client)
+        clientProfileUrl = clientProfile.profileImage.url if clientProfile and clientProfile.profileImage else None
+        clientsWithImages.append((client, clientProfileUrl))
+
     context = {
         'serviceProvidersWithImages': serviceProvidersWithImages,
+        'clientsWithImages': clientsWithImages,
         'rangeFrom15to180increasesBy15': geRangeTimeStrings(15, 180, 15),
     }
     return render(request, 'calendar/calendar.html', context)
 
 
-def allReservationsWithoutServiceProvider(request):
-    reservations = Reservation.objects.filter(availableBookingDate__isnull=True, isDeleted=False)
+def allReservationsWithoutServiceProvider(request, allClients=True, selectedClientsIds=None):
+    reservations = Reservation.objects.filter(availableBookingDate__isnull=True, isDeleted=False) if allClients else Reservation.objects.filter(availableBookingDate__isnull=True, isDeleted=False, bookingPerson__id__in=selectedClientsIds)
     out = []
     for reservation in reservations:
         out.append({
@@ -62,8 +65,8 @@ def allReservationsWithoutServiceProvider(request):
     return JsonResponse(out, safe=False)
 
 
-def allUnconfirmedReservations(request, allServiceProviders=True, selectedIds=None):
-    reservations = Reservation.objects.filter(isAccepted=False, availableBookingDate__isnull=False, availableBookingDate__isDeleted=False, isDeleted=False) if allServiceProviders else Reservation.objects.filter(isAccepted=False, availableBookingDate__isnull=False, availableBookingDate__isDeleted=False, isDeleted=False, availableBookingDate__user__id__in=selectedIds)
+def allUnconfirmedReservations(request, allClients=True, selectedClientsIds=None):
+    reservations = Reservation.objects.filter(isAccepted=False, availableBookingDate__isnull=False, availableBookingDate__isDeleted=False, isDeleted=False) if allClients else Reservation.objects.filter(isAccepted=False, availableBookingDate__isnull=False, availableBookingDate__isDeleted=False, isDeleted=False, bookingPerson__id__in=selectedClientsIds)
     out = []
     for reservation in reservations:
         out.append({
@@ -89,8 +92,14 @@ def allUnconfirmedReservations(request, allServiceProviders=True, selectedIds=No
     return JsonResponse(out, safe=False)
 
 
-def allConfirmedReservations(request, allServiceProviders=True, selectedIds=None):
-    reservations = Reservation.objects.filter(isAccepted=True, isDeleted=False) if allServiceProviders else Reservation.objects.filter(isAccepted=True, isDeleted=False, availableBookingDate__user__id__in=selectedIds)
+def allConfirmedReservations(request, allUsers=True, selectedServiceProvidersIds=None, selectedClientsIds=None):
+    if allUsers:
+        reservations = Reservation.objects.filter(isAccepted=True, isDeleted=False)
+    else:
+        reservations = Reservation.objects.filter(
+            Q(isAccepted=True, isDeleted=False, availableBookingDate__user__id__in=selectedServiceProvidersIds) |
+            Q(isAccepted=True, isDeleted=False, bookingPerson__id__in=selectedClientsIds)
+        )
     out = []
     for reservation in reservations:
         out.append({
@@ -116,8 +125,8 @@ def allConfirmedReservations(request, allServiceProviders=True, selectedIds=None
     return JsonResponse(out, safe=False)
 
 
-def allAvailableBookingDates(request, allServiceProviders=True, selectedIds=None):
-    availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False) if allServiceProviders else AvailableBookingDate.objects.filter(isDeleted=False, user__id__in=selectedIds)
+def allAvailableBookingDates(request, allServiceProviders=True, selectedServiceProvidersIds=None):
+    availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False) if allServiceProviders else AvailableBookingDate.objects.filter(isDeleted=False, user__id__in=selectedServiceProvidersIds)
     out = []
     for availableBookingDate in availableBookingDates:
         freeTimesInAvailableBookingDate = getAvailableTimeRanges(availableBookingDate)
@@ -148,23 +157,27 @@ def allAvailableBookingDates(request, allServiceProviders=True, selectedIds=None
 
 def filterServiceProviders(request):
     if request.method == 'POST':
-        selectedOptionsJson = request.POST.get('selectedOptions')
-        selectedOptions = json.loads(selectedOptionsJson)
-        ic(selectedOptions)
-        selectedIds = [option for option in selectedOptions]
-        if len(selectedIds) == 0:
-            selectedIds = [user.id for user in User.objects.filter(availablebookingdate__isnull=False).distinct()]
-            ic(selectedIds)
-            # return JsonResponse({'error': 'No selected options'})
-        allAvailableBookingDatesJSON = allAvailableBookingDates(request, allServiceProviders=False, selectedIds=selectedIds)
-        allUnconfirmedReservationsJSON = allUnconfirmedReservations(request, allServiceProviders=False, selectedIds=selectedIds)
-        allConfirmedReservationsJSON = allConfirmedReservations(request, allServiceProviders=False, selectedIds=selectedIds)
-        # allReservationsWithoutServiceProviderJSON = allReservationsWithoutServiceProvider(request, allServiceProviders=False, selectedIds=selectedIds)
+        ic(request.POST)
+        selectedServiceProvidersJSON = request.POST.get('selectedServiceProviders')
+        selectedServiceProviders = json.loads(selectedServiceProvidersJSON)
+        selectedClientsJSON = request.POST.get('selectedClients')
+        selectedClients = json.loads(selectedClientsJSON)
+        selectedServiceProvidersIds = [option for option in selectedServiceProviders]
+        if len(selectedServiceProvidersIds) == 0:
+            selectedServiceProvidersIds = User.objects.values_list('id', flat=True)
+        selectedClientsIds = [option for option in selectedClients]
+        if len(selectedClientsIds) == 0:
+            selectedClientsIds = User.objects.values_list('id', flat=True)
+        ic(selectedServiceProvidersIds, selectedClientsIds)
+        allAvailableBookingDatesJSON = allAvailableBookingDates(request, allServiceProviders=False, selectedServiceProvidersIds=selectedServiceProvidersIds)
+        allUnconfirmedReservationsJSON = allUnconfirmedReservations(request, allClients=False, selectedClientsIds=selectedClientsIds)
+        allConfirmedReservationsJSON = allConfirmedReservations(request, allUsers=False, selectedServiceProvidersIds=selectedServiceProvidersIds, selectedClientsIds=selectedClientsIds)
+        allReservationsWithoutServiceProviderJSON = allReservationsWithoutServiceProvider(request, allClients=False, selectedClientsIds=selectedClientsIds)
         combinedResponse = {
             'availableDates': json.loads(allAvailableBookingDatesJSON.content),
             'unconfirmedReservations': json.loads(allUnconfirmedReservationsJSON.content),
             'confirmedReservations': json.loads(allConfirmedReservationsJSON.content),
-            # 'reservationsWithoutServiceProvider': json.loads(allReservationsWithoutServiceProviderJSON.content),
+            'reservationsWithoutServiceProvider': json.loads(allReservationsWithoutServiceProviderJSON.content),
         }
         return JsonResponse(combinedResponse, safe=False)
 
@@ -388,6 +401,18 @@ def dragEvent(request):
         return JsonResponse(responseData)
 
 
+def readNotification(request):
+    ic("Przeczytano powiadomienie")
+    if request.method == 'POST':
+        ic(request.POST)
+        responseData = {'status': 'successWithoutNeedToRefetch', 'message': 'Przeczytano powiadomienie.'}
+        notificationId = request.POST.get('id')
+        notification = Notification.objects.get(pk=int(notificationId))
+        notification.hasBeenSeen = True
+        notification.save()
+        return JsonResponse(responseData)
+
+
 def userProfile(request, pk):
     userOwnerOfProfile = User.objects.get(pk=pk)
     userProfileInstance = UserProfile.objects.get(user=userOwnerOfProfile)
@@ -420,13 +445,11 @@ def registerUser(request):
             user = form.save()
             clientGroup = Group.objects.get(name='client')
             user.groups.add(clientGroup)
-            username = form.cleaned_data.get('username')
-            messages.success(request, 'Konto zostało utworzone dla: ' + username)
-            # return redirect('login')
             username = form.cleaned_data['username']
             password = form.cleaned_data['password1']
             user = authenticate(username=username, password=password)
             login(request, user)
+            messages.success(request, 'Konto zostało utworzone dla: ' + username)
             return redirect('index')
     return render(request, 'accounts/register.html', {'form': form})
 
@@ -468,18 +491,6 @@ def deleteNotification(request):
         notificationId = request.POST.get('id')
         notification = Notification.objects.get(pk=int(notificationId))
         notification.isDeleted = True
-        notification.save()
-        return JsonResponse(responseData)
-
-
-def readNotification(request):
-    ic("Przeczytano powiadomienie")
-    if request.method == 'POST':
-        ic(request.POST)
-        responseData = {'status': 'successWithoutNeedToRefetch', 'message': 'Przeczytano powiadomienie.'}
-        notificationId = request.POST.get('id')
-        notification = Notification.objects.get(pk=int(notificationId))
-        notification.hasBeenSeen = True
         notification.save()
         return JsonResponse(responseData)
 
