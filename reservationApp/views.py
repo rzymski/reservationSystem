@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from icecream import ic
 import json
 from django.db.models import Q
+from django.db.models import Min, Max
 
 
 def index(request):
@@ -411,6 +412,60 @@ def readNotification(request):
         notification.hasBeenSeen = True
         notification.save()
         return JsonResponse(responseData)
+
+
+@login_required(login_url='login')
+def eventTable(request):
+    availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False)
+    firstStartDate = availableBookingDates.aggregate(Min('start'))['start__min']
+    firstStartDate = f"{firstStartDate.day}/{firstStartDate.month}/{firstStartDate.year}"
+    lastEndDate = availableBookingDates.aggregate(Max('end'))['end__max']
+    lastEndDate = f"{lastEndDate.day}/{lastEndDate.month}/{lastEndDate.year}"
+    reservations = Reservation.objects.filter(isDeleted=False)
+    context = {'availableBookingDates': availableBookingDates,
+               'firstDate': firstStartDate,
+               'lastDate': lastEndDate,
+               }
+    return render(request, 'eventTable/eventTable.html', context)
+
+# class Event:
+#     def __init__(self, eventId, eventType, startDate, endDate, serviceProvider=None, client=None):
+#         self.eventId = eventId
+#         self.eventType = eventType
+#         self.startDate = startDate
+#         self.endDate = endDate
+#         self.serviceProvider = serviceProvider
+#         self.client = client
+#
+#     def __str__(self):
+#         if self.eventType == 0:
+#             return f"Dostępny termin z id={self.eventId} od {self.startDate} do {self.endDate}. Usługodawca={self.serviceProvider.name} {self.serviceProvider.surname}"
+#         elif self.eventType == 1:
+#             return f"Propozycja rezerwacji z id={self.eventId} od {self.startDate} do {self.endDate}. Usługodawca={self.serviceProvider.name} {self.serviceProvider.surname}. Client={self.client.name} {self.client.surname}"
+#         elif self.eventType == 2:
+#             return f"Potwierdzona rezerwacja z id={self.eventId} od {self.startDate} do {self.endDate}. Usługodawca={self.serviceProvider.name} {self.serviceProvider.surname}. Client={self.client.name} {self.client.surname}"
+#         elif self.eventType == 3:
+#             return f"Propozycja terminu z id={self.eventId} od {self.startDate} do {self.endDate}. Client={self.client.name} {self.client.surname}"
+#         else:
+#             return f"Dziwne wydarzenie Id={self.eventId} od {self.startDate} do {self.endDate}."
+
+
+# @login_required(login_url='login')
+# def eventTable(request):
+#     events = []
+#     availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False)
+#     for availableBookingDate in availableBookingDates:
+#         event = Event(
+#             eventId=availableBookingDate.id,
+#             eventType=0,
+#             startDate=availableBookingDate.start,
+#             endDate=availableBookingDate.end,
+#             serviceProvider=availableBookingDate.user)
+#         events.append(event)
+#     ic(events)
+#     reservations = Reservation.objects.filter(isDeleted=False)
+#     context = {'events': events}
+#     return render(request, 'eventTable/eventTable.html', context)
 
 
 def userProfile(request, pk):

@@ -1,0 +1,96 @@
+<script>
+    $(document).ready(function() {
+       {% comment %}$('#eventsTable thead tr')
+           .clone(true)
+           .addClass('filters')
+           .appendTo('#eventsTable thead');{% endcomment %}
+        let table = $('#eventsTable').DataTable({
+            paging: true, //stronicowanie
+            pageLength: 50,
+            lengthChange: true, //change number of elements in page
+            autoWidth: true,
+            searching: true,
+            bInfo: true, //info about number of elements in page
+            bSort: true,
+            orderCellsTop: false,
+
+            fixedHeader: true,
+            responsive: true,
+            dom: 'tip',
+            //order: [[4, 'asc']],
+            columnDefs: [
+                { type: 'moment', targets: [0, 3] },
+                { type: 'num', targets: [5] },
+                { targets: [1, 2], orderable: false },
+            ],
+            language: {
+                lengthMenu: "Pokaż _MENU_ wydarzeń",
+                search: "Wyszukiwarka: ",
+                paginate: {
+                    previous: "Poprzednia ",
+                    next: "Następna"
+                },
+                info: "Pokazuje _START_ do _END_ z _TOTAL_",
+                infoFiltered: " (wyfiltrowano z _MAX_ wszystkich rekordów)"
+            },
+
+           {% comment %}scrollY: '75vh',
+           scrollCollapse: true, //zeby nie robilo durnych paskow przy zmniejszeniu tabeli przez filtrowanie
+           scroller: true,{% endcomment %}
+
+           {#order: [[3, 'asc']],#}
+
+
+           {% comment %}initComplete: function() {
+               var api = this.api();
+               api.columns([0,1,2,3,4,5,6,7,8])
+                   .eq(0)
+                   .each(function(colIdx) {
+                        var cell = $('.filters th').eq(
+                            $(api.column(colIdx).header()).index()
+                        );
+                        var title = $(cell).text();
+                        $(cell).html('<input type="text" placeholder="' + title + '"/>');
+                        $(
+                            'input',
+                            $('.filters th').eq($(api.column(colIdx).header()).index())
+                        )
+                            .off('keyup change')
+                            .on('keyup change', function(e) {
+                                e.stopPropagation();
+                                $(this).attr('title', $(this).val());
+                                var regexr = '({search})';
+                                var curserPosition = this.selectionStart;
+                                api
+                                    .column(colIdx)
+                                    .search(
+                                        this.value != ''
+                                            ? regexr.replace('{search}', '(((' + this.value + ')))')
+                                            : '',
+                                        this.value != '',
+                                        this.value == ''
+                                    )
+                                .draw();
+
+                            $(this)
+                                .focus()[0]
+                                .setSelectionRange(curserPosition, curserPosition);
+                            });
+                    });
+           },{% endcomment %}
+        });
+        let newSearch = $("#table-search");
+        newSearch.keyup(function(){
+            table.search($(this).val()).draw();
+        });
+
+        let firstDate = '{{ firstDate }}';
+        const lastDate = '{{ lastDate }}';
+        console.log("F = ", firstDate, " L = ", lastDate)
+        {#let dateRangeStart = document.getElementById('dateRangeStart');#}
+        {#let dateRangeEnd = document.getElementById('dateRangeEnd');#}
+        {#dateRangeStart.value = firstDate;#}
+        {#dateRangeEnd.value = lastDate#}
+
+    });
+</script>

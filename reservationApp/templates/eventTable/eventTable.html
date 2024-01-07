@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+{% block content %}
+    <div>
+        <head>
+            <title>Lista wydarzeń</title>
+            {% comment %}Datatables{% endcomment %}
+            <link href="https://cdn.datatables.net/v/dt/jq-3.7.0/jszip-3.10.1/dt-1.13.8/b-2.4.2/b-colvis-2.4.2/b-html5-2.4.2/b-print-2.4.2/cr-1.7.0/date-1.5.1/fc-4.3.0/fh-3.4.0/kt-2.11.0/r-2.5.0/rg-1.4.1/rr-1.4.1/sc-2.3.0/sb-1.6.0/sp-2.2.0/sl-1.7.0/datatables.min.css" rel="stylesheet">
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+            <script src="https://cdn.datatables.net/v/dt/jq-3.7.0/jszip-3.10.1/dt-1.13.8/b-2.4.2/b-colvis-2.4.2/b-html5-2.4.2/b-print-2.4.2/cr-1.7.0/date-1.5.1/fc-4.3.0/fh-3.4.0/kt-2.11.0/r-2.5.0/rg-1.4.1/rr-1.4.1/sc-2.3.0/sb-1.6.0/sp-2.2.0/sl-1.7.0/datatables.min.js"></script>
+            {% comment %}sortowanie tabeli po datach potrzebne{% endcomment %}
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+            <script src="https://cdn.datatables.net/plug-ins/1.11.5/sorting/datetime-moment.js"></script>
+            {% comment %}flowbite elementy{% endcomment %}
+            <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.css" rel="stylesheet" />
+            {% load static %}
+            <link rel="stylesheet" type="text/css" href="{% static 'myCSS/calendar.css' %}">
+            <script src="{% static 'reservationApp/js/validation.js' %}"></script>
+        </head>
+        <body>
+            <div class="flex flex-column sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4 mx-10">
+                <div>
+                    <button id="dateRangeButton" data-dropdown-toggle="dateRangeDropdown" data-dropdown-placement="right-start" data-dropdown-offset-distance="0"  data-dropdown-ignore-click-outside-class="datepicker" type="button" class="inline-flex items-center text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-200 font-bold rounded-lg text-2xl px-5 py-3.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600" type="button">
+                        <i class="fa-solid fa-clock"></i>
+                        <span class="mx-2"> Zakres wydarzeń </span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <!-- Dropdown menu -->
+                    <div id="dateRangeDropdown" class="absolute z-10 hidden bg-white divide-y divide-gray-100 rounded-lg shadow w-80 lg:w-96 dark:bg-gray-700 dark:divide-gray-600">
+                        <div class="p-2.5" aria-labelledby="dateRangeButton">
+                            <div id="myDateRangePickerId" date-rangepicker datepicker-autohide datepicker-format="d/m/yyyy" class="flex items-center">
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                        <i class="fa-solid fa-calendar-minus"></i>
+                                    </div>
+                                    <input id="dateRangeStart" name="start" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Początkowa data">
+                                </div>
+                                <span class="mx-2">do</span>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                                        <i class="fa-solid fa-calendar-minus"></i>
+                                    </div>
+                                    <input id="dateRangeEnd" name="end" type="text" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Końcowa data">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 rtl:inset-r-0 rtl:right-0 flex items-center ps-3 pointer-events-none">
+                        <svg class="w-5 h-5 text-gray-500 dark:text-gray-400" aria-hidden="true" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path></svg>
+                    </div>
+                    <input type="text" id="table-search" class="block p-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Wyszukiwarka wydarzeń">
+                </div>
+            </div>
+
+
+            <div class="tableContainer m-10">
+                <table id="eventsTable" class="display cell-border nowrap">
+                    <thead class="table-success">
+                        <tr>
+                            <th colspan="2">Data rozpoczęcia</th>
+                            <th colspan="2">Data zakończenia</th>
+                            <th rowspan="2">Usługodawca</th>
+                            <th rowspan="2">Czas wizyty</th>
+                            <th rowspan="2">Dostępne operacje</th>
+                        </tr>
+                        <tr>
+                            <th>Data</th>
+                            <th>Godzina</th>
+                            <th>Godzina</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for event in availableBookingDates %}
+                            <tr class="clickable-row" onclick="goToEventInCalendar('{{ event.id }}', '{{ event.start|date:'Y-m-d\TH:i:s' }}', event)">
+                                <td data-order="{{ event.start|date:'Y-m-d\TH:i:s' }}">{{ event.start|myDateFormat }}</td>
+                                <td data-order="{{ event.start }}">{{ event.start|myTimeFormat}}</td>
+                                <td data-order="{{ event.end }}">{{ event.end|myTimeFormat }}</td>
+                                <td data-order="{{ event.end|date:'Y-m-d\TH:i:s' }}">{{ event.end|myDateFormat }}</td>
+                                <td>{{ event.user.first_name }} {{ event.user.last_name }}</td>
+                                {% if event.intervalTime %}
+                                    <td data-order="{{ event.intervalTime }}">{{ event.intervalTime }} minut</td>
+                                {% else %}
+                                    <td data-order="0"></td>
+                                {% endif %}
+                                <td></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/datepicker.min.js"></script>
+        </body>
+    </div>
+    {% include 'scripts/eventTableScripts.html' %}
+    <script>
+        function goToEventInCalendar(eventId, eventStart, e){
+            let url = '/?id='+eventId+'&date='+eventStart;
+            window.location.href = url;
+        }
+    </script>
+{% endblock %}

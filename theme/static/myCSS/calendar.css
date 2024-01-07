@@ -78,6 +78,25 @@
 }
 
 
+.tableContainer th {
+    border-top: 1px solid #dddddd;
+    /*border-bottom: 1px solid #dddddd;*/
+    border-right: 1px solid #dddddd;
+}
+.tableContainer th:first-child {
+  border-left: 1px solid #dddddd;
+}
+
+
+.dark .tableContainer th {
+    border-top: 1px solid rgb(64, 67, 70);
+    /*border-bottom: 1px solid rgb(64, 67, 70);*/
+    border-right: 1px solid rgb(64, 67, 70);
+}
+.dark .tableContainer th:first-child {
+  border-left: 1px solid rgb(64, 67, 70);
+}
+
 /*.popper,
 .tooltip {
     position: absolute;
