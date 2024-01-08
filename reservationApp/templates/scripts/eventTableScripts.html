@@ -1,18 +1,16 @@
 <script>
     function goToEventInCalendar(eventId, eventStart, e){
+        console.log("Go to event")
         let url = '/?id='+eventId+'&date='+eventStart;
         window.location.href = url;
     }
     let table;
     $(document).ready(function() {
-       {% comment %}$('#eventsTable thead tr')
-           .clone(true)
-           .addClass('filters')
-           .appendTo('#eventsTable thead');{% endcomment %}
         table = $('#eventsTable').DataTable({
             paging: true, //stronicowanie
             pageLength: 20,
             lengthChange: true, //change number of elements in page
+            lengthMenu: [[10, 20, 25, 50, 100, -1], [10, 20, 25, 50, 100, 'Wszystkie']],
             autoWidth: true,
             searching: true,
             bInfo: true, //info about number of elements in page
@@ -21,7 +19,7 @@
 
             fixedHeader: true,
             responsive: true,
-            dom: 'tip',
+            dom: 'ltip',
             //order: [[4, 'asc']],
             columnDefs: [
                 { type: 'moment', targets: [0, 3] },
@@ -38,50 +36,6 @@
                 info: "Pokazuje _START_ do _END_ z _TOTAL_",
                 infoFiltered: " (wyfiltrowano z _MAX_ wszystkich rekordów)"
             },
-           {% comment %}scrollY: '75vh',
-           scrollCollapse: true, //zeby nie robilo durnych paskow przy zmniejszeniu tabeli przez filtrowanie
-           scroller: true,{% endcomment %}
-
-           {#order: [[3, 'asc']],#}
-
-
-           {% comment %}initComplete: function() {
-               var api = this.api();
-               api.columns([0,1,2,3,4,5,6,7,8])
-                   .eq(0)
-                   .each(function(colIdx) {
-                        var cell = $('.filters th').eq(
-                            $(api.column(colIdx).header()).index()
-                        );
-                        var title = $(cell).text();
-                        $(cell).html('<input type="text" placeholder="' + title + '"/>');
-                        $(
-                            'input',
-                            $('.filters th').eq($(api.column(colIdx).header()).index())
-                        )
-                            .off('keyup change')
-                            .on('keyup change', function(e) {
-                                e.stopPropagation();
-                                $(this).attr('title', $(this).val());
-                                var regexr = '({search})';
-                                var curserPosition = this.selectionStart;
-                                api
-                                    .column(colIdx)
-                                    .search(
-                                        this.value != ''
-                                            ? regexr.replace('{search}', '(((' + this.value + ')))')
-                                            : '',
-                                        this.value != '',
-                                        this.value == ''
-                                    )
-                                .draw();
-
-                            $(this)
-                                .focus()[0]
-                                .setSelectionRange(curserPosition, curserPosition);
-                            });
-                    });
-           },{% endcomment %}
         });
         let newSearch = $("#table-search");
         newSearch.keyup(function(){
@@ -130,9 +84,12 @@
         console.log("Target = ", startDate, targetDate, endDate)
         return startDate <= targetDate && targetDate <= endDate;
     };
-
     function parseDateString(dateString) {
         const [day, month, year] = dateString.split('/');
         return new Date(year, month, day);
+    };
+    function toggleTable(tableContainer) {
+        let table = document.getElementById(tableContainer);
+        table.style.display = (table.style.display === 'none') ? '' : 'none';
     }
 </script>

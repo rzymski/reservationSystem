@@ -64,8 +64,16 @@
                 </div>
             </div>
 
-
-            <div class="tableContainer m-10">
+{#            <div class="flex justify-end">#}
+            <div class="absolute z-10 right-0">
+                <button id="availableBookingDateToggleTableButton" onclick="toggleTable('availableBookingDateTableContainer')" type="button" class="py-2.5 px-2.5 text-base font-bold text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                    Ukryj tabelę z dostępnymi terminami
+                </button>
+            </div>
+            <div class="flex justify-center font-extrabold text-4xl">
+                Dostępne terminy
+            </div>
+            <div id="availableBookingDateTableContainer" class="tableContainer mx-10">
                 <table id="eventsTable" class="display cell-border nowrap">
                     <thead class="table-success">
                         <tr>
@@ -89,7 +97,7 @@
                                 <td data-order="{{ event.start }}">{{ event.start|myTimeFormat}}</td>
                                 <td data-order="{{ event.end }}">{{ event.end|myTimeFormat }}</td>
                                 <td data-order="{{ event.end|date:'Y-m-d\TH:i:s' }}">{{ event.end|myDateFormat }}</td>
-                                <td>{{ event.user.first_name }} {{ event.user.last_name }}</td>
+                                <td><a href="/userProfile/{{ event.user.id }}/" class="hover:text-green-500">{{ event.user.first_name }} {{ event.user.last_name }}</a></td>
                                 {% if event.intervalTime %}
                                     <td data-order="{{ event.intervalTime }}">{{ event.intervalTime }} minut</td>
                                 {% else %}
@@ -101,6 +109,18 @@
                     </tbody>
                 </table>
             </div>
+            <div class="my-10">
+
+            </div>
+            <div class="absolute z-10 right-0">
+                <button id="availableBookingDateToggleTableButton" onclick="toggleTable('availableBookingDateTableContainer')" type="button" class="py-2.5 px-2.5 text-base font-bold text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                    Ukryj tabelę z zatwierdzonymi rezerwacjami
+                </button>
+            </div>
+            <div class="flex justify-center font-extrabold text-4xl">
+                Zatwierdzone rezerwacje
+            </div>
+
         <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/datepicker.min.js"></script>
         </body>
