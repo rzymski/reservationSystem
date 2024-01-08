@@ -1,12 +1,17 @@
 <script>
+    function goToEventInCalendar(eventId, eventStart, e){
+        let url = '/?id='+eventId+'&date='+eventStart;
+        window.location.href = url;
+    }
+    let table;
     $(document).ready(function() {
        {% comment %}$('#eventsTable thead tr')
            .clone(true)
            .addClass('filters')
            .appendTo('#eventsTable thead');{% endcomment %}
-        let table = $('#eventsTable').DataTable({
+        table = $('#eventsTable').DataTable({
             paging: true, //stronicowanie
-            pageLength: 50,
+            pageLength: 20,
             lengthChange: true, //change number of elements in page
             autoWidth: true,
             searching: true,
@@ -33,7 +38,6 @@
                 info: "Pokazuje _START_ do _END_ z _TOTAL_",
                 infoFiltered: " (wyfiltrowano z _MAX_ wszystkich rekordów)"
             },
-
            {% comment %}scrollY: '75vh',
            scrollCollapse: true, //zeby nie robilo durnych paskow przy zmniejszeniu tabeli przez filtrowanie
            scroller: true,{% endcomment %}
@@ -83,14 +87,52 @@
         newSearch.keyup(function(){
             table.search($(this).val()).draw();
         });
-
-        let firstDate = '{{ firstDate }}';
-        const lastDate = '{{ lastDate }}';
-        console.log("F = ", firstDate, " L = ", lastDate)
-        {#let dateRangeStart = document.getElementById('dateRangeStart');#}
-        {#let dateRangeEnd = document.getElementById('dateRangeEnd');#}
-        {#dateRangeStart.value = firstDate;#}
-        {#dateRangeEnd.value = lastDate#}
-
     });
+    let allRows = true;
+    function filterTable(){
+        allRows = false;
+        table.draw()
+    };
+    function cancelFilterTable(){
+        allRows = true;
+        table.draw()
+    };
+
+    DataTable.ext.search.push(function (settings, data, dataIndex) {
+        if (allRows){
+            console.log("ALL ROWS SET TRUE")
+            return  true;
+        }
+        //console.log(settings, data, dataIndex)
+        let dateRangeStart = document.getElementById('dateRangeStart');
+        let dateRangeEnd = document.getElementById('dateRangeEnd');
+        let startValue = dateRangeStart.value;
+        let endValue = dateRangeEnd.value;
+        if (startValue === "" || endValue === ""){
+            console.log("Inputs don't have values")
+            return true;
+        }
+        let startDate = data[0];
+        //console.log(startValue, endValue, startDate)
+        return isDateInRange(startValue, endValue, data[0]);
+    });
+
+    function isDateInRange(startDateStr, endDateStr, targetDateStr) {
+        let startDate = parseDateString(startDateStr);
+        let endDate = parseDateString(endDateStr);
+        //const monthMapping = {'Styczeń': '/1/','Luty': '/2/','Marzec': '/3/','Kwiecień': '/4/','Maj': '/5/','Czerwiec': '/6/','Lipiec': '/7/','Sierpień': '/8/','Wrzesień': '/9/','Październik': '/10/','Listopad': '/11/','Grudzień': '/12/'};
+        const monthMapping = {' Styczeń ': '/1/',' Luty ': '/2/',' Marzec ': '/3/',' Kwiecień ': '/4/',' Maj ': '/5/',' Czerwiec ': '/6/',' Lipiec ': '/7/',' Sierpień ': '/8/',' Wrzesień ': '/9/',' Październik ': '/10/',' Listopad ': '/11/',' Grudzień ': '/12/'};
+        for (const [monthName, monthValue] of Object.entries(monthMapping)) {
+            targetDateStr = targetDateStr.replace(monthName, monthValue);
+        }
+        console.log(targetDateStr)
+        let targetDate = parseDateString(targetDateStr);
+        console.log("Target = ", startDate, targetDate, endDate)
+        return startDate <= targetDate && targetDate <= endDate;
+    };
+
+    function parseDateString(dateString) {
+        const [day, month, year] = dateString.split('/');
+        return new Date(year, month, day);
+    }
 </script>

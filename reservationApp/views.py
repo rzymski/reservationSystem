@@ -417,14 +417,8 @@ def readNotification(request):
 @login_required(login_url='login')
 def eventTable(request):
     availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False)
-    firstStartDate = availableBookingDates.aggregate(Min('start'))['start__min']
-    firstStartDate = f"{firstStartDate.day}/{firstStartDate.month}/{firstStartDate.year}"
-    lastEndDate = availableBookingDates.aggregate(Max('end'))['end__max']
-    lastEndDate = f"{lastEndDate.day}/{lastEndDate.month}/{lastEndDate.year}"
     reservations = Reservation.objects.filter(isDeleted=False)
     context = {'availableBookingDates': availableBookingDates,
-               'firstDate': firstStartDate,
-               'lastDate': lastEndDate,
                }
     return render(request, 'eventTable/eventTable.html', context)
 
