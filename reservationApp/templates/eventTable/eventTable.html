@@ -81,7 +81,7 @@
                             <th colspan="2">Data zakończenia</th>
                             <th rowspan="2">Usługodawca</th>
                             <th rowspan="2">Czas wizyty</th>
-                            <th rowspan="2">Dostępne operacje</th>
+                            {% comment %}<th rowspan="2">Dostępne operacje</th>{% endcomment %}
                         </tr>
                         <tr>
                             <th>Data</th>
@@ -103,15 +103,22 @@
                                 {% else %}
                                     <td data-order="0"></td>
                                 {% endif %}
-                                <td></td>
+                                {% comment %}<td class="text-center" onclick="stopPropagationFunction(event)">
+                                    <button onclick="openModalFromTable(0, 'AddEditModal')" type="button" class="text-base px-2 py-1 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-lg dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                                        <i class="fa-solid fa-pen-to-square"></i>
+                                    </button>
+                                    <button onclick="openModalFromTable(1, 'DeleteModal')" type="button" class="text-base px-2 py-1 focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 rounded-lg dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+                                        <i class="fa-solid fa-trash-can"></i>
+                                    </button>
+                                </td>{% endcomment %}
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-            <div class="my-10">
 
-            </div>
+            <div class="my-10"></div>
+
             <div class="absolute z-10 right-0">
                 <button id="availableBookingDateToggleTableButton" onclick="toggleTable('availableBookingDateTableContainer')" type="button" class="py-2.5 px-2.5 text-base font-bold text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
                     Ukryj tabelę z zatwierdzonymi rezerwacjami
@@ -125,5 +132,6 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/datepicker.min.js"></script>
         </body>
         {% include 'scripts/eventTableScripts.html' %}
+        {% comment %}{% include 'scripts/calendarScripts.html' %}{% endcomment %}
     </div>
 {% endblock %}

@@ -44,6 +44,14 @@
             {% endwith %}
             {% endwith %}
 
+            {% comment %}{% include 'filter/filterServiceProviders.html' %}
+            {% include 'calendar/changeOptions.html' %}
+            {% include 'calendar/addEdit.html' %}
+            {% include 'calendar/delete.html' %}
+            {% include 'calendar/reserveIntervalOfBookingDate.html' %}
+            {% include 'calendar/confirmReservation.html' %}
+            {% include 'calendar/confirmOrRejectDrag.html' %}{% endcomment %}
+
             {% block content %}
             {% endblock %}
         </main>

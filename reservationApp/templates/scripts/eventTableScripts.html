@@ -3,7 +3,66 @@
         console.log("Go to event")
         let url = '/?id='+eventId+'&date='+eventStart;
         window.location.href = url;
+    };
+    {% comment %}function stopPropagationFunction(e){
+        e.stopPropagation()
+    };
+    function openModalFromTable(version, modalId){
+        console.log("ModalId = ", modalId, " Version ", version)
+        if (version === 0){
+            //setTextsInTextVariables({title: 'Edytuj dostepny termin świadczenia usługi', mainButton: 'Edytuj dostepny termin'})
+            openModalTableVersion(modalId, true, true, true, true)
+        }else if (version === 1){
+            //setTextsInTextVariables({question: 'Czy na pewno chcesz usunąć ten dostępny termin?', buttonOption1: 'Tak, usuń ten termin', buttonOption2: 'Anuluj'})
+            openModalTableVersion(modalId)
+        }
     }
+    function openModalTableVersion(modalId, datesDisplay=false, intervalDisplay=false, setTextsOption=true, fillInputsOption=true) {
+        console.log("OPEN MODAL TABLE VERSION = ", modalId)
+        let modal = document.getElementById(modalId);
+        //if (setTextsOption) { setTextsInTemplate(modalId, getMainEventData()) }
+        //if (fillInputsOption) { fillInputs(modalId) }
+        if ( modalId === 'AddEditModal') {
+            //console.log("Dates display =", datesDisplay)
+            if (datesDisplay) {
+                document.getElementById('endDateContainer'+modalId).classList.remove("hidden");
+                document.getElementById('startDateContainer'+modalId).classList.remove("hidden");
+                document.getElementById('endTimeContainer'+modalId).classList.remove("col-span-2","sm:col-span-2");
+                document.getElementById('startTimeContainer'+modalId).classList.remove("col-span-2","sm:col-span-2");
+
+                document.getElementById('endDateContainer'+modalId).classList.add("col-span-2","sm:col-span-1");
+                document.getElementById('startDateContainer'+modalId).classList.add("col-span-2","sm:col-span-1");
+                document.getElementById('endTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-1");
+                document.getElementById('startTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-1");
+            } else {
+                document.getElementById('endDateContainer'+modalId).classList.add("hidden");
+                document.getElementById('startDateContainer'+modalId).classList.add("hidden");
+                document.getElementById('endTimeContainer'+modalId).classList.remove("col-span-2","sm:col-span-1");
+                document.getElementById('startTimeContainer'+modalId).classList.remove("col-span-2","sm:col-span-1");
+                document.getElementById('endTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-2");
+                document.getElementById('startTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-2");
+            }
+            //console.log("intervalDisply = ", intervalDisplay)
+            if (intervalDisplay) {
+                //console.log("JEST INTERWAL")
+                document.getElementById('intervalTimeContainer'+modalId).classList.remove("hidden");
+                document.getElementById('breakBetweenIntervalsContainer'+modalId).classList.remove("hidden");
+            } else {
+                //console.log("NIE MA INTERWALOW")
+                document.getElementById('intervalTimeContainer'+modalId).classList.add("hidden");
+                document.getElementById('breakBetweenIntervalsContainer'+modalId).classList.add("hidden");
+            }
+        }
+        modal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+    };
+    function closeModal(modalId) {
+        setSuccess(modalId)
+        //console.error("MODAL ID = ", modalId)
+        let modal = document.getElementById(modalId);
+        modal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+    };{% endcomment %}
     let table;
     $(document).ready(function() {
         table = $('#eventsTable').DataTable({
