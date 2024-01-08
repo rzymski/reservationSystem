@@ -56,6 +56,38 @@
                     </div>
                 </div>
 
+                {% comment %}<ul class="w-64 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <li class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
+                        <div class="flex items-center ps-3">
+                            <input id="vue-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                            <label for="vue-checkbox" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Pokaż tylko moje wydarzenia</label>
+                        </div>
+                    </li>
+                    <li class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
+                        <div class="flex items-center ps-3">
+                            <input id="react-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                            <label for="react-checkbox" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 nowrap">Pokaż usunięte wydarzenia</label>
+                        </div>
+                    </li>
+                </ul>{% endcomment %}
+
+                <ul class="items-center w-[30rem] text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
+                        <div class="flex items-center ps-3">
+                            <input id="onlyMyEventsCheckbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                            <label for="onlyMyEventsCheckbox" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 nowrap">Pokaż tylko moje wydarzenia</label>
+                        </div>
+                    </li>
+                    <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
+                        <div class="flex items-center ps-3">
+                            <input id="deletedCheckbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                            <label for="deletedCheckbox" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 nowrap">Pokaż usunięte wydarzenia</label>
+                        </div>
+                    </li>
+                </ul>
+
+
+
                 <div class="relative">
                     <div class="absolute inset-y-0 left-0 rtl:inset-r-0 rtl:right-0 flex items-center ps-3 pointer-events-none">
                         <i class="fa-solid fa-magnifying-glass"></i>
@@ -64,68 +96,109 @@
                 </div>
             </div>
 
-{#            <div class="flex justify-end">#}
-            <div class="absolute z-10 right-0">
-                <button id="availableBookingDateToggleTableButton" onclick="toggleTable('availableBookingDateTableContainer')" type="button" class="py-2.5 px-2.5 text-base font-bold text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
-                    Ukryj tabelę z dostępnymi terminami
-                </button>
-            </div>
-            <div class="flex justify-center font-extrabold text-4xl">
-                Dostępne terminy
-            </div>
-            <div id="availableBookingDateTableContainer" class="tableContainer mx-10">
-                <table id="eventsTable" class="display cell-border nowrap">
-                    <thead class="table-success">
-                        <tr>
-                            <th colspan="2">Data rozpoczęcia</th>
-                            <th colspan="2">Data zakończenia</th>
-                            <th rowspan="2">Usługodawca</th>
-                            <th rowspan="2">Czas wizyty</th>
-                            {% comment %}<th rowspan="2">Dostępne operacje</th>{% endcomment %}
-                        </tr>
-                        <tr>
-                            <th>Data</th>
-                            <th>Godzina</th>
-                            <th>Godzina</th>
-                            <th>Data</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for event in availableBookingDates %}
-                            <tr class="clickable-row" onclick="goToEventInCalendar('{{ event.id }}', '{{ event.start|date:'Y-m-d\TH:i:s' }}', event)">
-                                <td data-order="{{ event.start|date:'Y-m-d\TH:i:s' }}">{{ event.start|myDateFormat }}</td>
-                                <td data-order="{{ event.start }}">{{ event.start|myTimeFormat}}</td>
-                                <td data-order="{{ event.end }}">{{ event.end|myTimeFormat }}</td>
-                                <td data-order="{{ event.end|date:'Y-m-d\TH:i:s' }}">{{ event.end|myDateFormat }}</td>
-                                <td><a href="/userProfile/{{ event.user.id }}/" class="hover:text-green-500">{{ event.user.first_name }} {{ event.user.last_name }}</a></td>
-                                {% if event.intervalTime %}
-                                    <td data-order="{{ event.intervalTime }}">{{ event.intervalTime }} minut</td>
-                                {% else %}
-                                    <td data-order="0"></td>
-                                {% endif %}
-                                {% comment %}<td class="text-center" onclick="stopPropagationFunction(event)">
-                                    <button onclick="openModalFromTable(0, 'AddEditModal')" type="button" class="text-base px-2 py-1 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-lg dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                                        <i class="fa-solid fa-pen-to-square"></i>
-                                    </button>
-                                    <button onclick="openModalFromTable(1, 'DeleteModal')" type="button" class="text-base px-2 py-1 focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 rounded-lg dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
-                                        <i class="fa-solid fa-trash-can"></i>
-                                    </button>
-                                </td>{% endcomment %}
+            <div class="border rounded-lg mx-5 p-5">
+                <div class="absolute z-[5] right-10">
+                    <button id="availableBookingDateTableToggleButton" onclick="toggleTable('availableBookingDateTable', 'Ukryj tabelę z dostępnymi terminami', 'Pokaż tabelę z dostępnymi terminami')" type="button" class="py-2.5 px-2.5 text-base font-bold text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                        <span id="availableBookingDateTableToggleButtonText">Ukryj tabelę z dostępnymi terminami</span>
+                    </button>
+                </div>
+                <div class="flex justify-center font-extrabold text-4xl">
+                    Dostępne terminy
+                </div>
+                <div id="availableBookingDateTableContainer" class="tableContainer mx-10">
+                    <table id="availableBookingDateTable" class="display cell-border nowrap">
+                        <thead class="table-success">
+                            <tr>
+                                <th colspan="2">Data rozpoczęcia</th>
+                                <th colspan="2">Data zakończenia</th>
+                                <th rowspan="2">Usługodawca</th>
+                                <th rowspan="2">Czas wizyty</th>
+                                {% comment %}<th rowspan="2">Dostępne operacje</th>{% endcomment %}
                             </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                            <tr>
+                                <th>Data</th>
+                                <th>Godzina</th>
+                                <th>Godzina</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in availableBookingDates %}
+                                <tr class="clickable-row" onclick="goToEventInCalendar('{{ event.id }}', '{{ event.start|date:'Y-m-d\TH:i:s' }}', event)">
+                                    <td data-order="{{ event.start|date:'Y-m-d\TH:i:s' }}">{{ event.start|myDateFormat }}</td>
+                                    <td data-order="{{ event.start }}">{{ event.start|myTimeFormat}}</td>
+                                    <td data-order="{{ event.end }}">{{ event.end|myTimeFormat }}</td>
+                                    <td data-order="{{ event.end|date:'Y-m-d\TH:i:s' }}">{{ event.end|myDateFormat }}</td>
+                                    <td><a href="/userProfile/{{ event.user.id }}/" class="hover:text-green-500">{{ event.user.first_name }} {{ event.user.last_name }}</a></td>
+                                    {% if event.intervalTime %}
+                                        <td data-order="{{ event.intervalTime }}">{{ event.intervalTime }} minut</td>
+                                    {% else %}
+                                        <td data-order="0"></td>
+                                    {% endif %}
+                                    {% comment %}<td class="text-center" onclick="stopPropagationFunction(event)">
+                                        <button onclick="openModalFromTable(0, 'AddEditModal')" type="button" class="text-base px-2 py-1 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-lg dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                                            <i class="fa-solid fa-pen-to-square"></i>
+                                        </button>
+                                        <button onclick="openModalFromTable(1, 'DeleteModal')" type="button" class="text-base px-2 py-1 focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 rounded-lg dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+                                            <i class="fa-solid fa-trash-can"></i>
+                                        </button>
+                                    </td>{% endcomment %}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="my-10"></div>
-
-            <div class="absolute z-10 right-0">
-                <button id="availableBookingDateToggleTableButton" onclick="toggleTable('availableBookingDateTableContainer')" type="button" class="py-2.5 px-2.5 text-base font-bold text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
-                    Ukryj tabelę z zatwierdzonymi rezerwacjami
-                </button>
-            </div>
-            <div class="flex justify-center font-extrabold text-4xl">
-                Zatwierdzone rezerwacje
+            <div class="border rounded-lg mx-5 p-5">
+                <div class="absolute z-[5] right-10">
+                    <button id="reservationTableToggleButton" onclick="toggleTable('reservationTable', 'Ukryj tabelę z rezerwacjami', 'Pokaż tabelę z rezerwacjami')" type="button" class="py-2.5 px-2.5 text-base font-bold text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                        <span id="reservationTableToggleButtonText">Ukryj tabelę z rezerwacjami</span>
+                    </button>
+                </div>
+                <div class="flex justify-center font-extrabold text-4xl">
+                    Rezerwacje
+                </div>
+                <div id="reservationTableContainer" class="tableContainer mx-10">
+                    <table id="reservationTable" class="display cell-border nowrap">
+                        <thead class="table-success">
+                            <tr>
+                                <th rowspan="2">Status</th>
+                                <th colspan="2">Data rozpoczęcia</th>
+                                <th colspan="2">Data zakończenia</th>
+                                <th rowspan="2">Usługodawca</th>
+                                <th rowspan="2">Usługobiorca</th>
+                            </tr>
+                            <tr>
+                                <th>Data</th>
+                                <th>Godzina</th>
+                                <th>Godzina</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for event in reservations %}
+                                <tr class="clickable-row" onclick="goToEventInCalendar('{{ event.id }}', '{{ event.start|date:'Y-m-d\TH:i:s' }}', event)">
+                                    {% if event.isAccepted %}
+                                        <td class="font-bold text-green-500">Potwierdzona</td>
+                                    {% else %}
+                                        <td class="font-bold text-red-600">Nie potwierdzona</td>
+                                    {% endif %}
+                                    <td data-order="{{ event.start|date:'Y-m-d\TH:i:s' }}">{{ event.start|myDateFormat }}</td>
+                                    <td data-order="{{ event.start }}">{{ event.start|myTimeFormat}}</td>
+                                    <td data-order="{{ event.end }}">{{ event.end|myTimeFormat }}</td>
+                                    <td data-order="{{ event.end|date:'Y-m-d\TH:i:s' }}">{{ event.end|myDateFormat }}</td>
+                                    {% if event.availableBookingDate %}
+                                        <td><a href="/userProfile/{{ event.availableBookingDate.user.id }}/" class="hover:text-green-500">{{ event.availableBookingDate.user.first_name }} {{ event.availableBookingDate.user.last_name }}</a></td>
+                                    {% else %}
+                                        <td data-order=""></td>
+                                    {% endif %}
+                                    <td><a href="/userProfile/{{ event.bookingPerson.id }}/" class="hover:text-orange-500">{{ event.bookingPerson.first_name }} {{ event.bookingPerson.last_name }}</a></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
         <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>

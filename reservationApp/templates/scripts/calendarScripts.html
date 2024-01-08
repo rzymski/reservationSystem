@@ -322,9 +322,9 @@
         }
         hideBadTooltips()
         if(actualChosenEventId && actualChosenEventId === info.event.id){
-            info.el.style.backgroundColor = 'gold';
-            info.el.style.border = '2px solid red';
-            console.error("El = ", info.el)
+            info.el.style.backgroundColor = 'rgb(0,191,255)';
+            info.el.style.border = '2px solid rgba(255, 0, 0, 1)';
+            //console.error("El = ", info.el)
         }
     };
     function hideBadTooltips() {
@@ -333,10 +333,9 @@
             const computedStyle = window.getComputedStyle(tooltip);
             const transformValue = computedStyle.getPropertyValue('transform');
             if (transformValue === 'matrix(1, 0, 0, 1, -10, 5)') {
-                //console.error("ZNALAZL ZLEGO w =", nr)
+                console.error("ZNALAZL ZLEGO z matrixem")
                 tooltip.style.display = 'none';
                 tooltip.remove()
-                //console.error("USUN GOWNO")
             }
         });
     };

@@ -417,9 +417,13 @@ def readNotification(request):
 @login_required(login_url='login')
 def eventTable(request):
     availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False)
+    filteredAvailableBookingDates = []
+    for availableBookingDate in availableBookingDates:
+        if availableBookingDate.reservation_set.filter(isAccepted=True, isDeleted=False).count() == 0:
+            filteredAvailableBookingDates.append(availableBookingDate)
     reservations = Reservation.objects.filter(isDeleted=False)
-    context = {'availableBookingDates': availableBookingDates,
-               }
+    context = {'availableBookingDates': filteredAvailableBookingDates,
+               'reservations': reservations}
     return render(request, 'eventTable/eventTable.html', context)
 
 # class Event:

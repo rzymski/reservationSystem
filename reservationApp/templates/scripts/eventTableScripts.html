@@ -63,11 +63,16 @@
         modal.classList.add('hidden');
         document.body.classList.remove('overflow-hidden');
     };{% endcomment %}
-    let table;
+    let availableBookingDateTable, reservationTable;
+    let allRows = true;
+    const onlyMyEventsCheckbox = document.getElementById('onlyMyEventsCheckbox');
+    let onlyMyEvents;
+    const currentUserNameAndSurname = '{{ request.user.first_name }} {{ request.user.last_name }}';
     $(document).ready(function() {
-        table = $('#eventsTable').DataTable({
+        availableBookingDateTable = $('#availableBookingDateTable').DataTable({
+            tableId: 'availableBookingDateTable',
             paging: true, //stronicowanie
-            pageLength: 20,
+            pageLength: 10,
             lengthChange: true, //change number of elements in page
             lengthMenu: [[10, 20, 25, 50, 100, -1], [10, 20, 25, 50, 100, 'Wszystkie']],
             autoWidth: true,
@@ -93,44 +98,103 @@
                     next: "Następna"
                 },
                 info: "Pokazuje _START_ do _END_ z _TOTAL_",
-                infoFiltered: " (wyfiltrowano z _MAX_ wszystkich rekordów)"
+                infoFiltered: " (wyfiltrowano z _MAX_ wszystkich rekordów)",
+                zeroRecords: "Brak pasującyh dostępnych terminów.",
+                infoEmpty: "Nie znaleziono żadny pasującyh dostępnych terminów.",
+            },
+        });
+        reservationTable = $('#reservationTable').DataTable({
+            tableId: 'reservationTable',
+            paging: true, //stronicowanie
+            pageLength: 10,
+            lengthChange: true, //change number of elements in page
+            lengthMenu: [[10, 20, 25, 50, 100, -1], [10, 20, 25, 50, 100, 'Wszystkie']],
+            autoWidth: true,
+            searching: true,
+            bInfo: true, //info about number of elements in page
+            bSort: true,
+            orderCellsTop: false,
+            fixedHeader: true,
+            responsive: true,
+            dom: 'ltip',
+            order: [[0, 'desc']],
+            columnDefs: [
+                { type: 'moment', targets: [1, 4] },
+                { targets: [2, 3], orderable: false },
+            ],
+            language: {
+                lengthMenu: "Pokaż _MENU_ wydarzeń",
+                search: "Wyszukiwarka: ",
+                paginate: {
+                    previous: "Poprzednia ",
+                    next: "Następna"
+                },
+                info: "Pokazuje _START_ do _END_ z _TOTAL_",
+                infoFiltered: " (wyfiltrowano z _MAX_ wszystkich rekordów)",
+                zeroRecords: "Brak pasującyh rezerwacji.",
+                infoEmpty: "Nie znaleziono żadny pasującyh rezerwacji.",
             },
         });
         let newSearch = $("#table-search");
         newSearch.keyup(function(){
-            table.search($(this).val()).draw();
+            availableBookingDateTable.search($(this).val()).draw();
+            reservationTable.search($(this).val()).draw();
         });
+
+        function onlyMyEventsCheckboxChange() {
+            console.log('Only myEventCheckbox changed:', onlyMyEventsCheckbox.checked);
+            onlyMyEvents = onlyMyEventsCheckbox.checked
+            availableBookingDateTable.draw()
+            reservationTable.draw()
+        }
+        onlyMyEventsCheckbox.addEventListener('change', onlyMyEventsCheckboxChange);
+        onlyMyEventsCheckboxChange();
     });
-    let allRows = true;
     function filterTable(){
         allRows = false;
-        table.draw()
+        availableBookingDateTable.draw()
+        reservationTable.draw()
     };
     function cancelFilterTable(){
         allRows = true;
-        table.draw()
+        availableBookingDateTable.draw()
+        reservationTable.draw()
     };
 
     DataTable.ext.search.push(function (settings, data, dataIndex) {
-        if (allRows){
-            console.log("ALL ROWS SET TRUE")
+        if (allRows && !onlyMyEvents){
+            console.log("ALL ROWS SET TRUE and not only my events")
             return  true;
         }
-        //console.log(settings, data, dataIndex)
+        //console.error("Otrzyman dane: ", settings, data, dataIndex)
         let dateRangeStart = document.getElementById('dateRangeStart');
         let dateRangeEnd = document.getElementById('dateRangeEnd');
         let startValue = dateRangeStart.value;
         let endValue = dateRangeEnd.value;
-        if (startValue === "" || endValue === ""){
-            console.log("Inputs don't have values")
+        let tableId = settings.oInit.tableId;
+        if (tableId){
+            if (tableId === 'availableBookingDateTable'){
+                return isDateInRange(startValue, endValue, data[0]) && isMyEvent([data[4]]);
+            } else if (tableId === 'reservationTable'){
+                return isDateInRange(startValue, endValue, data[1])  && isMyEvent([data[5], data[6]]);
+            } else {
+                console.log("Nie ma tabeli o takim id")
+            }
+        }
+        console.log("NIE MA tableID")
+        return true;
+    });
+    function isMyEvent(eventUsers){
+        if (!onlyMyEvents) { console.log("NIe patrzy czy to moj event"); return true; }
+        console.error("Podani uzytkownicy = ", eventUsers)
+        if(eventUsers.indexOf(currentUserNameAndSurname) > -1){ return true; }
+        return false;
+    }
+    function isDateInRange(startDateStr, endDateStr, targetDateStr) {
+        if (startDateStr === "" || endDateStr === ""){
+            console.log("Inputs don't have values. Can't compare date range.")
             return true;
         }
-        let startDate = data[0];
-        //console.log(startValue, endValue, startDate)
-        return isDateInRange(startValue, endValue, data[0]);
-    });
-
-    function isDateInRange(startDateStr, endDateStr, targetDateStr) {
         let startDate = parseDateString(startDateStr);
         let endDate = parseDateString(endDateStr);
         //const monthMapping = {'Styczeń': '/1/','Luty': '/2/','Marzec': '/3/','Kwiecień': '/4/','Maj': '/5/','Czerwiec': '/6/','Lipiec': '/7/','Sierpień': '/8/','Wrzesień': '/9/','Październik': '/10/','Listopad': '/11/','Grudzień': '/12/'};
@@ -138,17 +202,17 @@
         for (const [monthName, monthValue] of Object.entries(monthMapping)) {
             targetDateStr = targetDateStr.replace(monthName, monthValue);
         }
-        console.log(targetDateStr)
         let targetDate = parseDateString(targetDateStr);
-        console.log("Target = ", startDate, targetDate, endDate)
         return startDate <= targetDate && targetDate <= endDate;
     };
     function parseDateString(dateString) {
         const [day, month, year] = dateString.split('/');
         return new Date(year, month, day);
     };
-    function toggleTable(tableContainer) {
-        let table = document.getElementById(tableContainer);
+    function toggleTable(tableId, hideText, showText) {
+        let table = document.getElementById(tableId+'Container');
         table.style.display = (table.style.display === 'none') ? '' : 'none';
+        let toggleButtonText = document.getElementById(tableId+'ToggleButtonText');
+        toggleButtonText.innerText = table.style.display !== 'none' ? hideText : showText;
     }
 </script>
