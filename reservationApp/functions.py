@@ -42,8 +42,8 @@ def getUnconfirmedReservationJsonData(reservation):
             'intervalTimeString': getTimeStringValue(reservation.availableBookingDate.intervalTime),
             'breakBetweenIntervals': reservation.availableBookingDate.breakBetweenIntervals,
             'editable': False,
-            'availableBookingDateStart': reservation.availableBookingDate.start,
-            'availableBookingDateEnd': reservation.availableBookingDate.end}
+            'availableBookingDateStart': reservation.availableBookingDate.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'availableBookingDateEnd': reservation.availableBookingDate.end.strftime('%Y-%m-%dT%H:%M:%S')}
 
 
 def getConfirmedReservationJsonData(reservation):
@@ -63,8 +63,8 @@ def getConfirmedReservationJsonData(reservation):
             'intervalTimeString': getTimeStringValue(reservation.availableBookingDate.intervalTime),
             'breakBetweenIntervals': reservation.availableBookingDate.breakBetweenIntervals,
             'editable': False,
-            'availableBookingDateStart': reservation.availableBookingDate.start,
-            'availableBookingDateEnd': reservation.availableBookingDate.end}
+            'availableBookingDateStart': reservation.availableBookingDate.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'availableBookingDateEnd': reservation.availableBookingDate.end.strftime('%Y-%m-%dT%H:%M:%S')}
 
 
 def getAvailableBookingDateJsonData(availableBookingDate, freeTime, possibleDragging):

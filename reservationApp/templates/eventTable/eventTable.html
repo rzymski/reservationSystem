@@ -151,6 +151,7 @@
                                 <th colspan="2">Data zakończenia</th>
                                 <th rowspan="2">Usługodawca</th>
                                 <th rowspan="2">Usługobiorca</th>
+                                {% comment %}<th rowspan="2">Dostępne operacje</th>{% endcomment %}
                             </tr>
                             <tr>
                                 <th>Data</th>
@@ -160,24 +161,34 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for event in reservations %}
-                                <tr class="clickable-row" onclick="goToEventInCalendar('{{ event.id }}', '{{ event.start|date:'Y-m-d\TH:i:s' }}', event)">
-                                    {% if event.isAccepted %}
-                                        <td class="font-bold text-green-500">Potwierdzona</td>
-                                    {% else %}
-                                        <td class="font-bold text-red-600">Nie potwierdzona</td>
-                                    {% endif %}
-                                    <td data-order="{{ event.start|date:'Y-m-d\TH:i:s' }}">{{ event.start|myDateFormat }}</td>
-                                    <td data-order="{{ event.start }}">{{ event.start|myTimeFormat}}</td>
-                                    <td data-order="{{ event.end }}">{{ event.end|myTimeFormat }}</td>
-                                    <td data-order="{{ event.end|date:'Y-m-d\TH:i:s' }}">{{ event.end|myDateFormat }}</td>
-                                    {% if event.availableBookingDate %}
-                                        <td><a href="/userProfile/{{ event.availableBookingDate.user.id }}/" class="hover:text-green-500">{{ event.availableBookingDate.user.first_name }} {{ event.availableBookingDate.user.last_name }}</a></td>
-                                    {% else %}
-                                        <td data-order=""></td>
-                                    {% endif %}
-                                    <td><a href="/userProfile/{{ event.bookingPerson.id }}/" class="hover:text-orange-500">{{ event.bookingPerson.first_name }} {{ event.bookingPerson.last_name }}</a></td>
-                                </tr>
+                            {% for reservation in reservations %}
+                                {% with event=reservation.reservationObject jsonData=reservation.jsonData %}
+                                    <tr class="clickable-row" onclick="goToEventInCalendar('{{ event.id }}', '{{ event.start|date:'Y-m-d\TH:i:s' }}', event)">
+                                        {% if event.isAccepted %}
+                                            <td class="font-bold text-green-500">Potwierdzona</td>
+                                        {% else %}
+                                            <td class="font-bold text-red-600">Nie potwierdzona</td>
+                                        {% endif %}
+                                        <td data-order="{{ event.start|date:'Y-m-d\TH:i:s' }}">{{ event.start|myDateFormat }}</td>
+                                        <td data-order="{{ event.start }}">{{ event.start|myTimeFormat}}</td>
+                                        <td data-order="{{ event.end }}">{{ event.end|myTimeFormat }}</td>
+                                        <td data-order="{{ event.end|date:'Y-m-d\TH:i:s' }}">{{ event.end|myDateFormat }}</td>
+                                        {% if event.availableBookingDate %}
+                                            <td><a href="/userProfile/{{ event.availableBookingDate.user.id }}/" class="hover:text-green-500">{{ event.availableBookingDate.user.first_name }} {{ event.availableBookingDate.user.last_name }}</a></td>
+                                        {% else %}
+                                            <td data-order=""></td>
+                                        {% endif %}
+                                        <td><a href="/userProfile/{{ event.bookingPerson.id }}/" class="hover:text-orange-500">{{ event.bookingPerson.first_name }} {{ event.bookingPerson.last_name }}</a></td>
+                                        {% comment %}<td class="text-center" onclick="stopPropagationFunction(event)">
+                                            <button onclick="showTableModal(0, '{{ jsonData|escapejs }}')" type="button" class="text-base px-2 py-1 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 rounded-lg dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </button>
+                                            <button onclick="showTableModal(1, '{{ jsonData|escapejs }}')" type="button" class="text-base px-2 py-1 focus:outline-none text-white bg-red-700 hover:bg-red-800 focus:ring-4 focus:ring-red-300 rounded-lg dark:bg-red-600 dark:hover:bg-red-700 dark:focus:ring-red-900">
+                                                <i class="fa-solid fa-trash-can"></i>
+                                            </button>
+                                        </td>{% endcomment %}
+                                    </tr>
+                                {% endwith %}
                             {% endfor %}
                         </tbody>
                     </table>

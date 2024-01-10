@@ -173,5 +173,33 @@
         table.style.display = (table.style.display === 'none') ? '' : 'none';
         let toggleButtonText = document.getElementById(tableId+'ToggleButtonText');
         toggleButtonText.innerText = table.style.display !== 'none' ? hideText : showText;
+    };
+    function stopPropagationFunction(event){
+        event.stopPropagation()
     }
+    function showTableModal(operationType, jsonDataString){
+        jsonDataString = jsonDataString.replace(/'/g, '"');
+        jsonDataString = jsonDataString.replace(/None/g, 'null');
+        jsonDataString = jsonDataString.replace(/True/g, 'true');
+        jsonDataString = jsonDataString.replace(/False/g, 'false');
+        console.log(jsonDataString)
+        let jsonData = JSON.parse(jsonDataString)
+        console.log("Op = ", operationType)
+        console.log("json = ", jsonData, " type = ", typeof jsonData)
+        let info = {'event':jsonData}
+        //eventClick({'info':info})
+        let x = generateSyntheticInfo(jsonData)
+        console.log("X = ", x)
+    };
+    function generateSyntheticInfo(jsonData){
+        console.log(jsonData.serviceProviderId)
+        let syntheticInfo = {
+            event: {
+                extendedProps: {
+                    serviceProviderId: jsonData.serviceProviderId
+                }
+            }
+        };
+        return syntheticInfo
+    };
 </script>

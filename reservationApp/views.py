@@ -346,8 +346,18 @@ def eventTable(request):
         if availableBookingDate.reservation_set.filter(isAccepted=True, isDeleted=False).count() == 0:
             filteredAvailableBookingDates.append(availableBookingDate)
     reservations = Reservation.objects.filter(isDeleted=False)
+
+    reservationsWithJsonData = []
+    for reservation in reservations:
+        if reservation.availableBookingDate is None:
+            reservationJsonData = getReservationWithoutServiceProviderJsonData(reservation)
+        elif reservation.isAccepted:
+            reservationJsonData = getConfirmedReservationJsonData(reservation)
+        else:
+            reservationJsonData = getUnconfirmedReservationJsonData(reservation)
+        reservationsWithJsonData.append({'reservationObject': reservation, 'jsonData': reservationJsonData})
     context = {'availableBookingDates': filteredAvailableBookingDates,
-               'reservations': reservations}
+               'reservations': reservationsWithJsonData}
     return render(request, 'eventTable/eventTable.html', context)
 
 
