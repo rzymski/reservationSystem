@@ -37,13 +37,13 @@
                       </div>
                 </div>
             </div>
-            {% include 'filter/filterServiceProviders.html' %}
+            {% comment %}{% include 'filter/filterServiceProviders.html' %}
             {% include 'calendar/changeOptions.html' %}
             {% include 'calendar/addEdit.html' %}
             {% include 'calendar/delete.html' %}
             {% include 'calendar/reserveIntervalOfBookingDate.html' %}
             {% include 'calendar/confirmReservation.html' %}
-            {% include 'calendar/confirmOrRejectDrag.html' %}
+            {% include 'calendar/confirmOrRejectDrag.html' %}{% endcomment %}
             <div style="height: calc(100vh - 8rem)">
                 <div id='calendar' class="dark:text-white bg-gray-100 dark:bg-gray-600"></div>
             </div>

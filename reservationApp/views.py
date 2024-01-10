@@ -551,7 +551,15 @@ def deleteNotification(request):
 
 # TESTY
 def myTest(request):
-    return render(request, 'test/myTest.html')
+    availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False)
+    filteredAvailableBookingDates = []
+    for availableBookingDate in availableBookingDates:
+        if availableBookingDate.reservation_set.filter(isAccepted=True, isDeleted=False).count() == 0:
+            filteredAvailableBookingDates.append(availableBookingDate)
+    reservations = Reservation.objects.filter(isDeleted=False)
+    context = {'availableBookingDates': filteredAvailableBookingDates,
+               'reservations': reservations}
+    return render(request, 'test/myTest.html', context)
 # Wersja testowa THEME
 from django.views.generic import ListView, DetailView
 

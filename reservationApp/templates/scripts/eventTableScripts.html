@@ -4,69 +4,11 @@
         let url = '/?id='+eventId+'&date='+eventStart;
         window.location.href = url;
     };
-    {% comment %}function stopPropagationFunction(e){
-        e.stopPropagation()
-    };
-    function openModalFromTable(version, modalId){
-        console.log("ModalId = ", modalId, " Version ", version)
-        if (version === 0){
-            //setTextsInTextVariables({title: 'Edytuj dostepny termin świadczenia usługi', mainButton: 'Edytuj dostepny termin'})
-            openModalTableVersion(modalId, true, true, true, true)
-        }else if (version === 1){
-            //setTextsInTextVariables({question: 'Czy na pewno chcesz usunąć ten dostępny termin?', buttonOption1: 'Tak, usuń ten termin', buttonOption2: 'Anuluj'})
-            openModalTableVersion(modalId)
-        }
-    }
-    function openModalTableVersion(modalId, datesDisplay=false, intervalDisplay=false, setTextsOption=true, fillInputsOption=true) {
-        console.log("OPEN MODAL TABLE VERSION = ", modalId)
-        let modal = document.getElementById(modalId);
-        //if (setTextsOption) { setTextsInTemplate(modalId, getMainEventData()) }
-        //if (fillInputsOption) { fillInputs(modalId) }
-        if ( modalId === 'AddEditModal') {
-            //console.log("Dates display =", datesDisplay)
-            if (datesDisplay) {
-                document.getElementById('endDateContainer'+modalId).classList.remove("hidden");
-                document.getElementById('startDateContainer'+modalId).classList.remove("hidden");
-                document.getElementById('endTimeContainer'+modalId).classList.remove("col-span-2","sm:col-span-2");
-                document.getElementById('startTimeContainer'+modalId).classList.remove("col-span-2","sm:col-span-2");
-
-                document.getElementById('endDateContainer'+modalId).classList.add("col-span-2","sm:col-span-1");
-                document.getElementById('startDateContainer'+modalId).classList.add("col-span-2","sm:col-span-1");
-                document.getElementById('endTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-1");
-                document.getElementById('startTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-1");
-            } else {
-                document.getElementById('endDateContainer'+modalId).classList.add("hidden");
-                document.getElementById('startDateContainer'+modalId).classList.add("hidden");
-                document.getElementById('endTimeContainer'+modalId).classList.remove("col-span-2","sm:col-span-1");
-                document.getElementById('startTimeContainer'+modalId).classList.remove("col-span-2","sm:col-span-1");
-                document.getElementById('endTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-2");
-                document.getElementById('startTimeContainer'+modalId).classList.add("col-span-2","sm:col-span-2");
-            }
-            //console.log("intervalDisply = ", intervalDisplay)
-            if (intervalDisplay) {
-                //console.log("JEST INTERWAL")
-                document.getElementById('intervalTimeContainer'+modalId).classList.remove("hidden");
-                document.getElementById('breakBetweenIntervalsContainer'+modalId).classList.remove("hidden");
-            } else {
-                //console.log("NIE MA INTERWALOW")
-                document.getElementById('intervalTimeContainer'+modalId).classList.add("hidden");
-                document.getElementById('breakBetweenIntervalsContainer'+modalId).classList.add("hidden");
-            }
-        }
-        modal.classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
-    };
-    function closeModal(modalId) {
-        setSuccess(modalId)
-        //console.error("MODAL ID = ", modalId)
-        let modal = document.getElementById(modalId);
-        modal.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
-    };{% endcomment %}
     let availableBookingDateTable, reservationTable;
-    let allRows = true;
+    let allRowsWithoutDateRange = true;
     const onlyMyEventsCheckbox = document.getElementById('onlyMyEventsCheckbox');
-    let onlyMyEvents;
+    const onlyFutureEventsCheckbox = document.getElementById('onlyFutureEventsCheckbox');
+    let onlyMyEvents, onlyFutureEvents;
     const currentUserNameAndSurname = '{{ request.user.first_name }} {{ request.user.last_name }}';
     $(document).ready(function() {
         availableBookingDateTable = $('#availableBookingDateTable').DataTable({
@@ -79,10 +21,9 @@
             searching: true,
             bInfo: true, //info about number of elements in page
             bSort: true,
-            orderCellsTop: false,
-
-            fixedHeader: true,
+            orderCellsTop: true,
             responsive: true,
+            //fixedHeader: true,
             dom: 'ltip',
             //order: [[4, 'asc']],
             columnDefs: [
@@ -113,9 +54,9 @@
             searching: true,
             bInfo: true, //info about number of elements in page
             bSort: true,
-            orderCellsTop: false,
-            fixedHeader: true,
+            orderCellsTop: true,
             responsive: true,
+            //fixedHeader: true,
             dom: 'ltip',
             order: [[0, 'desc']],
             columnDefs: [
@@ -142,28 +83,34 @@
         });
 
         function onlyMyEventsCheckboxChange() {
-            console.log('Only myEventCheckbox changed:', onlyMyEventsCheckbox.checked);
+            //console.log('Only myEventCheckbox changed:', onlyMyEventsCheckbox.checked);
             onlyMyEvents = onlyMyEventsCheckbox.checked
             availableBookingDateTable.draw()
             reservationTable.draw()
-        }
+        };
         onlyMyEventsCheckbox.addEventListener('change', onlyMyEventsCheckboxChange);
         onlyMyEventsCheckboxChange();
+        function onlyFutureEventsCheckboxChange() {
+            //console.log('Only futureEventCheckbox changed:', onlyFutureEventsCheckbox.checked);
+            onlyFutureEvents = onlyFutureEventsCheckbox.checked
+            availableBookingDateTable.draw()
+            reservationTable.draw()
+        };
+        onlyFutureEventsCheckbox.addEventListener('change', onlyFutureEventsCheckboxChange);
+        onlyFutureEventsCheckboxChange();
     });
     function filterTable(){
-        allRows = false;
+        allRowsWithoutDateRange = false;
         availableBookingDateTable.draw()
         reservationTable.draw()
     };
     function cancelFilterTable(){
-        allRows = true;
+        allRowsWithoutDateRange = true;
         availableBookingDateTable.draw()
         reservationTable.draw()
     };
-
     DataTable.ext.search.push(function (settings, data, dataIndex) {
-        if (allRows && !onlyMyEvents){
-            console.log("ALL ROWS SET TRUE and not only my events")
+        if (allRowsWithoutDateRange && !onlyMyEvents && !onlyFutureEvents){
             return  true;
         }
         //console.error("Otrzyman dane: ", settings, data, dataIndex)
@@ -174,9 +121,9 @@
         let tableId = settings.oInit.tableId;
         if (tableId){
             if (tableId === 'availableBookingDateTable'){
-                return isDateInRange(startValue, endValue, data[0]) && isMyEvent([data[4]]);
+                return (allRowsWithoutDateRange || isDateInRange(startValue, endValue, data[0])) && isMyEvent([data[4]]) && isFutureEvent(data[3], data[2]);
             } else if (tableId === 'reservationTable'){
-                return isDateInRange(startValue, endValue, data[1])  && isMyEvent([data[5], data[6]]);
+                return (allRowsWithoutDateRange || isDateInRange(startValue, endValue, data[1]))  && isMyEvent([data[5], data[6]]) && isFutureEvent(data[4], data[3]);
             } else {
                 console.log("Nie ma tabeli o takim id")
             }
@@ -185,11 +132,16 @@
         return true;
     });
     function isMyEvent(eventUsers){
-        if (!onlyMyEvents) { console.log("NIe patrzy czy to moj event"); return true; }
-        console.error("Podani uzytkownicy = ", eventUsers)
-        if(eventUsers.indexOf(currentUserNameAndSurname) > -1){ return true; }
-        return false;
-    }
+        if (!onlyMyEvents) { return true; }
+        return eventUsers.indexOf(currentUserNameAndSurname) > -1;
+    };
+    function isFutureEvent(endDateStr, endTimeStr){
+        endDateStr = getMonthFromPolishString(endDateStr);
+        let endDate = parseDateString(endDateStr, endTimeStr);
+        if (!onlyFutureEvents) { return true; }
+        let currentDate = new Date();
+        return endDate > currentDate;
+    };
     function isDateInRange(startDateStr, endDateStr, targetDateStr) {
         if (startDateStr === "" || endDateStr === ""){
             console.log("Inputs don't have values. Can't compare date range.")
@@ -197,16 +149,23 @@
         }
         let startDate = parseDateString(startDateStr);
         let endDate = parseDateString(endDateStr);
-        //const monthMapping = {'Styczeń': '/1/','Luty': '/2/','Marzec': '/3/','Kwiecień': '/4/','Maj': '/5/','Czerwiec': '/6/','Lipiec': '/7/','Sierpień': '/8/','Wrzesień': '/9/','Październik': '/10/','Listopad': '/11/','Grudzień': '/12/'};
-        const monthMapping = {' Styczeń ': '/1/',' Luty ': '/2/',' Marzec ': '/3/',' Kwiecień ': '/4/',' Maj ': '/5/',' Czerwiec ': '/6/',' Lipiec ': '/7/',' Sierpień ': '/8/',' Wrzesień ': '/9/',' Październik ': '/10/',' Listopad ': '/11/',' Grudzień ': '/12/'};
-        for (const [monthName, monthValue] of Object.entries(monthMapping)) {
-            targetDateStr = targetDateStr.replace(monthName, monthValue);
-        }
+        targetDateStr = getMonthFromPolishString(targetDateStr);
         let targetDate = parseDateString(targetDateStr);
         return startDate <= targetDate && targetDate <= endDate;
     };
-    function parseDateString(dateString) {
+    function getMonthFromPolishString(dateStr){
+        const monthMapping = {' Styczeń ': '/1/',' Luty ': '/2/',' Marzec ': '/3/',' Kwiecień ': '/4/',' Maj ': '/5/',' Czerwiec ': '/6/',' Lipiec ': '/7/',' Sierpień ': '/8/',' Wrzesień ': '/9/',' Październik ': '/10/',' Listopad ': '/11/',' Grudzień ': '/12/'};
+        for (const [monthName, monthValue] of Object.entries(monthMapping)) {
+            dateStr = dateStr.replace(monthName, monthValue);
+        }
+        return dateStr
+    };
+    function parseDateString(dateString, timeString=null) {
         const [day, month, year] = dateString.split('/');
+        if (timeString) {
+            const [hours, minutes] = timeString.split(':');
+            return new Date(year, month-1, day, hours, minutes)
+        }
         return new Date(year, month, day);
     };
     function toggleTable(tableId, hideText, showText) {

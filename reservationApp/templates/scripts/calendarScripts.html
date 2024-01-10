@@ -17,8 +17,10 @@
     let buttonOption2Text;
     let reserveOption;
     let actualChosenEventId=null;
+    let calendarEl;
     document.addEventListener('DOMContentLoaded', function() {
-        var calendarEl = document.getElementById('calendar');
+        calendarEl = document.getElementById('calendar');
+        if (!calendarEl) { return; }
         calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
             timeZone: 'Europe/Warsaw',
@@ -756,9 +758,11 @@
     }
     // nasluchiwanie zmian w inputach addEdit w celu walidacji na biezaco
     const modal = document.getElementById('AddEditModal');
-    modal.addEventListener('input', (e) => {
-        validationModalForm('AddEditModal', e, false, false)
-    });
+    if (modal){
+        modal.addEventListener('input', (e) => {
+            validationModalForm('AddEditModal', e, false, false)
+        });
+    }
     function getAllNecessaryData(modalId){
         let id = selectedEventId
         let eventType = eventTypeInt

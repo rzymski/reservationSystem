@@ -44,13 +44,13 @@
             {% endwith %}
             {% endwith %}
 
-            {% comment %}{% include 'filter/filterServiceProviders.html' %}
+            {% include 'filter/filterServiceProviders.html' %}
             {% include 'calendar/changeOptions.html' %}
             {% include 'calendar/addEdit.html' %}
             {% include 'calendar/delete.html' %}
             {% include 'calendar/reserveIntervalOfBookingDate.html' %}
             {% include 'calendar/confirmReservation.html' %}
-            {% include 'calendar/confirmOrRejectDrag.html' %}{% endcomment %}
+            {% include 'calendar/confirmOrRejectDrag.html' %}
 
             {% block content %}
             {% endblock %}

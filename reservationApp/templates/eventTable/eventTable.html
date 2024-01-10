@@ -5,10 +5,10 @@
         <head>
             <title>Lista wydarzeń</title>
             {% comment %}Datatables{% endcomment %}
-            <link href="https://cdn.datatables.net/v/dt/jq-3.7.0/jszip-3.10.1/dt-1.13.8/b-2.4.2/b-colvis-2.4.2/b-html5-2.4.2/b-print-2.4.2/cr-1.7.0/date-1.5.1/fc-4.3.0/fh-3.4.0/kt-2.11.0/r-2.5.0/rg-1.4.1/rr-1.4.1/sc-2.3.0/sb-1.6.0/sp-2.2.0/sl-1.7.0/datatables.min.css" rel="stylesheet">
+            <link href="https://cdn.datatables.net/v/dt/jq-3.7.0/jszip-3.10.1/dt-1.13.8/b-2.4.2/b-colvis-2.4.2/b-html5-2.4.2/b-print-2.4.2/cr-1.7.0/date-1.5.1/fh-3.4.0/kt-2.11.0/r-2.5.0/rg-1.4.1/rr-1.4.1/sc-2.3.0/sb-1.6.0/sp-2.2.0/sl-1.7.0/datatables.min.css" rel="stylesheet">
             <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
             <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
-            <script src="https://cdn.datatables.net/v/dt/jq-3.7.0/jszip-3.10.1/dt-1.13.8/b-2.4.2/b-colvis-2.4.2/b-html5-2.4.2/b-print-2.4.2/cr-1.7.0/date-1.5.1/fc-4.3.0/fh-3.4.0/kt-2.11.0/r-2.5.0/rg-1.4.1/rr-1.4.1/sc-2.3.0/sb-1.6.0/sp-2.2.0/sl-1.7.0/datatables.min.js"></script>
+            <script src="https://cdn.datatables.net/v/dt/jq-3.7.0/jszip-3.10.1/dt-1.13.8/b-2.4.2/b-colvis-2.4.2/b-html5-2.4.2/b-print-2.4.2/cr-1.7.0/date-1.5.1/fh-3.4.0/kt-2.11.0/r-2.5.0/rg-1.4.1/rr-1.4.1/sc-2.3.0/sb-1.6.0/sp-2.2.0/sl-1.7.0/datatables.min.js"></script>
             {% comment %}sortowanie tabeli po datach potrzebne{% endcomment %}
             <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
             <script src="https://cdn.datatables.net/plug-ins/1.11.5/sorting/datetime-moment.js"></script>
@@ -19,7 +19,7 @@
             <script src="{% static 'reservationApp/js/validation.js' %}"></script>
         </head>
         <body>
-            <div class="flex flex-column sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4 mx-10">
+            <div class="flex flex-column sm:flex-row flex-wrap space-y-4 sm:space-y-0 items-center justify-between pb-4 my-2 ml-5">
                 <div>
                     <button id="dateRangeButton" data-dropdown-toggle="dateRangeDropdown" data-dropdown-placement="right-start" data-dropdown-offset-distance="0"  data-dropdown-ignore-click-outside-class="datepicker" type="button" class="inline-flex items-center text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 focus:ring-gray-200 font-bold rounded-lg text-2xl px-5 py-3.5 dark:bg-gray-800 dark:text-white dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600" type="button">
                         <i class="fa-solid fa-clock"></i>
@@ -55,40 +55,21 @@
                         </div>
                     </div>
                 </div>
-
-                {% comment %}<ul class="w-64 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    <li class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
-                        <div class="flex items-center ps-3">
-                            <input id="vue-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                            <label for="vue-checkbox" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">Pokaż tylko moje wydarzenia</label>
-                        </div>
-                    </li>
-                    <li class="w-full border-b border-gray-200 rounded-t-lg dark:border-gray-600">
-                        <div class="flex items-center ps-3">
-                            <input id="react-checkbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                            <label for="react-checkbox" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 nowrap">Pokaż usunięte wydarzenia</label>
-                        </div>
-                    </li>
-                </ul>{% endcomment %}
-
-                <ul class="items-center w-[30rem] text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-                        <div class="flex items-center ps-3">
+                <ul class="items-center w-[29rem] text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-lg sm:flex dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <li class="w-[14rem] border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
+                        <div class="flex items-center ps-2">
                             <input id="onlyMyEventsCheckbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                             <label for="onlyMyEventsCheckbox" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 nowrap">Pokaż tylko moje wydarzenia</label>
                         </div>
                     </li>
-                    <li class="w-full border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
-                        <div class="flex items-center ps-3">
-                            <input id="deletedCheckbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                            <label for="deletedCheckbox" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 nowrap">Pokaż usunięte wydarzenia</label>
+                    <li class="w-[15rem] border-b border-gray-200 sm:border-b-0 sm:border-r dark:border-gray-600">
+                        <div class="flex items-center ps-2">
+                            <input id="onlyFutureEventsCheckbox" type="checkbox" value="" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
+                            <label for="onlyFutureEventsCheckbox" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300 nowrap">Pokaż tylko przyszłe wydarzenia</label>
                         </div>
                     </li>
                 </ul>
-
-
-
-                <div class="relative">
+                <div class="relative mr-5">
                     <div class="absolute inset-y-0 left-0 rtl:inset-r-0 rtl:right-0 flex items-center ps-3 pointer-events-none">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </div>
@@ -97,16 +78,18 @@
             </div>
 
             <div class="border rounded-lg mx-5 p-5">
-                <div class="absolute z-[5] right-10">
+                <div class="absolute z-[5] right-7">
+                {% comment %}<div class="text-right right-7">{% endcomment %}
                     <button id="availableBookingDateTableToggleButton" onclick="toggleTable('availableBookingDateTable', 'Ukryj tabelę z dostępnymi terminami', 'Pokaż tabelę z dostępnymi terminami')" type="button" class="py-2.5 px-2.5 text-base font-bold text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
                         <span id="availableBookingDateTableToggleButtonText">Ukryj tabelę z dostępnymi terminami</span>
                     </button>
                 </div>
-                <div class="flex justify-center font-extrabold text-4xl">
+                <div class="text-center font-extrabold text-4xl">
                     Dostępne terminy
                 </div>
+
                 <div id="availableBookingDateTableContainer" class="tableContainer mx-10">
-                    <table id="availableBookingDateTable" class="display cell-border nowrap">
+                    <table id="availableBookingDateTable" class="display cell-border nowrap" style="width: 100%">
                         <thead class="table-success">
                             <tr>
                                 <th colspan="2">Data rozpoczęcia</th>
@@ -151,16 +134,16 @@
             </div>
 
             <div class="border rounded-lg mx-5 p-5">
-                <div class="absolute z-[5] right-10">
+                <div class="absolute z-[5] right-7">
                     <button id="reservationTableToggleButton" onclick="toggleTable('reservationTable', 'Ukryj tabelę z rezerwacjami', 'Pokaż tabelę z rezerwacjami')" type="button" class="py-2.5 px-2.5 text-base font-bold text-gray-900 bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
                         <span id="reservationTableToggleButtonText">Ukryj tabelę z rezerwacjami</span>
                     </button>
                 </div>
-                <div class="flex justify-center font-extrabold text-4xl">
+                <div class="text-center font-extrabold text-4xl">
                     Rezerwacje
                 </div>
                 <div id="reservationTableContainer" class="tableContainer mx-10">
-                    <table id="reservationTable" class="display cell-border nowrap">
+                    <table id="reservationTable" class="display cell-border nowrap" style="width: 100%;">
                         <thead class="table-success">
                             <tr>
                                 <th rowspan="2">Status</th>
@@ -200,11 +183,10 @@
                     </table>
                 </div>
             </div>
-
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/datepicker.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/flowbite.min.js"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.2.1/datepicker.min.js"></script>
         </body>
         {% include 'scripts/eventTableScripts.html' %}
-        {% comment %}{% include 'scripts/calendarScripts.html' %}{% endcomment %}
+        {% include 'scripts/calendarScripts.html' %}
     </div>
 {% endblock %}
