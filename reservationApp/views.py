@@ -43,26 +43,7 @@ def allReservationsWithoutServiceProvider(request, allClients=True, selectedClie
     reservations = Reservation.objects.filter(availableBookingDate__isnull=True, isDeleted=False) if allClients else Reservation.objects.filter(availableBookingDate__isnull=True, isDeleted=False, bookingPerson__id__in=selectedClientsIds)
     out = []
     for reservation in reservations:
-        out.append({
-            'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
-            'id': reservation.id,
-            'start': reservation.start.strftime('%Y-%m-%dT%H:%M:%S'),
-            'end': reservation.end.strftime('%Y-%m-%dT%H:%M:%S'),
-            'backgroundColor': '#FFA500',
-            'borderColor': '#FFFFFF',
-            'display': 'block',
-            'serviceProviderId': -1,
-            'serviceProviderNameAndSurname': f"",
-            'clientId': reservation.bookingPerson.id,
-            'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
-            'eventType': 3,
-            'intervalTimeInt': None,
-            'intervalTimeString': None,
-            'breakBetweenIntervals': 0,
-            'editable': True,
-            'availableBookingDateStart': None,
-            'availableBookingDateEnd': None,
-        })
+        out.append(getReservationWithoutServiceProviderJsonData(reservation))
     return JsonResponse(out, safe=False)
 
 
@@ -70,26 +51,7 @@ def allUnconfirmedReservations(request, allClients=True, selectedClientsIds=None
     reservations = Reservation.objects.filter(isAccepted=False, availableBookingDate__isnull=False, availableBookingDate__isDeleted=False, isDeleted=False) if allClients else Reservation.objects.filter(isAccepted=False, availableBookingDate__isnull=False, availableBookingDate__isDeleted=False, isDeleted=False, bookingPerson__id__in=selectedClientsIds)
     out = []
     for reservation in reservations:
-        out.append({
-            'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
-            'id': reservation.id,
-            'start': reservation.start.strftime('%Y-%m-%dT%H:%M:%S'),
-            'end': reservation.end.strftime('%Y-%m-%dT%H:%M:%S'),
-            'backgroundColor': '#FFA500',
-            'borderColor': '#FFFFFF',
-            'display': 'block',
-            'serviceProviderId': reservation.availableBookingDate.user.id,
-            'serviceProviderNameAndSurname': f"{reservation.availableBookingDate.user.first_name} {reservation.availableBookingDate.user.last_name}",
-            'clientId': reservation.bookingPerson.id,
-            'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
-            'eventType': 1,
-            'intervalTimeInt': reservation.availableBookingDate.intervalTime,
-            'intervalTimeString': getTimeStringValue(reservation.availableBookingDate.intervalTime),
-            'breakBetweenIntervals': reservation.availableBookingDate.breakBetweenIntervals,
-            'editable': False,
-            'availableBookingDateStart': reservation.availableBookingDate.start,
-            'availableBookingDateEnd': reservation.availableBookingDate.end,
-        })
+        out.append(getUnconfirmedReservationJsonData(reservation))
     return JsonResponse(out, safe=False)
 
 
@@ -103,26 +65,7 @@ def allConfirmedReservations(request, allUsers=True, selectedServiceProvidersIds
         )
     out = []
     for reservation in reservations:
-        out.append({
-            'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
-            'id': reservation.id,
-            'start': reservation.start.strftime('%Y-%m-%dT%H:%M:%S'),
-            'end': reservation.end.strftime('%Y-%m-%dT%H:%M:%S'),
-            'backgroundColor': '#BF40BF',
-            'borderColor': '#FFFFFF',
-            'display': 'block',
-            'serviceProviderId': reservation.availableBookingDate.user.id,
-            'serviceProviderNameAndSurname': f"{reservation.availableBookingDate.user.first_name} {reservation.availableBookingDate.user.last_name}",
-            'clientId': reservation.bookingPerson.id,
-            'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
-            'eventType': 2,
-            'intervalTimeInt': reservation.availableBookingDate.intervalTime,
-            'intervalTimeString': getTimeStringValue(reservation.availableBookingDate.intervalTime),
-            'breakBetweenIntervals': reservation.availableBookingDate.breakBetweenIntervals,
-            'editable': False,
-            'availableBookingDateStart': reservation.availableBookingDate.start,
-            'availableBookingDateEnd': reservation.availableBookingDate.end,
-        })
+        out.append(getConfirmedReservationJsonData(reservation))
     return JsonResponse(out, safe=False)
 
 
@@ -133,26 +76,7 @@ def allAvailableBookingDates(request, allServiceProviders=True, selectedServiceP
         freeTimesInAvailableBookingDate = getAvailableTimeRanges(availableBookingDate)
         for freeTime in freeTimesInAvailableBookingDate:
             possibleDragging = True if Reservation.objects.filter(isAccepted=True, availableBookingDate=availableBookingDate, isDeleted=False).count() == 0 else False
-            out.append({
-                'title': f"{availableBookingDate.user.first_name} {availableBookingDate.user.last_name}",
-                'id': availableBookingDate.id,
-                'start': freeTime[0].strftime('%Y-%m-%dT%H:%M:%S'),
-                'end': freeTime[1].strftime('%Y-%m-%dT%H:%M:%S'),
-                'backgroundColor': '#3ec336',
-                'borderColor': '#FFFFFF',
-                'display': 'block',
-                'serviceProviderId': availableBookingDate.user.id,
-                'serviceProviderNameAndSurname': f"{availableBookingDate.user.first_name} {availableBookingDate.user.last_name}",
-                'clientId': -1,
-                'clientNameAndSurname': "",
-                'eventType': 0,
-                'intervalTimeInt': availableBookingDate.intervalTime,
-                'intervalTimeString': getTimeStringValue(availableBookingDate.intervalTime),
-                'breakBetweenIntervals': availableBookingDate.breakBetweenIntervals,
-                'editable': possibleDragging,
-                'availableBookingDateStart': None,
-                'availableBookingDateEnd': None,
-            })
+            out.append(getAvailableBookingDateJsonData(availableBookingDate, freeTime, possibleDragging))
     return JsonResponse(out, safe=False)
 
 
@@ -425,6 +349,7 @@ def eventTable(request):
     context = {'availableBookingDates': filteredAvailableBookingDates,
                'reservations': reservations}
     return render(request, 'eventTable/eventTable.html', context)
+
 
 # class Event:
 #     def __init__(self, eventId, eventType, startDate, endDate, serviceProvider=None, client=None):

@@ -4,6 +4,90 @@ from django.core.mail import send_mail
 import threading
 
 
+def getReservationWithoutServiceProviderJsonData(reservation):
+    return {'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
+            'id': reservation.id,
+            'start': reservation.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end': reservation.end.strftime('%Y-%m-%dT%H:%M:%S'),
+            'backgroundColor': '#FFA500',
+            'borderColor': '#FFFFFF',
+            'display': 'block',
+            'serviceProviderId': -1,
+            'serviceProviderNameAndSurname': f"",
+            'clientId': reservation.bookingPerson.id,
+            'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
+            'eventType': 3,
+            'intervalTimeInt': None,
+            'intervalTimeString': None,
+            'breakBetweenIntervals': 0,
+            'editable': True,
+            'availableBookingDateStart': None,
+            'availableBookingDateEnd': None}
+
+
+def getUnconfirmedReservationJsonData(reservation):
+    return {'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
+            'id': reservation.id,
+            'start': reservation.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end': reservation.end.strftime('%Y-%m-%dT%H:%M:%S'),
+            'backgroundColor': '#FFA500',
+            'borderColor': '#FFFFFF',
+            'display': 'block',
+            'serviceProviderId': reservation.availableBookingDate.user.id,
+            'serviceProviderNameAndSurname': f"{reservation.availableBookingDate.user.first_name} {reservation.availableBookingDate.user.last_name}",
+            'clientId': reservation.bookingPerson.id,
+            'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
+            'eventType': 1,
+            'intervalTimeInt': reservation.availableBookingDate.intervalTime,
+            'intervalTimeString': getTimeStringValue(reservation.availableBookingDate.intervalTime),
+            'breakBetweenIntervals': reservation.availableBookingDate.breakBetweenIntervals,
+            'editable': False,
+            'availableBookingDateStart': reservation.availableBookingDate.start,
+            'availableBookingDateEnd': reservation.availableBookingDate.end}
+
+
+def getConfirmedReservationJsonData(reservation):
+    return {'title': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
+            'id': reservation.id,
+            'start': reservation.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'end': reservation.end.strftime('%Y-%m-%dT%H:%M:%S'),
+            'backgroundColor': '#BF40BF',
+            'borderColor': '#FFFFFF',
+            'display': 'block',
+            'serviceProviderId': reservation.availableBookingDate.user.id,
+            'serviceProviderNameAndSurname': f"{reservation.availableBookingDate.user.first_name} {reservation.availableBookingDate.user.last_name}",
+            'clientId': reservation.bookingPerson.id,
+            'clientNameAndSurname': f"{reservation.bookingPerson.first_name} {reservation.bookingPerson.last_name}",
+            'eventType': 2,
+            'intervalTimeInt': reservation.availableBookingDate.intervalTime,
+            'intervalTimeString': getTimeStringValue(reservation.availableBookingDate.intervalTime),
+            'breakBetweenIntervals': reservation.availableBookingDate.breakBetweenIntervals,
+            'editable': False,
+            'availableBookingDateStart': reservation.availableBookingDate.start,
+            'availableBookingDateEnd': reservation.availableBookingDate.end}
+
+
+def getAvailableBookingDateJsonData(availableBookingDate, freeTime, possibleDragging):
+    return {'title': f"{availableBookingDate.user.first_name} {availableBookingDate.user.last_name}",
+            'id': availableBookingDate.id,
+            'start': freeTime[0].strftime('%Y-%m-%dT%H:%M:%S'),
+            'end': freeTime[1].strftime('%Y-%m-%dT%H:%M:%S'),
+            'backgroundColor': '#3ec336',
+            'borderColor': '#FFFFFF',
+            'display': 'block',
+            'serviceProviderId': availableBookingDate.user.id,
+            'serviceProviderNameAndSurname': f"{availableBookingDate.user.first_name} {availableBookingDate.user.last_name}",
+            'clientId': -1,
+            'clientNameAndSurname': "",
+            'eventType': 0,
+            'intervalTimeInt': availableBookingDate.intervalTime,
+            'intervalTimeString': getTimeStringValue(availableBookingDate.intervalTime),
+            'breakBetweenIntervals': availableBookingDate.breakBetweenIntervals,
+            'editable': possibleDragging,
+            'availableBookingDateStart': None,
+            'availableBookingDateEnd': None}
+
+
 def getAvailableTimeRanges(availableBookingDate):
     reservations = Reservation.objects.filter(availableBookingDate=availableBookingDate, isAccepted=True, isDeleted=False).order_by('start')
     if not reservations:
