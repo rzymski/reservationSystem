@@ -16,18 +16,18 @@ from django.db import connection, reset_queries
 
 
 def calendar(request):
-    serviceProviders = User.objects.filter(availablebookingdate__isnull=False, availablebookingdate__isDeleted=False).distinct()
+    serviceProviders = User.objects.filter(availablebookingdate__isnull=False, availablebookingdate__isDeleted=False).distinct().prefetch_related('userprofile')
     serviceProvidersWithImages = []
     for serviceProvider in serviceProviders:
-        userProfileObject = UserProfile.objects.get(user=serviceProvider)
+        userProfileObject = serviceProvider.userprofile  # UserProfile.objects.get(user=serviceProvider)
         profileImageUrl = userProfileObject.profileImage.url if userProfileObject and userProfileObject.profileImage else None
         serviceProvidersWithImages.append((serviceProvider, profileImageUrl))
 
     clientGroup = Group.objects.get(name='client')
-    clients = User.objects.filter(groups=clientGroup)
+    clients = User.objects.filter(groups=clientGroup).prefetch_related('userprofile')
     clientsWithImages = []
     for client in clients:
-        clientProfile = UserProfile.objects.get(user=client)
+        clientProfile = client.userprofile # UserProfile.objects.get(user=client)
         clientProfileUrl = clientProfile.profileImage.url if clientProfile and clientProfile.profileImage else None
         clientsWithImages.append((client, clientProfileUrl))
 
@@ -40,7 +40,10 @@ def calendar(request):
 
 
 def allReservationsWithoutServiceProvider(request, allClients=True, selectedClientsIds=None):
-    reservations = Reservation.objects.filter(availableBookingDate__isnull=True, isDeleted=False) if allClients else Reservation.objects.filter(availableBookingDate__isnull=True, isDeleted=False, bookingPerson__id__in=selectedClientsIds)
+    if allClients:
+        reservations = Reservation.objects.filter(availableBookingDate__isnull=True, isDeleted=False).select_related('bookingPerson', 'availableBookingDate', 'availableBookingDate__user')
+    else:
+        reservations = Reservation.objects.filter(availableBookingDate__isnull=True, isDeleted=False, bookingPerson__id__in=selectedClientsIds).select_related('bookingPerson', 'availableBookingDate', 'availableBookingDate__user')
     out = []
     for reservation in reservations:
         out.append(getReservationWithoutServiceProviderJsonData(reservation))
@@ -48,7 +51,10 @@ def allReservationsWithoutServiceProvider(request, allClients=True, selectedClie
 
 
 def allUnconfirmedReservations(request, allClients=True, selectedClientsIds=None):
-    reservations = Reservation.objects.filter(isAccepted=False, availableBookingDate__isnull=False, availableBookingDate__isDeleted=False, isDeleted=False) if allClients else Reservation.objects.filter(isAccepted=False, availableBookingDate__isnull=False, availableBookingDate__isDeleted=False, isDeleted=False, bookingPerson__id__in=selectedClientsIds)
+    if allClients:
+        reservations = Reservation.objects.filter(isAccepted=False, availableBookingDate__isnull=False, availableBookingDate__isDeleted=False, isDeleted=False).select_related('bookingPerson', 'availableBookingDate', 'availableBookingDate__user')
+    else:
+        reservations = Reservation.objects.filter(isAccepted=False, availableBookingDate__isnull=False, availableBookingDate__isDeleted=False, isDeleted=False, bookingPerson__id__in=selectedClientsIds).select_related('bookingPerson', 'availableBookingDate', 'availableBookingDate__user')
     out = []
     for reservation in reservations:
         out.append(getUnconfirmedReservationJsonData(reservation))
@@ -57,12 +63,12 @@ def allUnconfirmedReservations(request, allClients=True, selectedClientsIds=None
 
 def allConfirmedReservations(request, allUsers=True, selectedServiceProvidersIds=None, selectedClientsIds=None):
     if allUsers:
-        reservations = Reservation.objects.filter(isAccepted=True, isDeleted=False)
+        reservations = Reservation.objects.filter(isAccepted=True, isDeleted=False).select_related('bookingPerson', 'availableBookingDate', 'availableBookingDate__user')
     else:
         reservations = Reservation.objects.filter(
             Q(isAccepted=True, isDeleted=False, availableBookingDate__user__id__in=selectedServiceProvidersIds) |
             Q(isAccepted=True, isDeleted=False, bookingPerson__id__in=selectedClientsIds)
-        )
+        ).select_related('bookingPerson', 'availableBookingDate', 'availableBookingDate__user')
     out = []
     for reservation in reservations:
         out.append(getConfirmedReservationJsonData(reservation))
@@ -70,41 +76,18 @@ def allConfirmedReservations(request, allUsers=True, selectedServiceProvidersIds
 
 
 def allAvailableBookingDates(request, allServiceProviders=True, selectedServiceProvidersIds=None):
-    reset_queries()
-
     if allServiceProviders:
         availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False)\
             .prefetch_related('user', Prefetch('reservation_set', queryset=Reservation.objects.filter(isAccepted=True, isDeleted=False).order_by('start'), to_attr='acceptedReservations'))
     else:
         availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False, user__id__in=selectedServiceProvidersIds)\
             .prefetch_related('user', Prefetch('reservation_set', queryset=Reservation.objects.filter(isAccepted=True, isDeleted=False).order_by('start'), to_attr='acceptedReservations'))
-
-    #availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False) if allServiceProviders else AvailableBookingDate.objects.filter(isDeleted=False, user__id__in=selectedServiceProvidersIds)
-    # if allServiceProviders:
-    #     availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False).prefetch_related('user', 'reservation_set')
-    # else:
-    #     availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False, user__id__in=selectedServiceProvidersIds).prefetch_related('user', 'reservation_set')
-
-    #availableBookingDates = availableBookingDates.annotate(acceptedReservationsCount=Count('reservation', filter=Q(reservation__isAccepted=True, reservation__isDeleted=False)))
-
     out = []
     for availableBookingDate in availableBookingDates:
         freeTimesInAvailableBookingDate = getAvailableTimeRanges(availableBookingDate)
         for freeTime in freeTimesInAvailableBookingDate:
-            # possibleDragging = True if Reservation.objects.filter(isAccepted=True, availableBookingDate=availableBookingDate, isDeleted=False).count() == 0 else False
-            # possibleDragging = True if len(availableBookingDate.reservation_set.filter(isAccepted=True, isDeleted=False)) == 0 else False
-            # possibleDragging = True if availableBookingDate.acceptedReservationsCount == 0 else False
             possibleDragging = True if availableBookingDate.acceptedReservations.count == 0 else False
             out.append(getAvailableBookingDateJsonData(availableBookingDate, freeTime, possibleDragging))
-
-    # for availableBookingDate in availableBookingDates:
-    #     possibleDragging = True if availableBookingDate.acceptedReservationsCount == 0 else False
-    #     #out.append(getAvailableBookingDateJsonData(availableBookingDate, freeTime, possibleDragging))
-
-    for query in connection.queries:
-        print(query['sql'], "\n")
-    ic(len(connection.queries))
-
     return JsonResponse(out, safe=False)
 
 
@@ -397,7 +380,8 @@ def createStatistics(request):
             ic(serviceProvider, availableBookingDate)
 
     for query in connection.queries:
-        print(query['sql'], "\n")
+        ic(query['sql'], "\n")
+    ic(len(connection.queries))
 
     # clientGroup = Group.objects.get(name='client')
     # clients = User.objects.filter(groups=clientGroup)
