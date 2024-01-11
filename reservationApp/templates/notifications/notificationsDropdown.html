@@ -5,7 +5,7 @@
     {% endif %}
 </button>
 
-<div id="notificationsDropdown" class="absolute z-10 hidden bg-gray-50 divide-y divide-gray-100 shadow w-96 dark:bg-gray-700 dark:divide-gray-600 right-52 border border-black overflow-y-hidden hover:overflow-y-auto" style="top: 67px; max-height: 30vh;">
+<div id="notificationsDropdown" class="fixed z-10 top-20 right-56 hidden bg-gray-50 divide-y divide-gray-100 shadow w-96 dark:bg-gray-700 dark:divide-gray-600 border border-black overflow-y-hidden hover:overflow-y-auto" style="max-height: 30vh;">
     {%  for notification in notifications %}
         {% if notification.hasBeenSeen %}
              <div onclick="navigateToEvent({{ notification.id }},'{{ notification.event.id }}', '{{ notification.event.start|date:'Y-m-d\TH:i:s' }}', event)" class="p-2 font-normal text-sm text-gray-400">

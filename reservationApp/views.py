@@ -15,7 +15,7 @@ from django.db.models import Q
 from django.db.models import Min, Max
 
 
-def index(request):
+def calendar(request):
     serviceProviders = User.objects.filter(availablebookingdate__isnull=False, availablebookingdate__isDeleted=False).distinct()
     serviceProvidersWithImages = []
     for serviceProvider in serviceProviders:
@@ -338,7 +338,6 @@ def readNotification(request):
         return JsonResponse(responseData)
 
 
-@login_required(login_url='login')
 def eventTable(request):
     availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False)
     filteredAvailableBookingDates = []
@@ -438,7 +437,7 @@ def registerUser(request):
             user = authenticate(username=username, password=password)
             login(request, user)
             messages.success(request, 'Konto zostało utworzone dla: ' + username)
-            return redirect('index')
+            return redirect('calendar')
     return render(request, 'accounts/register.html', {'form': form})
 
 
@@ -456,7 +455,7 @@ def loginUser(request):
                 login(request, user)
                 if 'next' in request.POST:
                     return redirect(request.POST['next'])
-                return redirect('index')
+                return redirect('calendar')
         else:
             errors.append('Username or password is incorrect')
             # messages.error(request, 'Username or password is incorrect')
@@ -468,7 +467,7 @@ def logoutUser(request):
     logout(request)
     if theme:
         request.session["is_dark_theme"] = True
-    return redirect('index')
+    return redirect('calendar')
 
 
 def deleteNotification(request):

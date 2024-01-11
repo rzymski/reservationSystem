@@ -5,7 +5,7 @@ from django.shortcuts import redirect
 def unauthenticatedUser(viewFunc):
     def wrappedFunc(request, *args, **kwargs):
         if request.user.is_authenticated:
-            return redirect('index')
+            return redirect('calendar')
         else:
             return viewFunc(request, *args, **kwargs)
     return wrappedFunc
