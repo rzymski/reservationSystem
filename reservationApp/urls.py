@@ -30,6 +30,8 @@ urlpatterns = [
 
     path('eventTable/', views.eventTable, name='eventTable'),
 
+    path('createStatistics/', views.createStatistics, name='createStatistics'),
+
 
     path('test/main/', views.PostListView.as_view(), name='main'),
     path('test/<pk>/', views.PostDetailView.as_view(), name='detail'),

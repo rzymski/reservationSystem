@@ -30,10 +30,15 @@
                 <div class="px-4 py-3 font-bold text-xl text-gray-900 dark:text-white">
                     <a href="{% url 'userProfile' pk=request.user.id %}">{{ request.user }}</a>
                 </div>
-                {% if userRole == 'admin' %}
+                {% if userRole == 'admin' or userRole == 'controller' %}
                     <ul class="py-2 text-base text-gray-700 dark:text-gray-200" aria-labelledby="avatarButton">
+                        {% if userRole == 'admin' %}
+                            <li>
+                                <a href="/admin/" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Strona administracyjna</a>
+                            </li>
+                        {% endif %}
                         <li>
-                            <a href="/admin/" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Strona administracyjna</a>
+                            <a href="{% url 'createStatistics' %}" class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Stwórz statystyki</a>
                         </li>
 {#                        <li>#}
 {#                            <a href="{% url 'updateRoles' %}"  class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Zmień uprawnienia</a>#}

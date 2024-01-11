@@ -7,8 +7,8 @@ from django.utils import timezone
 @admin.register(AvailableBookingDate)
 class AvailableBookingDateAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'start_display', 'end_display', 'intervalTime', 'breakBetweenIntervals', 'isDeleted')
-    list_filter = ('id', 'user', 'start', 'end', 'intervalTime', 'breakBetweenIntervals')
-    search_fields = ('id', 'start', 'end', 'intervalTime', 'breakBetweenIntervals')
+    list_filter = ('user', 'start', 'end', 'intervalTime', 'breakBetweenIntervals', 'id')
+    search_fields = ('id', 'user__username', 'start', 'end', 'intervalTime', 'breakBetweenIntervals')
     ordering = ('id', 'user', 'start', 'end', 'intervalTime', 'breakBetweenIntervals')
 
     def start_display(self, obj):
@@ -24,7 +24,7 @@ class AvailableBookingDateAdmin(admin.ModelAdmin):
 @admin.register(Reservation)
 class ReservationAdmin(admin.ModelAdmin):
     list_display = ('id', 'bookingPerson', 'availableBookingDate', 'start_display', 'end_display', 'isAccepted', 'isDeleted')
-    list_filter = ('id', 'bookingPerson', 'isAccepted', 'start', 'end', 'availableBookingDate')
+    list_filter = ('bookingPerson', 'isAccepted', 'start', 'end', 'availableBookingDate', 'id')
     search_fields = ('id', 'bookingPerson__username', 'start', 'end', 'isAccepted')
     ordering = ('id', 'bookingPerson', 'availableBookingDate', 'start', 'end', 'isAccepted')
 
@@ -66,10 +66,10 @@ class NotificationAdmin(admin.ModelAdmin):
 
 
 
-@admin.register(Post)
-class PostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'content')
-    list_filter = ('title', 'content')
-    search_fields = ('title', 'content')
-    ordering = ('title', 'content')
+# @admin.register(Post)
+# class PostAdmin(admin.ModelAdmin):
+#     list_display = ('title', 'content')
+#     list_filter = ('title', 'content')
+#     search_fields = ('title', 'content')
+#     ordering = ('title', 'content')
 
