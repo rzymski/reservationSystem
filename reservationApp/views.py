@@ -11,7 +11,7 @@ from django.http import JsonResponse
 from datetime import datetime, timedelta
 from icecream import ic
 import json
-from django.db.models import Q, Count, Prefetch
+from django.db.models import Q, F, Prefetch, Count, Sum, ExpressionWrapper, F, DurationField, OuterRef, Subquery
 from django.db import connection, reset_queries
 
 
@@ -371,13 +371,91 @@ def createStatistics(request):
 
     reset_queries()
 
-    # my query
+    # Wersja uniwersalna gdzie dostaje sie uzytkownikow i ich dostepnego terminy
+    # serviceProviderGroup = Group.objects.get(name='serviceProvider')
+    # serviceProviders = User.objects.filter(groups=serviceProviderGroup).prefetch_related('availablebookingdate_set', 'availablebookingdate_set__reservation_set')
+    # #ic(serviceProviders)
+    # for serviceProvider in serviceProviders:
+    #     for availableBookingDate in serviceProvider.availablebookingdate_set.all():
+    #         ic(serviceProvider, availableBookingDate)
+
+
+    # Suma wszystkich długości
+    # serviceProviderGroup = Group.objects.get(name='serviceProvider')
+    # serviceProviders = User.objects.filter(groups=serviceProviderGroup)  # .aggregate(Count('availablebookingdate'), Sum('availablebookingdate__id'))
+    # ic(serviceProviders)
+    # totalTimeSum = AvailableBookingDate.objects.filter(user__in=serviceProviders, isDeleted=False).aggregate(
+    #     totalTimeSeconds=Sum(F('end') - F('start'), output_field=models.DurationField())
+    # )
+    # totalTimeSumHours = totalTimeSum['totalTimeSeconds'].total_seconds() / 3600
+    # ic(totalTimeSumHours)
+
+
+
+    # serviceProviderGroup = Group.objects.get(name='serviceProvider')
+    # serviceProviders = User.objects.filter(groups=serviceProviderGroup).prefetch_related(
+    #     Prefetch('availablebookingdate_set',
+    #              queryset=AvailableBookingDate.objects.filter(isDeleted=False)
+    #              .annotate(totalTimeSeconds=ExpressionWrapper(F('end') - F('start'), output_field=DurationField()))
+    #              .filter(user=F('user'))
+    #              .annotate(totalTime=Sum('totalTimeSeconds')),
+    #              to_attr='totalTime')
+    # )
+    # ic(serviceProviders)
+    # for serviceProvider in serviceProviders:
+    #     ic(serviceProvider.username)
+    #     for available_booking_date in serviceProvider.totalTime:
+    #         ic(available_booking_date.totalTimeSeconds)
+    #         ic(available_booking_date.totalTime)
+
+    # Wersja co zwraca dla każdego dostepnego terminu czas jego trwania
+    # serviceProviderGroup = Group.objects.get(name='serviceProvider')
+    # serviceProviders = User.objects.filter(groups=serviceProviderGroup).prefetch_related(
+    #     Prefetch('availablebookingdate_set',
+    #              queryset=AvailableBookingDate.objects.filter(isDeleted=False)
+    #              .annotate(availableBookingDateTimeSeconds=ExpressionWrapper(F('end') - F('start'), output_field=DurationField()))
+    #              .filter(user=F('user')))
+    # )
+    # ic(serviceProviders)
+    # for serviceProvider in serviceProviders:
+    #     ic(serviceProvider.username)
+    #     for available_booking_date in serviceProvider.availablebookingdate_set.all():
+    #         ic(available_booking_date.availableBookingDateTimeSeconds)
+
+    # Najlepsza wersja co zwraca już gotowy wynik
+    totalTimeSubQuery = AvailableBookingDate.objects.filter(isDeleted=False, user=OuterRef('id'))\
+        .annotate(availableBookingDateTimeSeconds=ExpressionWrapper(F('end') - F('start'), output_field=DurationField()))
+
     serviceProviderGroup = Group.objects.get(name='serviceProvider')
-    serviceProviders = User.objects.filter(groups=serviceProviderGroup, username='wolontariuszka').prefetch_related('availablebookingdate_set', 'availablebookingdate_set__reservation_set')
-    #ic(serviceProviders)
+    serviceProviders = User.objects.filter(groups=serviceProviderGroup)\
+        .annotate(totalAvailableTime=Subquery(totalTimeSubQuery.values('user').annotate(totalSum=Sum('availableBookingDateTimeSeconds')).values('totalSum')[:1]))
+
     for serviceProvider in serviceProviders:
-        for availableBookingDate in serviceProvider.availablebookingdate_set.all():
-            ic(serviceProvider, availableBookingDate)
+        ic(serviceProvider.username)
+        time = serviceProvider.totalAvailableTime.total_seconds() / 3600 if serviceProvider.totalAvailableTime is not None else 0
+        ic(time)
+
+    # totalTimeSubQuery = AvailableBookingDate.objects.filter(isDeleted=False, user=OuterRef('id')) \
+    #     .annotate(
+    #     availableBookingDateTimeSeconds=ExpressionWrapper(F('end') - F('start'), output_field=DurationField()))
+    # serviceProviderGroup = Group.objects.get(name='serviceProvider')
+    # serviceProviders = User.objects.filter(groups=serviceProviderGroup) \
+    #     .annotate(totalAvailableTime=Subquery(totalTimeSubQuery.values('user').annotate(total=Sum('availableBookingDateTimeSeconds')).values('total')[:1]),
+    #               numberOfAvailableTime=Subquery(totalTimeSubQuery.values('user').annotate(total=Count('availableBookingDateTimeSeconds')).values('total')[:1]))
+    #
+    # for serviceProvider in serviceProviders:
+    #     ic(serviceProvider.username, serviceProvider.numberOfAvailableTime)
+    #     time = serviceProvider.totalAvailableTime.total_seconds() / 3600 if serviceProvider.totalAvailableTime is not None else 0
+    #     ic(time)
+
+    # Wersja zwraca właściwy wynik, ale tylko dla usługodawców co mają conajmniej jeden dostępny termin
+    # serviceProviderGroup = Group.objects.get(name='serviceProvider')
+    # result = AvailableBookingDate.objects.filter(isDeleted=False, user__groups=serviceProviderGroup).values('user').annotate(total=Sum(ExpressionWrapper(F('end') - F('start'), output_field=DurationField())))
+    # ic(result)
+    # for serviceProviderWithTime in result:
+    #     ic(serviceProviderWithTime['user__username'])
+    #     time = serviceProviderWithTime['total'].total_seconds() / 3600 if serviceProviderWithTime['total'] is not None else 0
+    #     ic(time)
 
     for query in connection.queries:
         ic(query['sql'], "\n")
