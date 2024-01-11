@@ -11,8 +11,8 @@ from django.http import JsonResponse
 from datetime import datetime, timedelta
 from icecream import ic
 import json
-from django.db.models import Q
-from django.db.models import Min, Max
+from django.db.models import Q, Count, Prefetch
+from django.db import connection, reset_queries
 
 
 def calendar(request):
@@ -70,13 +70,41 @@ def allConfirmedReservations(request, allUsers=True, selectedServiceProvidersIds
 
 
 def allAvailableBookingDates(request, allServiceProviders=True, selectedServiceProvidersIds=None):
-    availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False) if allServiceProviders else AvailableBookingDate.objects.filter(isDeleted=False, user__id__in=selectedServiceProvidersIds)
+    reset_queries()
+
+    if allServiceProviders:
+        availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False)\
+            .prefetch_related('user', Prefetch('reservation_set', queryset=Reservation.objects.filter(isAccepted=True, isDeleted=False).order_by('start'), to_attr='acceptedReservations'))
+    else:
+        availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False, user__id__in=selectedServiceProvidersIds)\
+            .prefetch_related('user', Prefetch('reservation_set', queryset=Reservation.objects.filter(isAccepted=True, isDeleted=False).order_by('start'), to_attr='acceptedReservations'))
+
+    #availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False) if allServiceProviders else AvailableBookingDate.objects.filter(isDeleted=False, user__id__in=selectedServiceProvidersIds)
+    # if allServiceProviders:
+    #     availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False).prefetch_related('user', 'reservation_set')
+    # else:
+    #     availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False, user__id__in=selectedServiceProvidersIds).prefetch_related('user', 'reservation_set')
+
+    #availableBookingDates = availableBookingDates.annotate(acceptedReservationsCount=Count('reservation', filter=Q(reservation__isAccepted=True, reservation__isDeleted=False)))
+
     out = []
     for availableBookingDate in availableBookingDates:
         freeTimesInAvailableBookingDate = getAvailableTimeRanges(availableBookingDate)
         for freeTime in freeTimesInAvailableBookingDate:
-            possibleDragging = True if Reservation.objects.filter(isAccepted=True, availableBookingDate=availableBookingDate, isDeleted=False).count() == 0 else False
+            # possibleDragging = True if Reservation.objects.filter(isAccepted=True, availableBookingDate=availableBookingDate, isDeleted=False).count() == 0 else False
+            # possibleDragging = True if len(availableBookingDate.reservation_set.filter(isAccepted=True, isDeleted=False)) == 0 else False
+            # possibleDragging = True if availableBookingDate.acceptedReservationsCount == 0 else False
+            possibleDragging = True if availableBookingDate.acceptedReservations.count == 0 else False
             out.append(getAvailableBookingDateJsonData(availableBookingDate, freeTime, possibleDragging))
+
+    # for availableBookingDate in availableBookingDates:
+    #     possibleDragging = True if availableBookingDate.acceptedReservationsCount == 0 else False
+    #     #out.append(getAvailableBookingDateJsonData(availableBookingDate, freeTime, possibleDragging))
+
+    for query in connection.queries:
+        print(query['sql'], "\n")
+    ic(len(connection.queries))
+
     return JsonResponse(out, safe=False)
 
 
@@ -339,13 +367,8 @@ def readNotification(request):
 
 
 def eventTable(request):
-    availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False)
-    filteredAvailableBookingDates = []
-    for availableBookingDate in availableBookingDates:
-        if availableBookingDate.reservation_set.filter(isAccepted=True, isDeleted=False).count() == 0:
-            filteredAvailableBookingDates.append(availableBookingDate)
-    reservations = Reservation.objects.filter(isDeleted=False)
-
+    filteredAvailableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False).exclude(reservation__isDeleted=False, reservation__isAccepted=True).distinct()
+    reservations = Reservation.objects.filter(isDeleted=False).select_related('bookingPerson', 'availableBookingDate', 'availableBookingDate__user')
     reservationsWithJsonData = []
     for reservation in reservations:
         if reservation.availableBookingDate is None:
@@ -363,18 +386,15 @@ def eventTable(request):
 def createStatistics(request):
     ic("Stworz statystyki")
 
-    from django.db import connection, reset_queries
     reset_queries()
 
     # my query
     serviceProviderGroup = Group.objects.get(name='serviceProvider')
-    serviceProviders = User.objects.filter(groups=serviceProviderGroup).prefetch_related('availablebookingdate_set')
+    serviceProviders = User.objects.filter(groups=serviceProviderGroup, username='wolontariuszka').prefetch_related('availablebookingdate_set', 'availablebookingdate_set__reservation_set')
     #ic(serviceProviders)
     for serviceProvider in serviceProviders:
-        ss = serviceProvider
         for availableBookingDate in serviceProvider.availablebookingdate_set.all():
-            ic(ss, availableBookingDate)
-
+            ic(serviceProvider, availableBookingDate)
 
     for query in connection.queries:
         print(query['sql'], "\n")

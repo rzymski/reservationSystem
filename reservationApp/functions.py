@@ -89,7 +89,8 @@ def getAvailableBookingDateJsonData(availableBookingDate, freeTime, possibleDrag
 
 
 def getAvailableTimeRanges(availableBookingDate):
-    reservations = Reservation.objects.filter(availableBookingDate=availableBookingDate, isAccepted=True, isDeleted=False).order_by('start')
+    #reservations = Reservation.objects.filter(availableBookingDate=availableBookingDate, isAccepted=True, isDeleted=False).order_by('start')
+    reservations = availableBookingDate.acceptedReservations
     if not reservations:
         return [(availableBookingDate.start, availableBookingDate.end)]
     # Dodanie czasu pomiędzy początkiem pierwszej rezerwacji a początkiem dostępnego czasu
@@ -103,8 +104,8 @@ def getAvailableTimeRanges(availableBookingDate):
         if startFreeTime > endFreeTime:
             ic("Wystapil error, ktory nie powinien miec miejsca. Kolejna rezerwacja zaczyna się zanim skończy się poprzednia.")
     # Dodanie czasu pomiędzy koncem ostatniej rezerwacji a końcem dostępnego czasu
-    if reservations.last().end != availableBookingDate.end:
-        availableTimeRanges.append((reservations.last().end, availableBookingDate.end))
+    if reservations[-1].end != availableBookingDate.end:
+        availableTimeRanges.append((reservations[-1].end, availableBookingDate.end))
     return availableTimeRanges
 
 
