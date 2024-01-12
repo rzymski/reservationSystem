@@ -25,7 +25,6 @@
             initialView: 'dayGridMonth',
             timeZone: 'Europe/Warsaw',
             headerToolbar: {
-                {#left: 'multiMonthYear,dayGridMonth,timeGridWeek,timeGridDay',#}
                 left: 'dayGridMonth,timeGridWeek,timeGridDay',
                 center: 'title',
                 right: 'prev,today,next'
@@ -34,7 +33,7 @@
                 today: 'dzisiaj',
                 month:    'miesiąc',
                 week:     'tydzień',
-                day:      'dzisiaj',
+                day:      'dzień',
             },
             footerToolbar: {
                 start: '',
@@ -275,10 +274,10 @@
         const start = getDateDetails(info.event.start, '.', 'YMD')
         const end = getDateDetails(info.event.end, '.', 'YMD')
         let tooltipContent = `<div onclick="eventTooltipClicked(${info.event.id})" class="text-left font-semibold mb-1 text-lg whitespace-nowrap p-5 border-2 border-solid rounded-lg dark:bg-slate-500 dark:border-gray-50 bg-slate-200 border-gray-950">`;
-        if (info.event.extendedProps.eventType === 0) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Dostępny termin</div>`;}
-        if (info.event.extendedProps.eventType === 1) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Propozycja rezerwacji</div>`;}
-        if (info.event.extendedProps.eventType === 2) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Potwierdzona rezerwacja</div>`;}
-        if (info.event.extendedProps.eventType === 3) {tooltipContent += `<div class="text-center font-bold text-xl mb-2">Propozycja terminu</div>`;}
+        if (info.event.extendedProps.eventType === 0) {tooltipContent += `<div class="text-center font-bold text-xl mb-2"><i class="fa-regular fa-thumbs-up"></i> Dostępny termin</div>`;}
+        if (info.event.extendedProps.eventType === 1) {tooltipContent += `<div class="text-center font-bold text-xl mb-2"><i class="fa-solid fa-book-bookmark"></i></i> Propozycja rezerwacji</div>`;}
+        if (info.event.extendedProps.eventType === 2) {tooltipContent += `<div class="text-center font-bold text-xl mb-2"><i class="fa-regular fa-handshake"></i> Potwierdzona rezerwacja</div>`;}
+        if (info.event.extendedProps.eventType === 3) {tooltipContent += `<div class="text-center font-bold text-xl mb-2"><i class="fa-regular fa-hand"></i></i> Propozycja terminu</div>`;}
         tooltipContent += `${info.event.extendedProps.serviceProviderId !== -1 ? `<div><a href="/userProfile/${info.event.extendedProps.serviceProviderId}/" class="hover:text-green-500">Usługodawca: ${info.event.extendedProps.serviceProviderNameAndSurname}</a></div>` : ''}`;
         tooltipContent += `${info.event.extendedProps.clientId !== -1 ? `<div><a href="/userProfile/${info.event.extendedProps.clientId}/" class="hover:text-orange-400">Usługobiorca: ${info.event.extendedProps.clientNameAndSurname}</a></div>` : ''}`;
         tooltipContent += `<div>Od: ${start.dateWithoutTime} ${start.dayOfTheWeek} ${start.time}</div>`;
@@ -431,7 +430,13 @@
         }
     };
     function getEventTitle(arg) {
-        return { html: `<div class="fc-title">${arg.event.title}</div>` }
+        let eventTitle = '<div class="fc-title">';
+        if (arg.event.extendedProps.eventType === 0) {eventTitle += `<i class="fa-regular fa-thumbs-up"></i>`;}
+        if (arg.event.extendedProps.eventType === 1) {eventTitle += `<i class="fa-solid fa-book-bookmark"></i></i>`;}
+        if (arg.event.extendedProps.eventType === 2) {eventTitle += `<i class="fa-regular fa-handshake"></i>`;}
+        if (arg.event.extendedProps.eventType === 3) {eventTitle += `<i class="fa-regular fa-hand"></i></i>`;}
+        eventTitle += ` ${arg.event.title}</div>`
+        return { html: eventTitle }
     };
     function filter() {
         //console.log("DZIALA")
