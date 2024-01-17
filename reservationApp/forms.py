@@ -6,8 +6,10 @@ from django.core.exceptions import ValidationError
 
 
 class LoginForm(AuthenticationForm):
-    username = forms.CharField(max_length=254, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nazwa użytkownika'}), required=True)
-    password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Hasło'}), required=True)
+    username = forms.CharField(max_length=254, widget=forms.TextInput(
+        attrs={'class': 'form-control', 'placeholder': 'Nazwa użytkownika'}), required=True)
+    password = forms.CharField(widget=forms.PasswordInput(
+        attrs={'class': 'form-control', 'placeholder': 'Hasło'}), required=True)
 
     class Meta:
         model = User
@@ -16,13 +18,14 @@ class LoginForm(AuthenticationForm):
     def confirm_login_allowed(self, user):
         if not user.is_active:
             raise ValidationError("This account is inactive.", code="inactive")
+
         # if user.username.startswith("b"):
         #     raise ValidationError("Sorry, accounts starting with 'b' aren't welcome here.", code="no_b_users",)
 
 
 class CreateUserForm(UserCreationForm):
     username = forms.CharField(label="", max_length=50,
-                               widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nick'}),
+                               widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nazwa użytkownika'}),
                                error_messages={
                                    'invalid': 'Podaj prawidłową nazwe użytkownika.',
                                    'unique': 'Nazwa jest już używana przez innego użytkownika.'})

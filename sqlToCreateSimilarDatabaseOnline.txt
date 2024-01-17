@@ -1,0 +1,81 @@
+CREATE TABLE auth_user (
+    id SERIAL PRIMARY KEY,
+    username VARCHAR(150) NOT NULL,
+    password VARCHAR(128) NOT NULL,
+    email VARCHAR(254) NOT NULL,
+    first_name VARCHAR(30) NOT NULL,
+    last_name VARCHAR(30) NOT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    date_joined TIMESTAMP NOT NULL
+);
+
+CREATE TABLE AvailableBookingDate (
+    id SERIAL PRIMARY KEY,
+    user_id INT REFERENCES auth_user(id) ON DELETE CASCADE,
+    start TIMESTAMP NULL,
+    end TIMESTAMP NULL,
+    intervalTime INT NULL,
+    breakBetweenIntervals INT DEFAULT 0,
+    isDeleted BOOLEAN DEFAULT FALSE
+);
+
+DROP TABLE demo;
+
+INSERT INTO auth_user (id, username, password, email, first_name, last_name, date_joined)
+VALUES (1, 'john_doe', 'hashed_password', 'john.doe@example.com', 'John', 'Doe', '2024-01-11 12:00:00');
+
+INSERT INTO auth_user (id, username, password, email, first_name, last_name, date_joined)
+VALUES (2, 'jane_smith', 'hashed_password', 'jane.smith@example.com', 'Jane', 'Smith', '2024-01-11 13:30:00');
+
+INSERT INTO auth_user (id, username, password, email, first_name, last_name, date_joined)
+VALUES (3, 'armagedon', 'hashed_password', 'john.doe@example.com', 'John', 'Doe', '2024-01-11 12:00:00');
+
+INSERT INTO auth_user (id, username, password, email, first_name, last_name, date_joined)
+VALUES (4, 'user4', 'hashed_password', 'jane.smith@example.com', 'Jane', 'Smith', '2024-01-11 13:30:00');
+
+INSERT INTO auth_user (id, username, password, email, first_name, last_name, date_joined)
+VALUES (5, 'user5', 'hashed_password', 'jane.smith@example.com', 'Jane', 'Smith', '2024-01-11 13:30:00');
+
+INSERT INTO auth_user (id, username, password, email, first_name, last_name, date_joined)
+VALUES (6, 'user6', 'hashed_password', 'jane.smith@example.com', 'Jane', 'Smith', '2024-01-11 13:30:00');
+
+
+INSERT INTO AvailableBookingDate (id, user_id, start, end, intervalTime, breakBetweenIntervals, isDeleted)
+VALUES (1001, 4, '2024-01-12 10:00:00', '2024-01-12 12:00:00', 45, 15, false);
+
+INSERT INTO AvailableBookingDate (id, user_id, start, end, intervalTime, breakBetweenIntervals, isDeleted)
+VALUES (1002, 5, '2024-01-13 12:30:00', '2024-01-13 13:00:00', 30, 0, false);
+
+INSERT INTO AvailableBookingDate (id, user_id, start, end, intervalTime, breakBetweenIntervals, isDeleted)
+VALUES (1003, 4, '2024-01-12 1:00:00', '2024-01-12 12:00:00', 45, 15, true);
+
+INSERT INTO AvailableBookingDate (id, user_id, start, end, intervalTime, breakBetweenIntervals, isDeleted)
+VALUES (1004, 5, '2024-01-13 18:59:00', '2024-01-13 19:00:00', 30, 0, true);
+
+INSERT INTO AvailableBookingDate (id, user_id, start, end, intervalTime, breakBetweenIntervals, isDeleted)
+VALUES (1005, 5, '2024-01-12 20:00:00', '2024-01-12 21:00:00', 45, 15, false);
+
+INSERT INTO AvailableBookingDate (id, user_id, start, end, intervalTime, breakBetweenIntervals, isDeleted)
+VALUES (1006, 6, '2024-01-13 22:30:00', '2024-01-14 10:00:00', 30, 0, false);
+
+INSERT INTO AvailableBookingDate (id, user_id, start, end, intervalTime, breakBetweenIntervals, isDeleted)
+VALUES (1007, 3, '2024-02-22 20:00:00', '2024-02-22 23:00:00', 45, 15, false);
+
+INSERT INTO AvailableBookingDate (id, user_id, start, end, intervalTime, breakBetweenIntervals, isDeleted)
+VALUES (1008, 4, '2024-05-01 10:00:00', '2024-05-01 15:00:00', 45, 15, false);
+
+INSERT INTO AvailableBookingDate (id, user_id, start, end, intervalTime, breakBetweenIntervals, isDeleted)
+VALUES (1009, 5, '2024-01-29 22:30:00', '2024-01-29 23:30:00', 30, 0, false);
+
+
+SELECT auth_user.id, username, AvailableBookingDate.start, AvailableBookingDate.end, AvailableBookingDate.id
+FROM auth_user
+LEFT JOIN AvailableBookingDate on auth_user.id = AvailableBookingDate.user_id
+WHERE AvailableBookingDate.user_id IS NOT NULL AND AvailableBookingDate.isdeleted = false
+
+
+SELECT auth_user.id
+FROM auth_user
+LEFT JOIN AvailableBookingDate on auth_user.id = AvailableBookingDate.user_id
+WHERE AvailableBookingDate.user_id IS NOT NULL AND AvailableBookingDate.isdeleted = false
+GROUP By auth_user.id

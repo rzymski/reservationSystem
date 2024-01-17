@@ -59,7 +59,7 @@ class AvailableBookingDate(models.Model):
                 isDeleted=False
             ).exclude(id=self.id)
             if conflictDates.exists():
-                raise ValidationError(f"Nie można zatwierdzić terminu. Użytkownik już ma dostępny termin w tym czasie.", code="userAlreadyHaveExistingAvailableBookingDateInThisTime")
+                raise ValidationError(f"Nie można zatwierdzić terminu. Użytkownik już ma spotkanie w tym czasie.", code="userAlreadyHaveExistingAvailableBookingDateInThisTime")
 
     def save(self, *args, **kwargs):
         fromUser = kwargs.pop('fromUser', None)
@@ -75,6 +75,10 @@ class AvailableBookingDate(models.Model):
                 reservation.availableBookingDate = None
                 reservation.save()
                 Notification.createNotification(9, reservation.bookingPerson, fromUser, None, reservation)
+
+    # class Meta:
+    #     verbose_name = "Dostępny termin"
+    #     verbose_name_plural = "Dostępne terminy"
 
 
 class Reservation(models.Model):
@@ -95,17 +99,27 @@ class Reservation(models.Model):
     def clean(self):
         if self.start and self.end and self.start >= self.end:
             raise ValidationError("Nie można zatwierdzić rezerwacji. Data końcowa nie może być przed początkową.")
-        # Check for conflicts only if both reservations are accepted
+        conflictingAcceptedReservations = Reservation.objects.filter(
+            # availableBookingDate=self.availableBookingDate,
+            bookingPerson=self.bookingPerson,
+            isAccepted=True,
+            start__lt=self.end,
+            end__gt=self.start,
+            isDeleted=False
+        ).exclude(pk=self.pk)  # Exclude self if instance is being updated
+        if conflictingAcceptedReservations.exists():
+            raise ValidationError("Nie można zatwierdzić rezerwacji. Następuje kolizja terminów. Użytkownik już ma zaakceptowaną rezerwacje w tym terminie", code="conflict")
         if self.isAccepted:
-            conflicting_reservations = Reservation.objects.filter(
-                availableBookingDate=self.availableBookingDate,
-                isAccepted=True,
+            conflictingNotAcceptedReservations = Reservation.objects.filter(
+                bookingPerson=self.bookingPerson,
+                isAccepted=False,
                 start__lt=self.end,
                 end__gt=self.start,
                 isDeleted=False
-            ).exclude(pk=self.pk)  # Exclude self if instance is being updated
-            if conflicting_reservations.exists():
-                raise ValidationError("Nie można zatwierdzić rezerwacji. Następuje kolizja terminów.", code="conflict")
+            ).exclude(pk=self.pk)
+            for conflictNotAcceptedReservation in conflictingNotAcceptedReservations:
+                conflictNotAcceptedReservation.isDeleted = True
+                conflictNotAcceptedReservation.save()
         if self.availableBookingDate:
             # Check for mismatch between interval+break and duration time
             if self.availableBookingDate.intervalTime and int(self.availableBookingDate.intervalTime) > 0:
@@ -132,7 +146,7 @@ class Reservation(models.Model):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     age = models.IntegerField(null=True, blank=True)
     UNDEFINED = 'UNDEFINED'
     MALE = 'MALE'
@@ -145,6 +159,7 @@ class UserProfile(models.Model):
     sex = models.CharField(max_length=30, choices=SEX_CHOICES, null=True, blank=True)
     description = models.CharField(max_length=300, null=True, blank=True)
     profileImage = models.ImageField(default='default.jpg', upload_to='profilePictures')
+    #userColor = models.CharField(max_length=20, default="white")
 
     def __str__(self):
         return f"{self.user.username} {self.user.first_name} {self.user.last_name} {self.age} {self.sex}"

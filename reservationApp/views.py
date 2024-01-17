@@ -269,7 +269,7 @@ def confirmOrRejectReservation(request):
         ic(request.POST)
         responseData = {'status': 'success', 'message': 'Potwierdzono wydarzenie.'}
         reservationId = request.POST.get('id')
-        reservation = Reservation.objects.get(pk=int(reservationId))
+        reservation = Reservation.objects.filter(pk=int(reservationId)).select_related("bookingPerson", "availableBookingDate", "availableBookingDate__user").first()
         action = request.POST.get('action')
         userWhoConfirmedReservation = request.user
         try:
@@ -287,7 +287,8 @@ def confirmOrRejectReservation(request):
             elif action == 'confirmExist':
                 errorMessage = saveReservationWhichCouldBePartOfAvailableBookingData(reservation, userWhoConfirmedReservation)
                 if errorMessage:
-                    messages.error(request, errorMessage)
+                    #messages.error(request, errorMessage)
+                    responseData = {'status': 'error', 'message': errorMessage}
             elif action == 'reject':
                 reservation.isDeleted = True
                 reservation.save()
@@ -338,14 +339,17 @@ def dragEvent(request):
 
 
 def readNotification(request):
-    ic("Przeczytano powiadomienie")
     if request.method == 'POST':
         ic(request.POST)
-        responseData = {'status': 'successWithoutNeedToRefetch', 'message': 'Przeczytano powiadomienie.'}
-        notificationId = request.POST.get('id')
-        notification = Notification.objects.get(pk=int(notificationId))
-        notification.hasBeenSeen = True
-        notification.save()
+        try:
+            responseData = {'status': 'successWithoutNeedToRefetch', 'message': 'Przeczytano powiadomienie.'}
+            notificationId = request.POST.get('id')
+            notification = Notification.objects.get(pk=int(notificationId))
+            notification.hasBeenSeen = True
+            notification.save()
+        except ValidationError as e:
+            ic("Wystąpił błąd: ", e)
+            responseData = {'status': 'error', 'message': e.message}
         return JsonResponse(responseData)
 
 
@@ -466,7 +470,6 @@ def createStatistics(request):
     return redirect('calendar')
 
 
-
 def userProfile(request, pk):
     userOwnerOfProfile = User.objects.get(pk=pk)
     userProfileInstance = UserProfile.objects.get(user=userOwnerOfProfile)
@@ -525,7 +528,6 @@ def loginUser(request):
                 return redirect('calendar')
         else:
             errors.append('Username or password is incorrect')
-            # messages.error(request, 'Username or password is incorrect')
     return render(request, 'accounts/login.html', {'form': form, 'errors': errors})
 
 
@@ -550,7 +552,7 @@ def deleteNotification(request):
 
 
 
-# TESTY
+# WIDOK TESTOWY
 def myTest(request):
     availableBookingDates = AvailableBookingDate.objects.filter(isDeleted=False)
     filteredAvailableBookingDates = []
@@ -560,6 +562,10 @@ def myTest(request):
     reservations = Reservation.objects.filter(isDeleted=False)
     context = {'availableBookingDates': filteredAvailableBookingDates,
                'reservations': reservations}
+
+    # serviceProviderGroup = Group.objects.get(name='serviceProvider')
+    # serviceProviders = User.objects.filter(groups=serviceProviderGroup).prefetch_related('availablebookingdate_set', 'availablebookingdate_set__reservation_set')
+    # context = {'serviceProviders': serviceProviders}
     return render(request, 'test/myTest.html', context)
 # Wersja testowa THEME
 from django.views.generic import ListView, DetailView

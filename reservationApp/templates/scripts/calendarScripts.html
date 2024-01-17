@@ -828,7 +828,6 @@
     };
     // wyslanie danych Ajax-em do view
     function passDataByAJAX(url, data, possibleNeedRevert=false) {
-        //console.log("OSTATECZNY URL =", url, "DATA =", data)
         $.ajax({
             type: 'POST',
             url: url,
@@ -850,7 +849,6 @@
                 displayBackendError(response.message)
                 if (possibleNeedRevert) {
                     selectedEventInfo.revert()
-                    console.error("REVERT ERROR NA BACKENDZIE")
                 }
                 return response;
             },

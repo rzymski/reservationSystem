@@ -4,6 +4,8 @@ from .models import UserProfile
 
 def userRole(request):
     currentUser = request.user
+    if not request.user.is_authenticated:
+        return {'userRole': 'anonymous'}
     isAdmin = currentUser.groups.filter(name='admin').exists()
     if isAdmin:
         return {'userRole': 'admin'}

@@ -17,24 +17,24 @@
         <body>
             <div class="h-12">
                 <div class="grid grid-flow-row-dense grid-cols-12">
-                      <div class="col-span-2 flex items-center">
-                          <div>
-                              <button id="filterOpenModalButton" onclick="openModalNewVersion('FilterModal', false, false, false, false)" class="mr-2 my-1 py-1 px-2.5 text-2xl font-bold text-gray-900 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Filtruj</button>
-                          </div>
-                      </div>
-                      <div class="col-span-4">
-                      </div>
-                      <div class="col-span-6">
-                          {% if userRole != 'client' %}
-                              <div class="text-right">
-                                  <button id="btnAddAvailableBookingDate" onclick="addByButton('AddEditModal', 0, 'Dodaj nowy dostępny termin świadczenie usług', 'Dodaj termin')" type="button" class="ml-2 my-1 py-1.5 px-2.5 text-xl font-bold text-gray-900 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Dodaj dostepny termin</button>
-                              </div>
-                          {% else %}
-                              <div class="text-right">
-                                  <button id="btnAddAvailableBookingDate" onclick="addByButton('AddEditModal', 3, 'Dodaj propozycje nowego terminu', 'Dodaj propozycje')" type="button" class="ml-2 my-1 py-1.5 px-2.5 text-xl font-bold text-gray-900 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Zaproponuj termin</button>
-                              </div>
-                          {% endif %}
-                      </div>
+                    <div class="col-span-6 flex items-center">
+                        <div>
+                            <button id="filterOpenModalButton" onclick="openModalNewVersion('FilterModal', false, false, false, false)" class="mr-2 my-1 py-1 px-2.5 text-2xl font-bold text-gray-900 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Filtruj</button>
+                        </div>
+                    </div>
+                    {% if userRole != 'anonymous' %}
+                        <div class="col-span-6">
+                            {% if userRole != 'client' %}
+                                <div class="text-right">
+                                    <button id="btnAddAvailableBookingDate" onclick="addByButton('AddEditModal', 0, 'Dodaj nowy dostępny termin świadczenie usług', 'Dodaj termin')" type="button" class="ml-2 my-1 py-1.5 px-2.5 text-xl font-bold text-gray-900 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Dodaj dostepny termin</button>
+                                </div>
+                            {% else %}
+                                <div class="text-right">
+                                    <button id="btnAddAvailableBookingDate" onclick="addByButton('AddEditModal', 3, 'Dodaj propozycje nowego terminu', 'Dodaj propozycje')" type="button" class="ml-2 my-1 py-1.5 px-2.5 text-xl font-bold text-gray-900 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Zaproponuj termin</button>
+                                </div>
+                            {% endif %}
+                        </div>
+                    {% endif %}
                 </div>
             </div>
             {% comment %}{% include 'filter/filterServiceProviders.html' %}

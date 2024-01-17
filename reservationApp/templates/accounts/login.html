@@ -17,23 +17,19 @@
                         <h1 class="text-2xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-gray-50 text-center">
                             Zaloguj się
                         </h1>
-                        <form class="space-y-4 md:space-y-6" method="POST" action="">
+                        <form method="POST" action="" class="space-y-4 md:space-y-6">
                             {% csrf_token %}
-    {#                            <label for="username" class="block mb-2 text-2xl font-medium text-gray-900 dark:text-gray-50">Nazwa użytkownika</label>#}
                             <div class="relative flex items-stretch">
                                 <div class="flex items-center whitespace-nowrap rounded-l border border-solid border-gray-300 bg-gray-50 dark:bg-gray-700 dark:text-gray-50 dark:border-gray-600 px-4">
                                     <i class="fas fa-user text-xl"></i>
                                 </div>
                                 {{ form.username|add_class:customClass }}
-    {#                                <input type="text" name="username" id="usernameLogin" placeholder="Nazwa użytkownika" class="flex-auto border border-solid border-gray-300 bg-gray-50 text-gray-900 sm:text-2xl rounded-r focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-50 dark:focus:ring-blue-500 dark:focus:border-blue-500 form-control">#}
                             </div>
-    {#                            <label for="password" class="block mb-2 text-2xl font-medium text-gray-900 dark:text-gray-50">Hasło</label>#}
                             <div class="relative flex items-stretch">
                                 <div class="flex items-center whitespace-nowrap rounded-l border border-solid border-gray-300 bg-gray-50 dark:bg-gray-700 dark:text-gray-50 dark:border-gray-600 px-4">
                                     <i class="fas fa-key text-xl"></i>
                                 </div>
                                 {{ form.password|add_class:customClass }}
-    {#                                <input type="password" name="password" id="passwordLogin" placeholder="Hasło" class="flex-auto border border-solid border-gray-300 bg-gray-50 text-gray-900 sm:text-2xl rounded-r focus:ring-primary-600 focus:border-primary-600 p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-gray-50 dark:focus:ring-blue-500 dark:focus:border-blue-500 form-control">#}
                             </div>
                             <div class="form-text text-red-600 dark:text-red-500 small">
                                 {{ form.password.errors }}
@@ -45,7 +41,9 @@
                                     {% endif %}
                                 {% endfor %}
                             </div>
-                            {% if request.GET.next %}<input type="hidden" name="next" value="{{request.GET.next}}" />{% endif %}
+                            {% if request.GET.next %}
+                                <input type="hidden" name="next" value="{{request.GET.next}}" />
+                            {% endif %}
                             <div class="login_container">
                                 <input type="submit" value="zaloguj się" class="w-full text-gray-50 bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-bold rounded-lg text-3xl px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">
                             </div>
